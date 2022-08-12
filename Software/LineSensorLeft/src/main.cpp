@@ -46,69 +46,46 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  unsigned long long time1 = micros();
-  for (int i = 0;i < 10000;i++) {
-    int _sensor_value[SENSOR_NUM];
-    int _line_flag[SENSOR_NUM];
-    for (int i =0; i < SENSOR_NUM; i++) {
-      if (byte(i) & (1 << 0)) {
-        digitalWrite(SELECT_PIN0, HIGH);
-      } else {
-        digitalWrite(SELECT_PIN0, LOW);
-      }
-      if (byte(i) & (1 << 1)) {
-        digitalWrite(SELECT_PIN1, HIGH);
-      } else {
-        digitalWrite(SELECT_PIN1, LOW);
-      }
-      if (byte(i) & (1 << 2)) {
-        digitalWrite(SELECT_PIN2, HIGH);
-      } else {
-        digitalWrite(SELECT_PIN2, LOW);
-        
-      }
-      if (byte(i) & (1 << 3)) {
-        digitalWrite(SELECT_PIN3, HIGH);
-      } else {
-        digitalWrite(SELECT_PIN3, LOW);
-      }
-      _sensor_value[i] = analogRead(COM);
-    }
-    sensor_value[8] = _sensor_value[0];
-    sensor_value[9] = _sensor_value[1];
-    sensor_value[10] = _sensor_value[2];
-    sensor_value[11] = _sensor_value[3];
-    sensor_value[12] = _sensor_value[4];
-    sensor_value[13] = _sensor_value[5];
-    sensor_value[14] = _sensor_value[6];
-    sensor_value[15] = _sensor_value[7];
-    sensor_value[0] = _sensor_value[8];
-    sensor_value[1] = _sensor_value[9];
-    sensor_value[2] = _sensor_value[10];
-    sensor_value[3] = _sensor_value[11];
-    sensor_value[4] = _sensor_value[12];
-    sensor_value[5] = _sensor_value[13];
-    sensor_value[6] = _sensor_value[14];
-    sensor_value[7] = _sensor_value[15];
+  int _sensor_value[SENSOR_NUM];
+  int _line_flag[SENSOR_NUM];
+  for (int i =0; i < SENSOR_NUM; i++) {
+    digitalWrite(SELECT_PIN0, byte(i) & (1 << 0));
+    digitalWrite(SELECT_PIN1, byte(i) & (1 << 1));
+    digitalWrite(SELECT_PIN2, byte(i) & (1 << 2));
+    digitalWrite(SELECT_PIN3, byte(i) & (1 << 3));
+    _sensor_value[i] = analogRead(COM);
+  }
+  sensor_value[8] = _sensor_value[0];
+  sensor_value[9] = _sensor_value[1];
+  sensor_value[10] = _sensor_value[2];
+  sensor_value[11] = _sensor_value[3];
+  sensor_value[12] = _sensor_value[4];
+  sensor_value[13] = _sensor_value[5];
+  sensor_value[14] = _sensor_value[6];
+  sensor_value[15] = _sensor_value[7];
+  sensor_value[0] = _sensor_value[8];
+  sensor_value[1] = _sensor_value[9];
+  sensor_value[2] = _sensor_value[10];
+  sensor_value[3] = _sensor_value[11];
+  sensor_value[4] = _sensor_value[12];
+  sensor_value[5] = _sensor_value[13];
+  sensor_value[6] = _sensor_value[14];
+  sensor_value[7] = _sensor_value[15];
 
-    for (int i = 0; i < SENSOR_NUM; i++) {
-      if (sensor_value[i] > THRESHOLD) {
-        line_flag[i] = 1;
-      } else {
-        line_flag[i] = 0;
-      }
-    }
-    
-    for (int i = 0; i < SENSOR_NUM; i++) {
-      if (line_flag[i] == 1) {
-        line_x += sensor_x[i] * line_flag[i];
-        line_y += sensor_y[i] * line_flag[i];
-      }
+  for (int i = 0; i < SENSOR_NUM; i++) {
+    if (sensor_value[i] > THRESHOLD) {
+      line_flag[i] = 1;
+    } else {
+      line_flag[i] = 0;
     }
   }
-  unsigned long long time2 = micros();
-  Serial.print(time2 - time1);
-  Serial.println("us");
+  
+  for (int i = 0; i < SENSOR_NUM; i++) {
+    if (line_flag[i] == 1) {
+      line_x += sensor_x[i] * line_flag[i];
+      line_y += sensor_y[i] * line_flag[i];
+    }
+  }
 }
 
 void setup1() {
