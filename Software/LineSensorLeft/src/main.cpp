@@ -41,7 +41,7 @@ void setup() {
     sensor_x[i] = cos(SENSOR_THETA[i]);
     sensor_y[i] = sin(SENSOR_THETA[i]);
   }
-  Serial.begin(250000);
+  Serial.begin(115200);
 }
 
 void loop() {
@@ -86,6 +86,12 @@ void loop() {
       line_y += sensor_y[i] * line_flag[i];
     }
   }
+  for (int i = 0;i < SENSOR_NUM;i++) {
+    Serial.print(sensor_value[i]);
+    Serial.print(" ");
+  }
+  Serial.println("");
+  delay(50);
 }
 
 void setup1() {
