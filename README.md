@@ -11,7 +11,7 @@
   カメラ：Open MV M7 R2
   電源：Li-Poバッテリー 11.1V 3cell 1000mA
 
-チームメンバー： 18v17 x4
+チームメンバー
 　根岸 孝次 (リーダー)
 　斎藤 
  11.1先：3koji.p0rsonal@gmail.com
