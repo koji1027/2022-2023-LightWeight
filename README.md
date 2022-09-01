@@ -12,6 +12,7 @@
   電源：Li-Poバッテリー 11.1V 3cell 1000mA
 
 チームメンバー
-　根岸 孝次 (リーダー)
-　斎藤 
- 11.1先：3koji.p0rsonal@gmail.com
+　ハード担当 根岸 孝次 (リーダー) 
+　ソフト担当 斎藤 孝介
+ 
+連絡先:koji.personal@gmail.com
