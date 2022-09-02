@@ -14,5 +14,5 @@
 チームメンバー
 　ハード担当 根岸 孝次 (リーダー) 
 　ソフト担当 斎藤 孝介
- fesfesfs
+
 連絡先:koji.personal@gmail.com
