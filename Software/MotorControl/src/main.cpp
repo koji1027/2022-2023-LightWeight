@@ -5,7 +5,7 @@
 #define MOTOR_PIN 2
 
 const int MOTORS_PIN[MOTOR_NUM][MOTOR_PIN] = {{1, 2}, {5, 6}, {9, 10}, {13, 14}};              // PWMピン、DIRピン
-const double MOTORS_THETA[MOTOR_NUM] = {PI / 3.0, 2.0 * PI / 3.0, -PI / 3.0, -2.0 * PI / 3.0}; //モータの配置角度(ラジアン) 正面０ラジアン、-PI < theta <= PI
+const double MOTORS_THETA[MOTOR_NUM] = {PI / 3.0, 2.0 * PI / 3.0, -2.0 * PI / 3.0, -PI / 3.0}; //モータの配置角度(ラジアン) 正面０ラジアン、-PI < theta <= PI
 
 void motor_control(double theta, uint8_t power);
 void motor_move(double motor_power[MOTOR_NUM], int motor_dir[MOTOR_NUM]);
