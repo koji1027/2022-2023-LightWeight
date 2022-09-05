@@ -44,8 +44,15 @@ void motor_move(double motor_power[MOTOR_NUM], int motor_dir[MOTOR_NUM])
 {
   for (int i = 0; i < MOTOR_NUM; i++)
   {
+    if (i == 3){
+      analogWrite(MOTORS_PIN[i][0], int(motor_power[i])+20);
+      digitalWrite(MOTORS_PIN[i][1], motor_dir[i]);
+    }
+    
+    else{
     analogWrite(MOTORS_PIN[i][0], int(motor_power[i]));
     digitalWrite(MOTORS_PIN[i][1], motor_dir[i]);
+    }
   }
 }
 
