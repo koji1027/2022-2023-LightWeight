@@ -25,7 +25,7 @@ double psi = 0;
 float Gz, LastGz;
 
 unsigned long InitTime, RunTime, LastTime, count;
-uint32_t PrintRate = 1000/PRINT_RATE;
+uint16_t PrintRate = 1000/PRINT_RATE;
 
 void BMX055_Init();
 void BMX055_Gyro();
