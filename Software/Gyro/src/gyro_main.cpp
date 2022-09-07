@@ -16,19 +16,16 @@
 #define Addr_Accl 0x19  // (JP1,JP2,JP3 = Openの時)
 #define Addr_Gyro 0x69  // (JP1,JP2,JP3 = Openの時)
 #define Addr_Mag 0x13   // (JP1,JP2,JP3 = Openの時)
-#define PRINT_RATE 40 
+#define PRINT_RATE 1
 #define ANGULAR_SENSITYVITY 0.00875 
 
 // センサーの値を保存するグローバル変数
 float zGyro = 0.00;
 double psi = 0;
-float Gz;
+float Gz, LastGz;
 
-double phi = 0;
-double theta = 0;
-
-unsigned long InitTime, RunTime, PrintTime, sample;
-uint8_t PrintRate = 1000/PRINT_RATE;
+unsigned long InitTime, RunTime, LastTime, count;
+uint16_t PrintRate = 1000/PRINT_RATE;
 
 void BMX055_Init();
 void BMX055_Gyro();
@@ -39,7 +36,8 @@ void setup()
   Serial.begin(115200);
   BMX055_Init();
   InitTime = millis();
-  sample = 0;
+  count = 0;
+  LastGz = 0;
 }
 
 void loop()
@@ -55,21 +53,22 @@ void loop()
   delay(1000);*/
 
   BMX055_Gyro();
-  RunTime = millis()-InitTime;
+  RunTime = micros()-InitTime;
 
-  if(((millis()-PrintTime)>PrintRate)&&(zGyro<10000))
+  if((micros()-LastTime)>PrintRate)
   {
     Gz = zGyro*ANGULAR_SENSITYVITY*PI/180;
-    psi = psi+zGyro * (millis()-PrintTime)/1000;
+    psi = psi + (Gz+LastGz)*(micros()-LastTime)/1000000/2;//角速度を積分
     Serial.print("zGyro:\t");
-    Serial.println(zGyro);
+    Serial.print(zGyro);
     Serial.print("\tpsi:\t");
-    Serial.println((int)(psi*180/PI));
-    PrintTime = millis();
-    sample++;
+    Serial.print(psi*100/PI);
+    Serial.println("π");
+    LastTime = micros();
+    LastGz = Gz;
+    count++;
   }
-
-  delay(500);
+  //delay(10);
 }
 
 //=====================================================================================//
