@@ -2,18 +2,18 @@
 #include <math.h>
 #include <Wire.h>
 #include "accel_gyro.h"
-// BMX055 加速度センサのI2Cアドレス  
-#define Addr_Accl 0x19  // (JP1,JP2,JP3 = Openの時)
+// BMX055 加速度センサのI2Cアドレス
+#define Addr_Accl 0x19 // (JP1,JP2,JP3 = Openの時)
 // BMX055 ジャイロセンサのI2Cアドレス
-#define Addr_Gyro 0x69  // (JP1,JP2,JP3 = Openの時)
+#define Addr_Gyro 0x69 // (JP1,JP2,JP3 = Openの時)
 // BMX055 磁気センサのI2Cアドレス
-#define Addr_Mag 0x13   // (JP1,JP2,JP3 = Openの時)
+#define Addr_Mag 0x13 // (JP1,JP2,JP3 = Openの時)
 
 // センサーの値を保存するグローバル変数
 void BMX055_Mag();
-int   xMag  = 0;
-int   yMag  = 0;
-int   zMag  = 0;
+int xMag = 0;
+int yMag = 0;
+int zMag = 0;
 float dir;
 float xmod = -1;
 float ymod = -1;
@@ -24,16 +24,16 @@ void setup()
   Wire.begin();
   // デバッグ用シリアル通信は9600bps
   Serial.begin(115200);
-  //BMX055 初期化
+  // BMX055 初期化
   BMX055_Init();
   delay(300);
 }
 
 void loop()
 {
- // Serial.println("--------------------------------------"); 
+  // Serial.println("--------------------------------------");
 
-  //BMX055 加速度の読み取り
+  // BMX055 加速度の読み取り
   BMX055_Accl();
   /*Serial.print("Accl= ");
   Serial.print(xAccl);
@@ -41,8 +41,8 @@ void loop()
   Serial.print(yAccl);
   Serial.print(",");
   Serial.print(zAccl);
-  Serial.println(""); 
-  
+  Serial.println("");
+
   //BMX055 ジャイロの読み取り
   BMX055_Gyro();
   Serial.print("Gyro= ");
@@ -52,8 +52,8 @@ void loop()
   Serial.print(",");
   Serial.print(zGyro);
   Serial.println(""); */
-  
-  //BMX055 磁気の読み取り
+
+  // BMX055 磁気の読み取り
   BMX055_Mag();
   /*Serial.print("Mag= ");
   Serial.println(xMag);
@@ -62,7 +62,7 @@ void loop()
   Serial.print(",");
   Serial.println(zMag);
   Serial.println(""); */
-  dir = atan2(yMag*ymod,xMag*xmod);
+  dir = atan2(yMag * ymod, xMag * xmod);
   Serial.println(dir);
   delay(10);
 }
@@ -199,19 +199,22 @@ void BMX055_Mag()
   for (int i = 0; i < 8; i++)
   {
     Wire.beginTransmission(Addr_Mag);
-    Wire.write((0x42 + i));    // Select data register
+    Wire.write((0x42 + i)); // Select data register
     Wire.endTransmission();
-    Wire.requestFrom(Addr_Mag, 1);    // Request 1 byte of data
+    Wire.requestFrom(Addr_Mag, 1); // Request 1 byte of data
     // Read 6 bytes of data
     // xMag lsb, xMag msb, yMag lsb, yMag msb, zMag lsb, zMag msb
     if (Wire.available() == 1)
       data[i] = Wire.read();
   }
-// Convert the data
-  xMag = ((data[1] <<5) | (data[0]>>3));
-  if (xMag > 4095)  xMag -= 8192;
-  yMag = ((data[3] <<5) | (data[2]>>3));
-  if (yMag > 4095)  yMag -= 8192;
-  zMag = ((data[5] <<7) | (data[4]>>1));
-  if (zMag > 16383)  zMag -= 32768;
+  // Convert the data
+  xMag = ((data[1] << 5) | (data[0] >> 3));
+  if (xMag > 4095)
+    xMag -= 8192;
+  yMag = ((data[3] << 5) | (data[2] >> 3));
+  if (yMag > 4095)
+    yMag -= 8192;
+  zMag = ((data[5] << 7) | (data[4] >> 1));
+  if (zMag > 16383)
+    zMag -= 32768;
 }
