@@ -1,10 +1,7 @@
 #include <Arduino.h>
 #include <BMX055.h>
 #include <math.h>
-#include <fstream>
 
-int adjust_xMag = 25;
-int adjust_yMag = 55;
 float radian;
 float degree;
 
@@ -23,17 +20,10 @@ void loop(){
     while (true)
   {
     BMX055_Mag();
-    xMag += adjust_xMag;
-    yMag += adjust_yMag;
-    /*
-    Serial.print(xMag);
-    Serial.print(",");
-    Serial.println(yMag);
-    */
     radian = atan2(yMag,xMag);
     degree = radian * 180 / PI;
     Serial.print(degree);
     Serial.println("°");
-    delay(10);
   }
+  delay(10);
 }
