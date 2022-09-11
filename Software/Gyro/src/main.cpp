@@ -1,13 +1,8 @@
 #include <Arduino.h>
 #include <BMX055.h>
-#include <math.h>
-#include <fstream>
-
-int adjust_xMag = 25;
-int adjust_yMag = 55;
-float radian;
-float degree;
-
+float degree = 0.00;
+float prexGyro = 0.00;
+unsigned long long preMicros = 0;
 void setup()
 {
   // Wire(Arduino-I2C)の初期化
@@ -19,21 +14,51 @@ void setup()
   delay(300);
 }
 
-void loop(){
-    while (true)
+void loop()
+{
+  // Serial.println("--------------------------------------");
+
+  /*
+  // BMX055 加速度の読み取り
+  BMX055_Accl();
+  Serial.print("Accl= ");
+  Serial.print(xAccl);
+  Serial.print(",");
+  Serial.print(yAccl);
+  Serial.print(",");
+  Serial.print(zAccl);
+  Serial.println("");
+
+  // BMX055 ジャイロの読み取り
+  BMX055_Gyro();
+  Serial.print("Gyro= ");
+  Serial.print(xGyro);
+  Serial.print(",");
+  Serial.print(yGyro);
+  Serial.print(",");
+  Serial.print(zGyro);
+  Serial.println("");
+
+  // BMX055 磁気の読み取り
+  BMX055_Mag();
+  Serial.print("Mag= ");
+  Serial.print(xMag);
+  Serial.print(",");
+  Serial.print(yMag);
+  Serial.print(",");
+  Serial.print(zMag);
+  Serial.println("");
+  */
+  while (true)
   {
-    BMX055_Mag();
-    xMag += adjust_xMag;
-    yMag += adjust_yMag;
-    /*
-    Serial.print(xMag);
-    Serial.print(",");
-    Serial.println(yMag);
-    */
-    radian = atan2(yMag,xMag);
-    degree = radian * 180 / PI;
+    BMX055_Gyro();
+    zGyro -= 0.01;
+    unsigned long long time = micros();
+    degree += (zGyro + prexGyro) * float(time - preMicros) / 2000000;
+    preMicros = time;
+    prexGyro = zGyro;
     Serial.print(degree);
     Serial.println("°");
-    delay(10);
   }
+  delay(10);
 }
