@@ -7,6 +7,30 @@
 const int MOTORS_PIN[MOTOR_NUM][MOTOR_PIN] = {{1, 2}, {5, 6}, {9, 10}, {13, 14}};              // PWMピン、DIRピン
 const double MOTORS_THETA[MOTOR_NUM] = {PI / 3.0, 2.0 * PI / 3.0, -PI / 3.0, -2.0 * PI / 3.0}; //モータの配置角度(ラジアン) 正面０ラジアン、-PI < theta <= PI
 
+void motor_move(double motor_power[MOTOR_NUM], int motor_dir[MOTOR_NUM])
+{
+  for (int i = 0; i < MOTOR_NUM; i++)
+  {
+    analogWrite(MOTORS_PIN[i][0], int(motor_power[i]));
+    digitalWrite(MOTORS_PIN[i][1], motor_dir[i]);
+  }
+}
+
+int get_max_index(double data[], int data_num)
+{
+  int max_index = 0;
+  int max = 0;
+  for (int i = 0; i < data_num; i++)
+  {
+    if (data[i] > max)
+    {
+      max = data[i];
+      max_index = i;
+    }
+  }
+  return max_index;
+}
+
 void motor_init()
 {
   for (int i = 0; i < MOTOR_NUM; i++)
@@ -33,40 +57,12 @@ void motor_control(double theta, uint8_t power)
   {
     if (motor_power[i] < 0)
     {
-      motor_dir[i] = 0;
+      motor_dir[i] = 1;
       motor_power[i] = -motor_power[i];
+    }
+    else {
+      motor_dir[i] = 0;
     }
   }
   motor_move(motor_power, motor_dir);
-}
-
-void motor_move(double motor_power[MOTOR_NUM], int motor_dir[MOTOR_NUM])
-{
-  for (int i = 0; i < MOTOR_NUM; i++)
-  {
-    if (i == 3){
-      analogWrite(MOTORS_PIN[i][0], int(motor_power[i])+20);
-      digitalWrite(MOTORS_PIN[i][1], motor_dir[i]);
-    }
-    
-    else{
-    analogWrite(MOTORS_PIN[i][0], int(motor_power[i]));
-    digitalWrite(MOTORS_PIN[i][1], motor_dir[i]);
-    }
-  }
-}
-
-int get_max_index(double data[], int data_num)
-{
-  int max_index = 0;
-  int max = 0;
-  for (int i = 0; i < data_num; i++)
-  {
-    if (data[i] > max)
-    {
-      max = data[i];
-      max_index = i;
-    }
-  }
-  return max_index;
 }
