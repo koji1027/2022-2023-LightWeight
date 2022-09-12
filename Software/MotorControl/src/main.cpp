@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <motorcontrol.h>
 #include <math.h>
+//#include <BMX055.h>
 
 #define MOTOR_NUM 4
 #define MOTOR_PIN 2
@@ -35,11 +36,11 @@ void loop()
 {
   // put your main code here, to run repeatedly:
   uint8_t power = 120;
-  double theta = -PI / 2.0;
+  double theta = 0;
   while (true)
   {
-    theta += PI / 2.0;
-    motor_control(0, power);
-    delay(800);
+    gyro_posture_spin(power);
+    //motor_control(theta, power);
+    //delay(800);
   }
 }
