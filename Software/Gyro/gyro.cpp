@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <BMX055.h>
 float degree = 0.00;
-float prexGyro = 0.00;
+float prezGyro = 0.00;
 unsigned long long preMicros = 0;
 void setup()
 {
@@ -54,9 +54,9 @@ void loop()
     BMX055_Gyro();
     zGyro -= 0.01;
     unsigned long long time = micros();
-    degree += (zGyro + prexGyro) * float(time - preMicros) / 2000000;
+    degree += (zGyro + prezGyro) * float(time - preMicros) / 2000000;
     preMicros = time;
-    prexGyro = zGyro;
+    prezGyro = zGyro;
     Serial.print(degree);
     Serial.println("°");
   }
