@@ -69,17 +69,19 @@ void motor_control(double theta, uint8_t power)
       motor_dir[i] = 1;
       motor_power[i] = -motor_power[i];
     }
-    else {
+    else
+    {
       motor_dir[i] = 0;
     }
   }
   motor_move(motor_power, motor_dir);
 }
 
-void gyro_posture_spin(uint8_t spinpower){
-  double spin_power[MOTOR_NUM]={spinpower,spinpower,spinpower,spinpower};
-  int rightspin_dir[MOTOR_NUM] = {1,1,0,0};
-  int leftspin_dir[MOTOR_NUM] = {0,0,1,1};
+void gyro_posture_spin(uint8_t spinpower)
+{
+  double spin_power[MOTOR_NUM] = {spinpower, spinpower, spinpower, spinpower}; //回転のちからは、角度のズレにおおじて計算したほうがいいともう ex) （ズレ） * 1 的な...
+  int rightspin_dir[MOTOR_NUM] = {0, 0, 0, 0};                                 //回転は、すべてのタイヤが同じ方向に回るから修正しといた
+  int leftspin_dir[MOTOR_NUM] = {1, 1, 1, 1};                                  //回転は、すべてのタイヤが同じ方向に回るから修正しといた
   BMX055_Gyro();
   zGyro += 0.01;
   unsigned long long time = micros();
@@ -88,10 +90,12 @@ void gyro_posture_spin(uint8_t spinpower){
   preMicros = time;
   prezGyro = zGyro;
 
-  if(radian > 0){
-    motor_move(spin_power,rightspin_dir);
+  if (radian > (5.0 / 180.0 * PI)) //ぴったり０ラジアンにすると振動するから余裕を持たせる
+  {
+    motor_move(spin_power, rightspin_dir);
   }
-  if(radian < 0){
-    motor_move(spin_power,leftspin_dir);
+  if (radian < (-5.0 / 180.0 * PI))
+  {
+    motor_move(spin_power, leftspin_dir);
   }
 }
