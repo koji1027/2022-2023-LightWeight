@@ -25,6 +25,9 @@ void setup()
   Serial6.begin(250000);
   Serial7.begin(250000);
 
+  Wire.begin();
+  BMX055_Init();
+
   for (int i = 0; i < MOTOR_NUM; i++)
   {
     pinMode(MOTORS_PIN[i][0], OUTPUT);

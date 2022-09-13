@@ -31,7 +31,13 @@ int xMag = 0;
 int yMag = 0;
 int zMag = 0;
 
-void BMX055_Gyro();
+float degree = 0.00;
+float radian;
+float prezGyro = 0.00;
+unsigned long long preMicros = 0;
+
+float BMX055_Gyro();
+void BMX055_Mag();
 
 void BMX055_Init()
 {
@@ -149,7 +155,7 @@ void BMX055_Accl()
     zAccl = zAccl * 0.0098; // range = +/-2g
 }
 //=====================================================================================//
-void BMX055_Gyro()
+float BMX055_Gyro()
 {
     unsigned int data[6];
     for (int i = 0; i < 6; i++)
@@ -180,6 +186,38 @@ void BMX055_Gyro()
     xGyro -= xGyro_offset;
     yGyro -= yGyro_offset;
     zGyro -= zGyro_offset;
+
+    zGyro += 0.01;
+    unsigned long long time = micros();
+    degree += (zGyro + prezGyro) * float(time - preMicros) / 2000000;
+    int _degree = int(degree);
+    _degree += 180;
+    _degree %= 360;
+    if(_degree < 0){
+        _degree += 180;
+    }else{
+        _degree -= 180;
+    }
+
+    float radian = -radians(_degree);
+
+    /*if(radian>PI){
+        radian -= 2*314*floor(_radian/(2*314))/100.0;
+    }
+
+    if(0<_radian%(2*314) && _radian%(2*314)<=314){
+        radian = (float)_radian / 100;
+    }
+    else{
+        radian = (float)(_radian - 314*2) / 100;
+    }
+
+    radian = (float)_radian / 100;*/
+
+    preMicros = time;
+    prezGyro = zGyro;
+    Serial.println(radian);
+    return radian;
 }
 //=====================================================================================//
 void BMX055_Mag()

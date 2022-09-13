@@ -4,14 +4,11 @@
 
 #define MOTOR_NUM 4
 #define MOTOR_PIN 2
+#define SPIN_ADJUST 50
 
 const int MOTORS_PIN[MOTOR_NUM][MOTOR_PIN] = {{1, 2}, {5, 6}, {9, 10}, {13, 14}};              // PWMピン、DIRピン
 const double MOTORS_THETA[MOTOR_NUM] = {PI / 3.0, 2.0 * PI / 3.0, -PI / 3.0, -2.0 * PI / 3.0}; //モータの配置角度(ラジアン) 正面０ラジアン、-PI < theta <= PI
 
-float degree = 0.00;
-float radian;
-float prezGyro = 0.00;
-unsigned long long preMicros = 0;
 
 void motor_move(double motor_power[MOTOR_NUM], int motor_dir[MOTOR_NUM])
 {
@@ -79,23 +76,29 @@ void motor_control(double theta, uint8_t power)
 
 void gyro_posture_spin(uint8_t spinpower)
 {
-  double spin_power[MOTOR_NUM] = {spinpower, spinpower, spinpower, spinpower}; //回転のちからは、角度のズレにおおじて計算したほうがいいともう ex) （ズレ） * 1 的な...
   int rightspin_dir[MOTOR_NUM] = {0, 0, 0, 0};                                 //回転は、すべてのタイヤが同じ方向に回るから修正しといた
   int leftspin_dir[MOTOR_NUM] = {1, 1, 1, 1};                                  //回転は、すべてのタイヤが同じ方向に回るから修正しといた
-  BMX055_Gyro();
-  zGyro += 0.01;
-  unsigned long long time = micros();
-  degree += (zGyro + prezGyro) * float(time - preMicros) / 2000000;
-  radian = -degree * PI / 180;
-  preMicros = time;
-  prezGyro = zGyro;
-
-  if (radian > (5.0 / 180.0 * PI)) //ぴったり０ラジアンにすると振動するから余裕を持たせる
+  radian = BMX055_Gyro();
+  Serial.println(radian);
+  spinpower = abs(radian)*SPIN_ADJUST;
+  double spin_power[MOTOR_NUM] = {spinpower, spinpower, spinpower, spinpower}; //回転のちからは、角度のズレにおおじて計算したほうがいいともう ex) （ズレ） * 1 的な...
+  Serial.println(spinpower);
+  if (radian > PI / 40.0) //ぴったり０ラジアンにすると振動するから余裕を持たせる
   {
     motor_move(spin_power, rightspin_dir);
+    Serial.println("+");
   }
-  if (radian < (-5.0 / 180.0 * PI))
+  if (radian < -PI / 40.0)
   {
     motor_move(spin_power, leftspin_dir);
+    Serial.println("-");
   }
+  /*BMX055_Gyro();
+  zGyro -= 0.01;
+  unsigned long long time = micros();
+  degree += (zGyro + prezGyro) * float(time - preMicros) / 2000000;
+  preMicros = time;
+  prezGyro = zGyro;
+  Serial.println(xGyro);
+  //Serial.println("°");*/
 }
