@@ -3,8 +3,8 @@
 #include <math.h>
 #include <fstream>
 
-int adjust_xMag = 25;
-int adjust_yMag = 55;
+int adjust_xMag = 35;
+int adjust_yMag = 105;
 float radian;
 float degree;
 
@@ -25,15 +25,15 @@ void loop(){
     BMX055_Mag();
     xMag += adjust_xMag;
     yMag += adjust_yMag;
-    /*
+    
     Serial.print(xMag);
     Serial.print(",");
     Serial.println(yMag);
-    */
+    
     radian = atan2(yMag,xMag);
     degree = radian * 180 / PI;
-    Serial.print(degree);
-    Serial.println("°");
-    delay(10);
+    //Serial.print(degree);
+    //Serial.println("°");
+    delay(100);
   }
 }

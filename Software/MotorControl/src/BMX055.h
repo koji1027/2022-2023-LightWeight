@@ -31,13 +31,19 @@ int xMag = 0;
 int yMag = 0;
 int zMag = 0;
 
-float degree = 0.00;
-float radian;
+float degree_g = 0.00;
+float radian_g;
 float prezGyro = 0.00;
 unsigned long long preMicros = 0;
 
+float degree_m = 0.00;
+float radian_m;
+int adjust_xMag = 8;
+int adjust_yMag = -68;
+float zero_radian = 0.00;
+
 float BMX055_Gyro();
-void BMX055_Mag();
+float BMX055_Mag();
 
 void BMX055_Init()
 {
@@ -124,6 +130,8 @@ void BMX055_Init()
     xGyro_offset = x_offset / 5.0;
     yGyro_offset = y_offset / 5.0;
     zGyro_offset = z_offset / 5.0;
+
+    zero_radian = BMX055_Mag();
 }
 //=====================================================================================//
 void BMX055_Accl()
@@ -189,17 +197,17 @@ float BMX055_Gyro()
 
     zGyro += 0.01;
     unsigned long long time = micros();
-    degree += (zGyro + prezGyro) * float(time - preMicros) / 2000000;
-    int _degree = int(degree);
-    _degree += 180;
-    _degree %= 360;
-    if(_degree < 0){
-        _degree += 180;
+    degree_g += (zGyro + prezGyro) * float(time - preMicros) / 2000000;
+    int _degree_g = int(degree_g);
+    _degree_g += 180;
+    _degree_g %= 360;
+    if(_degree_g < 0){
+        _degree_g += 180;
     }else{
-        _degree -= 180;
+        _degree_g -= 180;
     }
 
-    float radian = -radians(_degree);
+    float radian_g = -radians(_degree_g);
 
     /*if(radian>PI){
         radian -= 2*314*floor(_radian/(2*314))/100.0;
@@ -216,11 +224,11 @@ float BMX055_Gyro()
 
     preMicros = time;
     prezGyro = zGyro;
-    Serial.println(radian);
-    return radian;
+    Serial.println(radian_g);
+    return radian_g;
 }
 //=====================================================================================//
-void BMX055_Mag()
+float BMX055_Mag()
 {
     unsigned int data[8];
     for (int i = 0; i < 8; i++)
@@ -244,4 +252,25 @@ void BMX055_Mag()
     zMag = ((data[5] << 7) | (data[4] >> 1));
     if (zMag > 16383)
         zMag -= 32768;
+    
+    xMag += adjust_xMag;
+    yMag += adjust_yMag;
+    /*Serial.print(xMag);
+    Serial.print(",");
+    Serial.println(yMag);*/
+    radian_m = atan2(yMag,xMag);
+    degree_m = radian_m * 180 / PI;
+
+    int _degree_m = int(degree_m);
+    _degree_m += 180;
+    _degree_m %= 360;
+    if(_degree_m < 0){
+        _degree_m += 180;
+    }else{
+        _degree_m -= 180;
+    }
+
+    float _radian_m = radians(_degree_m);
+    //Serial.println(radian_m);
+    return _radian_m - zero_radian;
 }

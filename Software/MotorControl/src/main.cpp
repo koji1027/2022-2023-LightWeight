@@ -40,10 +40,14 @@ void loop()
   // put your main code here, to run repeatedly:
   uint8_t power = 120;
   double theta = 0;
-  while (true)
+  /*while (true)
   {
-    gyro_posture_spin(power);
-    //motor_control(theta, power);
-    //delay(800);
+    motor_control(theta, power);
+    //delay();
+  }*/
+  while (true) {
+    motor_control(theta,power);
+    theta += PI/2;
+    delay(1000);
   }
 }
