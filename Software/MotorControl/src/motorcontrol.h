@@ -57,10 +57,11 @@ void motor_control(double theta, uint8_t power)
   {
     motor_power[i] = double(power) * sin(theta - MOTORS_THETA[i]);
   }
-  /*int adjust_power = mag_posture_spin();
+
+  int adjust_power = mag_posture_spin();
   for (int i = 0; i < MOTOR_NUM; i++) {
     motor_power[i] += adjust_power;
-  }*/
+  }
 
   int max_index = get_max_index(motor_power, MOTOR_NUM);
   for (int i = 0; i < MOTOR_NUM; i++) {
@@ -121,14 +122,18 @@ void gyro_posture_spin()
 
 int mag_posture_spin()
 {
-  uint8_t spinpower = 0;
+  int8_t spinpower = 0;
   int rightspin_dir[MOTOR_NUM] = {1, 1, 1, 1};                                 //回転は、すべてのタイヤが同じ方向に回るから修正しといた
   int leftspin_dir[MOTOR_NUM] = {0, 0, 0, 0};                                  //回転は、すべてのタイヤが同じ方向に回るから修正しといた
   radian_m = BMX055_Mag();
   //Serial.println(radian_m);
-  int _power = abs(radian_m)*SPIN_ADJUST;
+  int _power = radian_m * SPIN_ADJUST;//絶対値消した
+  
   if (_power > 255){
     spinpower = 255;
+  }
+  else if(_power < -225){
+    spinpower = -225;
   }
   else {
     spinpower = _power;
