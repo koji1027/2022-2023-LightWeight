@@ -47,7 +47,5 @@ void loop()
   }*/
   while (true) {
     motor_control(theta,power);
-    theta += PI/2;
-    delay(1000);
   }
 }

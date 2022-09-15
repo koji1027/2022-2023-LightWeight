@@ -270,7 +270,7 @@ float BMX055_Mag()
         _degree_m -= 180;
     }
 
-    float _radian_m = radians(_degree_m);
+    float _radian_m = -radians(_degree_m);
     //Serial.println(radian_m);
     return _radian_m - zero_radian;
 }
