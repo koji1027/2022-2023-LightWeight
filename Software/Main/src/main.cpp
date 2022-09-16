@@ -22,21 +22,10 @@ void setup()
   Wire.begin();
 
   motor.init();
+  axis.init();
 }
 
 void loop()
 {
   // put your main code here, to run repeatedly:
-  float theta = 0.0;
-  while (true)
-  {
-    motor.cal_pwm(theta, 200);
-    motor.move();
-    theta += 0.1;
-    if (theta > 2 * PI)
-    {
-      theta = 0.0;
-    }
-    delay(100);
-  }
 }
