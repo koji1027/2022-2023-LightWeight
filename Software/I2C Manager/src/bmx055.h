@@ -12,7 +12,10 @@ public:
     void accl();
     void gyro();
     void mag();
+    void accl_gyro_calibration();
+    void mag_calibration();
     float convert_range(float degree);
+    int get_max_min(int data[], int size, bool tag);
 
 private:
     float xaccl = 0.00;
@@ -24,11 +27,14 @@ private:
     int xmag = 0;
     int ymag = 0;
     int zmag = 0;
+    float xaccl_offset = 0.00;
+    float yaccl_offset = 0.00;
+    float zaccl_offset = 0.00;
     float xgyro_offset = 0.00;
     float ygyro_offset = 0.00;
     float zgyro_offset = 0.00;
-    int xmag_offset = 25;
-    int ymag_offset = 25;
+    float xmag_offset = 0.00;
+    float ymag_offset = 0.00;
     float gyro_degree = 0.00;
     float gyro_radian = 0.00;
     unsigned long long pre_micro = 0;
@@ -48,7 +54,7 @@ void Axis::init()
     //------------------------------------------------------------//
     Wire.beginTransmission(Addr_accl);
     Wire.write(0x10); // Select PMU_BW register
-    Wire.write(0x08); // Bandwidth = 7.81 Hz
+    Wire.write(0x0F); // Bandwidth = 7.81 Hz
     Wire.endTransmission();
     delay(100);
     //------------------------------------------------------------//
@@ -66,7 +72,7 @@ void Axis::init()
     //------------------------------------------------------------//
     Wire.beginTransmission(Addr_gyro);
     Wire.write(0x10); // Select Bandwidth register
-    Wire.write(0x07); // ODR = 100 Hz
+    Wire.write(0x01); // ODR = 100 Hz
     Wire.endTransmission();
     delay(100);
     //------------------------------------------------------------//
@@ -90,7 +96,7 @@ void Axis::init()
     //------------------------------------------------------------//
     Wire.beginTransmission(Addr_mag);
     Wire.write(0x4C); // Select mag register
-    Wire.write(0x00); // Normal Mode, ODR = 10 Hz
+    Wire.write(0x07); // Normal Mode, ODR = 10 Hz
     Wire.endTransmission();
     //------------------------------------------------------------//
     Wire.beginTransmission(Addr_mag);
@@ -107,26 +113,6 @@ void Axis::init()
     Wire.write(0x52); // Select mag register
     Wire.write(0x16); // No. of Repetitions for Z-Axis = 15
     Wire.endTransmission();
-
-    float x_offset = 0.00;
-    float y_offset = 0.00;
-    float z_offset = 0.00;
-    for (int i = 0; i < 10; i++)
-    {
-        gyro();
-        x_offset += xgyro;
-        y_offset += ygyro;
-        z_offset += zgyro;
-        delay(10);
-    }
-    xgyro_offset = x_offset / 10.0;
-    ygyro_offset = y_offset / 10.0;
-    zgyro_offset = z_offset / 10.0;
-
-    mag();
-    xmag += xmag_offset;
-    ymag += ymag_offset;
-    mag_radian_zero = atan2(ymag, xmag);
 }
 //=====================================================================================//
 void Axis::accl()
@@ -245,4 +231,102 @@ float Axis::convert_range(float degree) //-Pi から Pi に変換
     float radian = _degree * PI / 180.0;
     radian = -radian;
     return radian;
+}
+
+void Axis::accl_gyro_calibration()
+{
+    int i = 0;
+    int buff_size = 1000;
+    float buff_xaccl, buff_yaccl, buff_zaccl = 0.00;
+    int buff_xgyro, buff_ygyro, buff_zgyro = 0;
+    while (i < buff_size + 101)
+    {
+        if (i < 100)
+        {
+            accl();
+            gyro();
+            delay(2);
+        }
+        else if (i < buff_size + 100)
+        {
+            accl();
+            gyro();
+            buff_xaccl += xaccl;
+            buff_yaccl += yaccl;
+            buff_zaccl += zaccl;
+            buff_xgyro += xgyro;
+            buff_ygyro += ygyro;
+            buff_zgyro += zgyro;
+            delay(2);
+        }
+        else if (i == buff_size + 100)
+        {
+            xaccl_offset = float(buff_xaccl) / float(buff_size);
+            yaccl_offset = float(buff_yaccl) / float(buff_size);
+            zaccl_offset = float(buff_zaccl) / float(buff_size);
+            xgyro_offset = float(buff_xgyro) / float(buff_size);
+            ygyro_offset = float(buff_ygyro) / float(buff_size);
+            zgyro_offset = float(buff_zgyro) / float(buff_size);
+        }
+    }
+}
+
+void Axis::mag_calibration()
+{
+    int i = 0;
+    int buff_size = 1000;
+    int buff_xmag[buff_size], buff_ymag[buff_size];
+    while (i < buff_size + 101)
+    {
+        if (i < 100)
+        {
+            mag();
+            delay(2);
+        }
+        else if (i < buff_size + 100)
+        {
+            mag();
+            buff_xmag[i - 100] = xmag;
+            buff_ymag[i - 100] = ymag;
+            delay(2);
+        }
+        else if (i == buff_size + 100)
+        {
+            int xmag_max, xmag_min, ymag_max, ymag_min;
+            xmag_max = get_max_min(buff_xmag, buff_size, true);
+            xmag_min = get_max_min(buff_xmag, buff_size, false);
+            ymag_max = get_max_min(buff_ymag, buff_size, true);
+            ymag_min = get_max_min(buff_ymag, buff_size, false);
+            xmag_offset = float(xmag_max + xmag_min) / 2.0;
+            ymag_offset = float(ymag_max + ymag_min) / 2.0;
+        }
+    }
+}
+
+int Axis::get_max_min(int data[], int size, bool tag)
+{
+    if (tag)
+    {
+        int max = data[0];
+        for (int i = 1; i < size; i++)
+        {
+            if (max < data[i])
+            {
+                max = data[i];
+            }
+        }
+        return max;
+    }
+    else
+    {
+        int min = data[0];
+        for (int i = 1; i < size; i++)
+        {
+            if (min > data[i])
+            {
+                min = data[i];
+            }
+        }
+        return min;
+    }
 }

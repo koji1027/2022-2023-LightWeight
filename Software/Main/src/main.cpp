@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <motor_control.h>
-#include <gyro.h>
+#include <bmx055.h>
 
 #define SERIAL_BAUD_RATE 115200
 
