@@ -22,13 +22,7 @@ void setup() {
 }
 
 void loop() {
-  ir.print();
-  Serial.print("radius:");
-  Serial.println(ir.get_radius());
-  Serial.print("angle:");
-  Serial.print(ir.get_angle());
-  Serial.println("π");
-  Serial.println("ー－－－－");
-
+  ir.IR_get();
+  ir.angle_read();
   delay(100);
 }
