@@ -9,9 +9,8 @@
 
 int mag_posture_spin();
 
-const int MOTORS_PIN[MOTOR_NUM][MOTOR_PIN] = {{1, 2}, {5, 6}, {9, 10}, {13, 14}};              // PWMピン、DIRピン
+const int MOTORS_PIN[MOTOR_NUM][MOTOR_PIN] = {{2, 3}, {9, 10}, {11, 12}, {13, 18}};            // PWMピン、DIRピン
 const double MOTORS_THETA[MOTOR_NUM] = {PI / 3.0, 2.0 * PI / 3.0, -PI / 3.0, -2.0 * PI / 3.0}; //モータの配置角度(ラジアン) 正面０ラジアン、-PI < theta <= PI
-
 
 void motor_move(double motor_power[MOTOR_NUM], int motor_dir[MOTOR_NUM])
 {
@@ -59,15 +58,17 @@ void motor_control(double theta, uint8_t power)
   }
 
   int adjust_power = mag_posture_spin();
-  for (int i = 0; i < MOTOR_NUM; i++) {
+  for (int i = 0; i < MOTOR_NUM; i++)
+  {
     motor_power[i] += adjust_power;
   }
 
   int max_index = get_max_index(motor_power, MOTOR_NUM);
-  for (int i = 0; i < MOTOR_NUM; i++) {
-    motor_power[i] = round(float(power) * (motor_power[i] / abs(motor_power[max_index]))); 
+  for (int i = 0; i < MOTOR_NUM; i++)
+  {
+    motor_power[i] = round(float(power) * (motor_power[i] / abs(motor_power[max_index])));
   }
-  
+
   for (int i = 0; i < MOTOR_NUM; i++)
   {
     if (motor_power[i] < 0)
@@ -86,15 +87,17 @@ void motor_control(double theta, uint8_t power)
 void gyro_posture_spin()
 {
   uint8_t spinpower = 0;
-  int rightspin_dir[MOTOR_NUM] = {1, 1, 1, 1};                                 //回転は、すべてのタイヤが同じ方向に回るから修正しといた
-  int leftspin_dir[MOTOR_NUM] = {0, 0, 0, 0};                                  //回転は、すべてのタイヤが同じ方向に回るから修正しといた
+  int rightspin_dir[MOTOR_NUM] = {1, 1, 1, 1}; //回転は、すべてのタイヤが同じ方向に回るから修正しといた
+  int leftspin_dir[MOTOR_NUM] = {0, 0, 0, 0};  //回転は、すべてのタイヤが同じ方向に回るから修正しといた
   radian_g = BMX055_Gyro();
   Serial.println(radian_g);
-  int _power = abs(radian_g)*SPIN_ADJUST;
-  if (_power > 255){
+  int _power = abs(radian_g) * SPIN_ADJUST;
+  if (_power > 255)
+  {
     spinpower = 255;
   }
-  else {
+  else
+  {
     spinpower = _power;
   }
   double spin_power[MOTOR_NUM] = {spinpower, spinpower, spinpower, spinpower}; //回転のちからは、角度のズレにおおじて計算したほうがいいともう ex) （ズレ） * 1 的な...
@@ -123,22 +126,25 @@ void gyro_posture_spin()
 int mag_posture_spin()
 {
   int16_t spinpower = 0;
-  //int rightspin_dir[MOTOR_NUM] = {1, 1, 1, 1};                                 //回転は、すべてのタイヤが同じ方向に回るから修正しといた
-  //int leftspin_dir[MOTOR_NUM] = {0, 0, 0, 0};                                  //回転は、すべてのタイヤが同じ方向に回るから修正しといた
+  // int rightspin_dir[MOTOR_NUM] = {1, 1, 1, 1};                                 //回転は、すべてのタイヤが同じ方向に回るから修正しといた
+  // int leftspin_dir[MOTOR_NUM] = {0, 0, 0, 0};                                  //回転は、すべてのタイヤが同じ方向に回るから修正しといた
   radian_m = BMX055_Mag();
-  //Serial.println(radian_m);
-  int _power = radian_m * SPIN_ADJUST;//絶対値消した
-  
-  if (_power > 255){
+  // Serial.println(radian_m);
+  int _power = radian_m * SPIN_ADJUST; //絶対値消した
+
+  if (_power > 255)
+  {
     spinpower = 255;
   }
-  else if(_power < -255){
+  else if (_power < -255)
+  {
     spinpower = -255;
   }
-  else {
+  else
+  {
     spinpower = _power;
   }
-  //double spin_power[MOTOR_NUM] = {spinpower, spinpower, spinpower, spinpower}; //回転のちからは、角度のズレにおおじて計算したほうがいいともう ex) （ズレ） * 1 的な...
+  // double spin_power[MOTOR_NUM] = {spinpower, spinpower, spinpower, spinpower}; //回転のちからは、角度のズレにおおじて計算したほうがいいともう ex) （ズレ） * 1 的な...
   Serial.print("radian:");
   Serial.print(radian_m);
   Serial.print(" power:");

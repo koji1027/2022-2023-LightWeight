@@ -13,11 +13,4 @@ void loop()
 {
   // put your main code here, to run repeatedly:
   motor_control(0, power);
-  delay(500);
-  motor_control(PI / 2, power);
-  delay(500);
-  motor_control(PI, power);
-  delay(500);
-  motor_control(PI * 3 / 2, power);
-  delay(500);
 }
