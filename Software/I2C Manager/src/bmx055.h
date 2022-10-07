@@ -14,6 +14,7 @@ public:
     void mag();
     void accl_gyro_calibration();
     void mag_calibration();
+    void show();
     float convert_range(float degree);
     int get_max_min(int data[], int size, bool tag);
 
@@ -96,7 +97,7 @@ void Axis::init()
     //------------------------------------------------------------//
     Wire.beginTransmission(Addr_mag);
     Wire.write(0x4C); // Select mag register
-    Wire.write(0x07); // Normal Mode, ODR = 10 Hz
+    Wire.write(0x00); // Normal Mode, ODR = 10 Hz
     Wire.endTransmission();
     //------------------------------------------------------------//
     Wire.beginTransmission(Addr_mag);
@@ -187,32 +188,36 @@ void Axis::mag()
     unsigned int data[8];
     for (int i = 0; i < 8; i++)
     {
-        Wire.beginTransmission(Addr_mag);
-        Wire.write((0x42 + i)); // Select data register
-        Wire.endTransmission();
-        Wire.requestFrom(Addr_mag, 1); // Request 1 byte of data
-        // Read 6 bytes of data
-        // xmag lsb, xmag msb, ymag lsb, ymag msb, zmag lsb, zmag msb
-        if (Wire.available() == 1)
-            data[i] = Wire.read();
+        unsigned int data[8];
+        for (int i = 0; i < 8; i++)
+        {
+            Wire.beginTransmission(Addr_mag);
+            Wire.write((0x42 + i)); // Select data register
+            Wire.endTransmission();
+            Wire.requestFrom(Addr_mag, 1); // Request 1 byte of data
+            // Read 6 bytes of data
+            // xMag lsb, xMag msb, yMag lsb, yMag msb, zMag lsb, zMag msb
+            if (Wire.available() == 1)
+                data[i] = Wire.read();
+        }
+        // Convert the data
+        xmag = ((data[1] << 5) | (data[0] >> 3));
+        if (xmag > 4095)
+            xmag -= 8192;
+        ymag = ((data[3] << 5) | (data[2] >> 3));
+        if (ymag > 4095)
+            ymag -= 8192;
+        zmag = ((data[5] << 7) | (data[4] >> 1));
+        if (zmag > 16383)
+            zmag -= 32768;
+
+        xmag += xmag_offset;
+        ymag += ymag_offset;
+
+        float radian = atan2(ymag, xmag);
+        float mag_degree = radian * 180.0 / PI;
+        mag_radian = convert_range(mag_degree) - mag_radian_zero;
     }
-    // Convert the data
-    xmag = ((data[1] << 5) | (data[0] >> 3));
-    if (xmag > 4095)
-        xmag -= 8192;
-    ymag = ((data[3] << 5) | (data[2] >> 3));
-    if (ymag > 4095)
-        ymag -= 8192;
-    zmag = ((data[5] << 7) | (data[4] >> 1));
-    if (zmag > 16383)
-        zmag -= 32768;
-
-    xmag += xmag_offset;
-    ymag += ymag_offset;
-
-    float radian = atan2(ymag, xmag);
-    float mag_degree = radian * 180.0 / PI;
-    mag_radian = convert_range(mag_degree) - mag_radian_zero;
 }
 
 float Axis::convert_range(float degree) //-Pi から Pi に変換
@@ -239,6 +244,7 @@ void Axis::accl_gyro_calibration()
     int buff_size = 1000;
     float buff_xaccl, buff_yaccl, buff_zaccl = 0.00;
     int buff_xgyro, buff_ygyro, buff_zgyro = 0;
+    Serial.println("Don't move the sensor");
     while (i < buff_size + 101)
     {
         if (i < 100)
@@ -268,13 +274,14 @@ void Axis::accl_gyro_calibration()
             ygyro_offset = float(buff_ygyro) / float(buff_size);
             zgyro_offset = float(buff_zgyro) / float(buff_size);
         }
+        i++;
     }
 }
 
 void Axis::mag_calibration()
 {
     int i = 0;
-    int buff_size = 1000;
+    int buff_size = 500;
     int buff_xmag[buff_size], buff_ymag[buff_size];
     while (i < buff_size + 101)
     {
@@ -300,6 +307,7 @@ void Axis::mag_calibration()
             xmag_offset = float(xmag_max + xmag_min) / 2.0;
             ymag_offset = float(ymag_max + ymag_min) / 2.0;
         }
+        i++;
     }
 }
 
@@ -329,4 +337,20 @@ int Axis::get_max_min(int data[], int size, bool tag)
         }
         return min;
     }
+}
+
+void Axis::show()
+{
+    Serial.print("xGyro :");
+    Serial.print(xgyro);
+    Serial.print("yGyro :");
+    Serial.print(ygyro);
+    Serial.print(" 角度 = ");
+    Serial.print(degrees(gyro_degree));
+    Serial.println();
+    Serial.print("xGyro_offset :");
+    Serial.print(xgyro_offset);
+    Serial.print("yGyro_offset :");
+    Serial.print(ygyro_offset);
+    Serial.println();
 }

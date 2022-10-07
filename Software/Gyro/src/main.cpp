@@ -18,7 +18,6 @@ void loop()
 {
   // Serial.println("--------------------------------------");
 
-  /*
   // BMX055 加速度の読み取り
   BMX055_Accl();
   Serial.print("Accl= ");
@@ -48,8 +47,8 @@ void loop()
   Serial.print(",");
   Serial.print(zMag);
   Serial.println("");
-  */
-  while (true)
+  delay(100);
+  /*while (true)
   {
     BMX055_Gyro();
     zGyro -= 0.01;
@@ -60,5 +59,5 @@ void loop()
     Serial.print(degree);
     Serial.println("°");
   }
-  delay(10);
+  delay(10);*/
 }
