@@ -9,8 +9,8 @@
 
 int mag_posture_spin();
 
-const int MOTORS_PIN[MOTOR_NUM][MOTOR_PIN] = {{2, 3}, {9, 10}, {11, 12}, {13, 18}};            // PWMピン、DIRピン
-const double MOTORS_THETA[MOTOR_NUM] = {PI / 3.0, 2.0 * PI / 3.0, -PI / 3.0, -2.0 * PI / 3.0}; //モータの配置角度(ラジアン) 正面０ラジアン、-PI < theta <= PI
+const int MOTORS_PIN[MOTOR_NUM][MOTOR_PIN] = {{3, 2}, {10, 9}, {12, 11}, {18, 13}};            // PWMピン、DIRピン
+const double MOTORS_THETA[MOTOR_NUM] = {PI / 3.0, 2.0 * PI / 3.0, -2.0 * PI / 3.0, -PI / 3.0}; //モータの配置角度(ラジアン) 正面０ラジアン、-PI < theta <= PI
 
 void motor_move(double motor_power[MOTOR_NUM], int motor_dir[MOTOR_NUM])
 {
@@ -57,11 +57,11 @@ void motor_control(double theta, uint8_t power)
     motor_power[i] = double(power) * sin(theta - MOTORS_THETA[i]);
   }
 
-  int adjust_power = mag_posture_spin();
+  /*int adjust_power = mag_posture_spin();
   for (int i = 0; i < MOTOR_NUM; i++)
   {
     motor_power[i] += adjust_power;
-  }
+  }*/
 
   int max_index = get_max_index(motor_power, MOTOR_NUM);
   for (int i = 0; i < MOTOR_NUM; i++)
@@ -81,6 +81,13 @@ void motor_control(double theta, uint8_t power)
       motor_dir[i] = 0;
     }
   }
+  Serial.print(motor_power[0]);
+  Serial.print(",");
+  Serial.print(motor_power[1]);
+  Serial.print(",");
+  Serial.print(motor_power[2]);
+  Serial.print(",");
+  Serial.println(motor_power[3]);
   motor_move(motor_power, motor_dir);
 }
 

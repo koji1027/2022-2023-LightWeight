@@ -10,6 +10,7 @@ void setup() {
   pinMode(s2, OUTPUT);
   pinMode(s3, OUTPUT);
   pinMode(SIG_pin, INPUT);
+  pinMode(A0, INPUT);
 
   digitalWrite(s0, LOW);
   digitalWrite(s1, LOW);
@@ -23,6 +24,9 @@ void setup() {
 
 void loop() {
   ir.IR_get();
+  ir.IRpin_read();
+  ir.radius_read();
   ir.angle_read();
   delay(100);
+  
 }
