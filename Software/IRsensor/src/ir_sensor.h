@@ -22,8 +22,7 @@ public:
     void radius_read();
     void angle_read();
     void send();
-    int maxPinVal = 0;
-    int maxPin = 0;
+    float angle_PI;
 
 private:
     int muxChannel[16][4] = {
@@ -82,7 +81,8 @@ private:
     float unit_cos[IR_NUM];
     // float unit_cor[IR_NUM];
     float now_radius;
-    float angle_PI;
+    int maxPinVal = 0;
+    int maxPin = 0;
 };
 
 void IR::begin()
@@ -157,15 +157,12 @@ void IR::angle_read()
 
 void IR::send()
 {
-    while (!Serial1.available() > 0)
-    {
-    }
-    byte recv_data = Serial1.read();
-    if (int(recv_data) == 255)
-    {
-        Serial1.write(now_radius);
-        Serial1.write(angle_PI);
-        Serial1.write(255);
-    }
+    float _angle = angle_PI;
+    _angle += 1;
+    int angle = _angle * 100;
+    Serial.print(angle_PI);
+    Serial.print(", ");
+    Serial.println(angle);
+    Serial1.write(angle);
 }
 #endif

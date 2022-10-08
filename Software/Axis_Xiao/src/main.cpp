@@ -10,6 +10,7 @@ void setup()
 {
   // put your setup code here, to run once:
   Serial.begin(SERIAL_BAUD);
+  Serial1.begin(SERIAL_BAUD);
   Wire.begin();
   delay(100);
   bmx055.init();
@@ -20,8 +21,16 @@ void loop()
 {
   bmx055.cal_angle_gyro();
   bmx055.cal_angle_mag();
-  bmx055.show(false, false, false);
-  delay(10);
+  // bmx055.adjust_angle();
+  // bmx055.show(false, false, false);
+  if (Serial1.available())
+  {
+    int recv_data = Serial1.read();
+    if (recv_data == 255)
+    {
+      bmx055.send();
+    }
+  }
 }
 /*
 //================================================================//

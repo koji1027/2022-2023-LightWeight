@@ -15,6 +15,8 @@ public:
     void cal_angle_gyro();
     void cal_angle_mag();
     void zero_point_set();
+    void send();
+    void adjust_angle();
     void show(bool accl, bool gyro, bool mag);
 
 private:
@@ -23,7 +25,7 @@ private:
     float zaccl = 0.00;
     float xgyro = 0.00;
     float ygyro = 0.00;
-    float zgyro = 0.00;
+    float zgyro = -0.07;
     int xmag = 0;
     int ymag = 0;
     int zmag = 0;
@@ -115,7 +117,7 @@ void Axis::init()
     Wire.write(0x16); // No. of Repetitions for Z-Axis = 15
     Wire.endTransmission();
 
-    Serial.println("Calibrating...");
+    /*Serial.println("Calibrating...");
     Serial.println("Do not move the sensor");
     float sum_zgyro = 0;
     for (int i = 0; i < 351; i++)
@@ -170,9 +172,16 @@ void Axis::init()
             xmag_offset = -float(xmag_max + xmag_min) / 2.0;
             ymag_offset = -float(ymag_max + ymag_min) / 2.0;
         }
-    }
-    Serial.println("Calibration complete");
-    delay(500);
+}
+Serial.println("Calibration complete");
+Serial.print("Calibration Result: ");
+Serial.print("xmag_offset = ");
+Serial.print(xmag_offset);
+Serial.print(", ymag_offset = ");
+Serial.print(ymag_offset);
+Serial.print(", zgyro_offset = ");
+Serial.println(zgyro_offset);
+delay(500);*/
     zero_point_set();
     delay(500);
 }
@@ -315,11 +324,6 @@ void Axis::show(bool accl, bool gyro, bool mag)
     }
     if (!accl && !gyro && !mag)
     {
-        float diff = abs(gyro_degree - degrees(mag_radian));
-        if (diff > 2)
-        {
-            gyro_degree = degrees(mag_radian);
-        }
         Serial.print("gyro_degree = ");
         Serial.print(gyro_degree);
         Serial.print(" mag_degree = ");
@@ -348,4 +352,24 @@ void Axis::zero_point_set()
     gyro_degree = 0.00;
     cal_angle_mag();
     mag_radian_offset = mag_radian;
+}
+
+void Axis::send()
+{
+    float rad = radians(gyro_degree);
+    rad = rad / PI;
+    rad += 1;
+    int data = rad * 100;
+    Serial1.write(255);
+    Serial1.write(data);
+    Serial.println(data);
+}
+
+void Axis::adjust_angle()
+{
+    float diff = abs(gyro_degree - degrees(mag_radian));
+    if (diff > 3)
+    {
+        gyro_degree = degrees(mag_radian);
+    }
 }

@@ -4,7 +4,8 @@
 
 IR ir;
 
-void setup() {
+void setup()
+{
   pinMode(s0, OUTPUT);
   pinMode(s1, OUTPUT);
   pinMode(s2, OUTPUT);
@@ -22,11 +23,28 @@ void setup() {
   ir.begin();
 }
 
-void loop() {
+void loop()
+{
   ir.IR_get();
-  ir.IRpin_read();
-  ir.radius_read();
-  ir.angle_read();
-  delay(100);
-  
+  //ir.IRpin_read();
+  //ir.radius_read();
+  //ir.angle_read();
+}
+
+void setup1()
+{
+  Serial1.begin(115200);
+}
+
+void loop1()
+{
+  while (!Serial1.available())
+  {
+  }
+  int recv_data = Serial1.read();
+  if (recv_data == 255)
+  {
+    Serial1.write(255);
+    ir.send();
+  }
 }
