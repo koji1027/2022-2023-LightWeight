@@ -21,6 +21,9 @@ public:
     void IRpin_read();
     void radius_read();
     void angle_read();
+    void send();
+    int maxPinVal = 0;
+    int maxPin = 0;
 
 private:
     int muxChannel[16][4] = {
@@ -95,7 +98,7 @@ void IR::begin()
 void IR::IR_get()
 {
     int controlPin[] = {s0, s1, s2, s3};
-    for (int i = 0; i < IR_NUM; i++)
+    for (int i = 0; i < IR_NUM - 1; i++)
     {
         for (int j = 0; j < 4; j++)
         {
@@ -104,22 +107,24 @@ void IR::IR_get()
         IR_Cur[i] = IR_CUR_MAX - analogRead(SIG_pin);
     }
 
+    IR_Cur[15] = IR_CUR_MAX - analogRead(A0);
+
     vector_XY = {0, 0};
     for (int i = 0; i < IR_NUM; i++)
     {
         vector_XY.x += IR_Cur[i] * unit_cos[i];
         vector_XY.y += IR_Cur[i] * unit_sin[i];
     }
-
     vector_RT.radius = sqrt(pow(vector_XY.x, 2.0) + pow(vector_XY.y, 2.0));
-    now_radius = ave.updateData(vector_RT.radius);//半径
+    now_radius = ave.updateData(vector_RT.radius); //半径
 
     vector_RT.angle = atan2(vector_XY.y, vector_XY.x);
-    angle_PI = vector_RT.angle / PI;//角度
+    angle_PI = vector_RT.angle / PI; //角度
 }
 
 void IR::IRpin_read()
 {
+
     for (int i = 0; i < IR_NUM; i++)
     {
         Serial.print(i);
@@ -127,6 +132,14 @@ void IR::IRpin_read()
         Serial.println(IR_Cur[i]);
     }
     Serial.println("ー－－－－");
+    /*
+    for (int i = maxPin - 2 + 16; i < maxPin - 2 + 16 + 5; i++)
+    {
+        i = i % 16;
+        Serial.print(i);
+        Serial.print(": ");
+        Serial.println(IR_Cur[i]);
+    }*/
 }
 
 void IR::radius_read()
@@ -142,4 +155,17 @@ void IR::angle_read()
     Serial.println("π");
 }
 
+void IR::send()
+{
+    while (!Serial1.available() > 0)
+    {
+    }
+    byte recv_data = Serial1.read();
+    if (int(recv_data) == 255)
+    {
+        Serial1.write(now_radius);
+        Serial1.write(angle_PI);
+        Serial1.write(255);
+    }
+}
 #endif

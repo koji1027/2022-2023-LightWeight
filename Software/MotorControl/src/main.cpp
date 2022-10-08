@@ -16,14 +16,14 @@ int get_max_index(double data[], int data_num);
 void setup()
 {
   // put your setup code here, to run once:
-  Serial.begin(250000);
-  Serial1.begin(250000);
-  Serial2.begin(250000);
-  Serial3.begin(250000);
-  Serial4.begin(250000);
-  Serial5.begin(250000);
-  Serial6.begin(250000);
-  Serial7.begin(250000);
+  Serial.begin(115200);
+  Serial1.begin(115200);
+  Serial2.begin(115200);
+  Serial3.begin(115200);
+  Serial4.begin(115200);
+  Serial5.begin(115200);
+  Serial6.begin(115200);
+  Serial7.begin(115200);
 
   // Wire.begin();
   // BMX055_Init();
@@ -33,19 +33,21 @@ void setup()
     pinMode(MOTORS_PIN[i][0], OUTPUT);
     pinMode(MOTORS_PIN[i][1], OUTPUT);
   }
+
+  digitalWrite(LED_BUILTIN,1);
 }
 
 void loop()
 {
   // put your main code here, to run repeatedly:
-  uint8_t power = 120;
+  uint8_t power = 255;
   double theta = 0;
   /*while (true)
   {
     motor_control(theta, power);
     //delay();
   }*/
-  while (1)
+  /*while (1)
   {
     digitalWrite(3, HIGH);
     digitalWrite(10, HIGH);
@@ -58,10 +60,11 @@ void loop()
     /*analogWrite(2, 120);
     analogWrite(9, 120);
     analogWrite(11, 120);
-    analogWrite(13, 120);*/
-  }
-  while (true)
-  {
+    analogWrite(13, 120);
+  }*/
+  while(1){
     motor_control(theta, power);
+    theta++;
+    theta = theta
   }
 }
