@@ -4,6 +4,7 @@
 #define Addr_accl 0x19
 #define Addr_gyro 0x69
 #define Addr_mag 0x13
+#define MAG_LPF_BUFF 30
 
 class Axis
 {
@@ -35,15 +36,16 @@ private:
     float xgyro_offset = 0.00;
     float ygyro_offset = 0.00;
     float zgyro_offset = 0.00;
-    int xmag_offset = 0;
-    int ymag_offset = 0;
+    int xmag_offset = 108;
+    int ymag_offset = -270;
     int zmag_offset = 0;
     unsigned long long pre_time = 0;
     float pre_zgyro = 0.00;
     float gyro_degree = 0.00;
-    float gyro_degree_offset = 0.00;
     float mag_radian = 0.00;
     float mag_radian_offset = 0.00;
+    float integrated_degree = 0.00;
+    float mag_rad_buff[MAG_LPF_BUFF];
 };
 
 void Axis::init()
@@ -172,16 +174,16 @@ void Axis::init()
             xmag_offset = -float(xmag_max + xmag_min) / 2.0;
             ymag_offset = -float(ymag_max + ymag_min) / 2.0;
         }
-}
-Serial.println("Calibration complete");
-Serial.print("Calibration Result: ");
-Serial.print("xmag_offset = ");
-Serial.print(xmag_offset);
-Serial.print(", ymag_offset = ");
-Serial.print(ymag_offset);
-Serial.print(", zgyro_offset = ");
-Serial.println(zgyro_offset);
-delay(500);*/
+    }
+    Serial.println("Calibration complete");
+    Serial.print("Calibration Result: ");
+    Serial.print("xmag_offset = ");
+    Serial.print(xmag_offset);
+    Serial.print(", ymag_offset = ");
+    Serial.print(ymag_offset);
+    Serial.print(", zgyro_offset = ");
+    Serial.println(zgyro_offset);
+    delay(500);*/
     zero_point_set();
     delay(500);
 }
@@ -327,7 +329,9 @@ void Axis::show(bool accl, bool gyro, bool mag)
         Serial.print("gyro_degree = ");
         Serial.print(gyro_degree);
         Serial.print(" mag_degree = ");
-        Serial.println(degrees(mag_radian));
+        Serial.print(degrees(mag_radian));
+        Serial.print(" integrated_degree = ");
+        Serial.println(integrated_degree);
     }
 }
 
@@ -337,14 +341,27 @@ void Axis::cal_angle_gyro()
     unsigned long long now = micros();
     float dt = (now - pre_time) / 1000000.0;
     pre_time = now;
-    gyro_degree += zgyro * dt;
+    float dtheta = zgyro * dt;
+    if (abs(dtheta) > 0.05)
+    {
+        gyro_degree += dtheta;
+    }
 }
 
 void Axis::cal_angle_mag()
 {
     mag();
-    mag_radian = -atan2(ymag, xmag);
-    mag_radian -= mag_radian_offset;
+    for (int i = MAG_LPF_BUFF - 1; i > 0; i--)
+    {
+        mag_rad_buff[i] = mag_rad_buff[i - 1];
+    }
+    mag_rad_buff[0] = -atan2(ymag, xmag) - mag_radian_offset;
+    float sum = 0;
+    for (int i = 0; i < MAG_LPF_BUFF; i++)
+    {
+        sum += mag_rad_buff[i];
+    }
+    mag_radian = sum / float(MAG_LPF_BUFF);
 }
 
 void Axis::zero_point_set()
@@ -368,8 +385,9 @@ void Axis::send()
 void Axis::adjust_angle()
 {
     float diff = abs(gyro_degree - degrees(mag_radian));
-    if (diff > 3)
+    if (diff > 4)
     {
         gyro_degree = degrees(mag_radian);
     }
+    integrated_degree = (gyro_degree + degrees(mag_radian)) / 2.0;
 }

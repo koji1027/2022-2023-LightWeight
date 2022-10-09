@@ -8,16 +8,16 @@
 #define SELECT_PIN1 D2
 #define SELECT_PIN2 D3
 #define SELECT_PIN3 D4
-#define NEOPIXEL_NUM 32
+#define NEOPIXEL_NUM 33
 #define NEOPIXEL_DIN D5
+#define BUFFER_SIZE 5
 
-int threshold = 500;
+int threshold[SENSOR_NUM] = {250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250};
 int neopixel_coloer[3] = {255, 0, 0};
 
 Adafruit_NeoPixel pixels(NEOPIXEL_NUM, NEOPIXEL_DIN, NEO_GRB + NEO_KHZ800);
 
-void change_color();
-
+void pixels_init();
 const float SENSOR_THETA[SENSOR_NUM] =
     {
         PI, -PI * 15.0 / 16.0, -PI * 14.0 / 16.0, -PI * 13.0 / 16.0, -PI * 12.0 / 16.0, -PI * 11.0 / 16.0, -PI * 10.0 / 16.0, -PI * 9.0 / 16.0,
@@ -28,6 +28,7 @@ float sensor_y[SENSOR_NUM] = {};
 uint8_t mode = 0;
 int line_flag[SENSOR_NUM] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 int sensor_value[SENSOR_NUM] = {};
+int sensor_value_buff[SENSOR_NUM][BUFFER_SIZE];
 // float line_x = 0;
 // float line_y = 0;
 
@@ -49,7 +50,7 @@ void setup()
     sensor_x[i] = cos(SENSOR_THETA[i]);
     sensor_y[i] = sin(SENSOR_THETA[i]);
   }
-  Serial.begin(250000);
+  Serial.begin(115200);
 }
 
 void loop()
@@ -63,7 +64,9 @@ void loop()
     digitalWrite(SELECT_PIN1, byte(i) & (1 << 1));
     digitalWrite(SELECT_PIN2, byte(i) & (1 << 2));
     digitalWrite(SELECT_PIN3, byte(i) & (1 << 3));
+    delayMicroseconds(10);
     _sensor_value[i] = analogRead(COM);
+    delayMicroseconds(10);
   }
   sensor_value[8] = _sensor_value[0];
   sensor_value[9] = _sensor_value[1];
@@ -84,7 +87,22 @@ void loop()
 
   for (int i = 0; i < SENSOR_NUM; i++)
   {
-    if (sensor_value[i] > threshold)
+    for (int j = BUFFER_SIZE - 1; j > 0; j--)
+    {
+      sensor_value_buff[i][j] = sensor_value_buff[i][j - 1];
+    }
+    sensor_value_buff[i][0] = sensor_value[i];
+    int sum = 0;
+    for (int j = 0; j < BUFFER_SIZE; j++)
+    {
+      sum += sensor_value_buff[i][j];
+    }
+    sensor_value[i] = round(sum / float(BUFFER_SIZE));
+  }
+
+  for (int i = 0; i < SENSOR_NUM; i++)
+  {
+    if (sensor_value[i] > threshold[i])
     {
       line_flag[i] = 1;
     }
@@ -93,6 +111,13 @@ void loop()
       line_flag[i] = 0;
     }
   }
+  for (int i = 0; i < SENSOR_NUM; i++)
+  {
+    Serial.print(line_flag[i]);
+    Serial.print(" ");
+  }
+  Serial.println();
+  delay(100);
 
   /* for (int i = 0; i < SENSOR_NUM; i++) ベクトルの計算 今は使わない予定
   {
@@ -109,9 +134,9 @@ void setup1()
   pinMode(NEOPIXEL_DIN, OUTPUT);
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, HIGH);
-  Serial1.begin(250000);
+  Serial1.begin(115200);
   pixels.begin();
-  change_color();
+  pixels_init();
 }
 
 void loop1()
@@ -129,7 +154,7 @@ void loop1()
       }
       neopixel_coloer[i] = Serial1.read();
     }
-    change_color();
+    pixels_init();
   }
   else if (int(recv_data) == 254)
   {
@@ -139,13 +164,13 @@ void loop1()
       Serial1.write(line_flag[i]);
     }
   }
-  else if (int(recv_data) == 253)
+  /*else if (int(recv_data) == 253)
   {
     while (!Serial1.available() > 0)
     {
     }
     threshold = int(Serial1.read()) * 4;
-  }
+  }*/
   else if (int(recv_data) == 252)
   {
     Serial1.write(255);
@@ -156,11 +181,12 @@ void loop1()
   }
 }
 
-void change_color()
+void pixels_init()
 {
   for (int i = 0; i < NEOPIXEL_NUM; i++)
   {
     pixels.setPixelColor(i, pixels.Color(neopixel_coloer[0], neopixel_coloer[1], neopixel_coloer[2]));
   }
+  pixels.setBrightness(150);
   pixels.show();
 }

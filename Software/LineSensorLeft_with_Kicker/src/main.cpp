@@ -8,8 +8,9 @@
 #define SELECT_PIN1 D2
 #define SELECT_PIN2 D3
 #define SELECT_PIN3 D4
+#define BUFFER_SIZE 5
 
-int threshold = 500;
+int threshold[SENSOR_NUM] = {250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250};
 
 const float SENSOR_THETA[SENSOR_NUM] =
     {
@@ -21,6 +22,7 @@ float sensor_y[SENSOR_NUM] = {};
 uint8_t mode = 0;
 int line_flag[SENSOR_NUM] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 int sensor_value[SENSOR_NUM] = {};
+int sensor_value_buff[SENSOR_NUM][BUFFER_SIZE];
 // float line_x = 0;
 // float line_y = 0;
 
@@ -42,7 +44,7 @@ void setup()
     sensor_x[i] = cos(SENSOR_THETA[i]);
     sensor_y[i] = sin(SENSOR_THETA[i]);
   }
-  Serial.begin(250000);
+  Serial.begin(115200);
 }
 
 void loop()
@@ -56,7 +58,9 @@ void loop()
     digitalWrite(SELECT_PIN1, byte(i) & (1 << 1));
     digitalWrite(SELECT_PIN2, byte(i) & (1 << 2));
     digitalWrite(SELECT_PIN3, byte(i) & (1 << 3));
+    delayMicroseconds(10);
     _sensor_value[i] = analogRead(COM);
+    delayMicroseconds(10);
   }
   sensor_value[8] = _sensor_value[0];
   sensor_value[9] = _sensor_value[1];
@@ -77,7 +81,22 @@ void loop()
 
   for (int i = 0; i < SENSOR_NUM; i++)
   {
-    if (sensor_value[i] > threshold)
+    for (int j = BUFFER_SIZE - 1; j > 0; j--)
+    {
+      sensor_value_buff[i][j] = sensor_value_buff[i][j - 1];
+    }
+    sensor_value_buff[i][0] = sensor_value[i];
+    int sum = 0;
+    for (int j = 0; j < BUFFER_SIZE; j++)
+    {
+      sum += sensor_value_buff[i][j];
+    }
+    sensor_value[i] = round(sum / float(BUFFER_SIZE));
+  }
+
+  for (int i = 0; i < SENSOR_NUM; i++)
+  {
+    if (sensor_value[i] > threshold[i])
     {
       line_flag[i] = 1;
     }
@@ -86,6 +105,14 @@ void loop()
       line_flag[i] = 0;
     }
   }
+
+  for (int i = 0; i < SENSOR_NUM; i++)
+  {
+    Serial.print(line_flag[i]);
+    Serial.print(" ");
+  }
+  Serial.println();
+  delay(100);
 
   /* for (int i = 0; i < SENSOR_NUM; i++) ベクトルの計算 今は使わない予定
   {
@@ -103,7 +130,7 @@ void setup1()
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(KICKER_PIN, LOW);
   digitalWrite(LED_PIN, HIGH);
-  Serial1.begin(250000);
+  Serial1.begin(115200);
 }
 
 void loop1()
@@ -126,10 +153,10 @@ void loop1()
       Serial1.write(line_flag[i]);
     }
   }
-  else if (int(recv_data) == 253)
+  /*else if (int(recv_data) == 253)
   {
     threshold = int(Serial1.read()) * 4;
-  }
+  }*/
   else if (int(recv_data) == 252)
   {
     Serial1.write(255);

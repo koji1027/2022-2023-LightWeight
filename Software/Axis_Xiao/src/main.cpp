@@ -21,8 +21,8 @@ void loop()
 {
   bmx055.cal_angle_gyro();
   bmx055.cal_angle_mag();
-  // bmx055.adjust_angle();
-  // bmx055.show(false, false, false);
+  //bmx055.adjust_angle();
+  bmx055.show(false, false, false);
   if (Serial1.available())
   {
     int recv_data = Serial1.read();

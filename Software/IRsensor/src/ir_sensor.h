@@ -163,6 +163,7 @@ void IR::send()
     Serial.print(angle_PI);
     Serial.print(", ");
     Serial.println(angle);
+    //Serial1.write(255);
     Serial1.write(angle);
 }
 #endif
