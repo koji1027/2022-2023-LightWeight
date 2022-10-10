@@ -15,9 +15,9 @@ void setup()
 {
   // put your setup code here, to run once:
   // Serial.begin(115200);
+  Serial.begin(115200);
   Serial2.begin(115200);
   Serial3.begin(115200);
-  pinMode(LED_BUILTIN, OUTPUT);
   Motor.begin();
   delay(2000);
 }
@@ -25,13 +25,13 @@ void setup()
 void loop()
 {
   // put your main code here, to run repeatedly:
-  ir_get();
-  gyro_get();
+  // ir_get();
+  //gyro_get();
   // Serial.print("ir_deg: ");
   // Serial.print(ir_deg);
   // Serial.print("  gyro_deg: ");
   // Serial.println(gyro_deg);
-  Motor.cal(1, 1, 0, 180);
+  Motor.cal(0, 0, 150, 0, gyro_deg);
   delay(100);
   // Motor.cal(0, 0, CONST_ANG_VEL * gyro_deg, 255);
 }

@@ -1,12 +1,13 @@
 #include <Arduino.h>
 
 #define MOTOR_NUM 4
+#define Kp 0.5
 
 class motor_control
 {
 public:
     void begin();
-    void cal(float vel_x, float vel_y, float vel_theta, int max_speed);
+    void cal(float vel_x, float vel_y, int speed, float target_deg, float current_deg);
     void move(float power[MOTOR_NUM]);
 
 private:
@@ -32,12 +33,12 @@ void motor_control::begin()
     }
 }
 
-void motor_control::cal(float vel_x, float vel_y, float vel_theta, int speed)
+void motor_control::cal(float vel_x, float vel_y, int speed, float target_deg, float current_deg)
 {
     float power[MOTOR_NUM];
     for (int i = 0; i < MOTOR_NUM; i++)
     {
-        power[i] = vel_x * COS[MOTOR_POS[i]] + vel_y * SIN[MOTOR_POS[i]] + vel_theta;
+        power[i] = -vel_x * COS[MOTOR_POS[i]] + vel_y * SIN[MOTOR_POS[i]];
     }
     float max_power = 0;
     for (int i = 0; i < MOTOR_NUM; i++)
@@ -47,22 +48,37 @@ void motor_control::cal(float vel_x, float vel_y, float vel_theta, int speed)
             max_power = abs(power[i]);
         }
     }
+    if (max_power != 0)
+    {
+        for (int i = 0; i < MOTOR_NUM; i++)
+        {
+            power[i] = power[i] / max_power * speed;
+        }
+    }
+    float diff_deg = target_deg - current_deg;
+    float vel_theta = Kp * diff_deg;
     for (int i = 0; i < MOTOR_NUM; i++)
     {
-        power[i] = power[i] / max_power * speed;
+        power[i] += vel_theta;
+    }
+    for (int i = 0; i < MOTOR_NUM; i++)
+    {
+        power[i] = constrain(power[i], -255, 255);
+    }
+    //Serial.print("current_deg: ");
+    //Serial.print(current_deg);
+    Serial.print(" power: ");
+    for (int i = 0; i < MOTOR_NUM; i++)
+    {
+        Serial.print(power[i]);
+        Serial.print(" ");
     }
     move(power);
 }
 
 void motor_control::move(float power[MOTOR_NUM])
 {
-    /*Serial.print("power: ");
-    for (int i = 0; i < MOTOR_NUM; i++)
-    {
-        Serial.print(power[i]);
-        Serial.print(" ");
-    }
-    Serial.println();*/
+    Serial.println();
     for (int i = 0; i < MOTOR_NUM; i++)
     {
         int dir = 0;
