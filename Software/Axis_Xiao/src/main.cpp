@@ -18,7 +18,7 @@ void setup()
 }
 
 void loop()
-{
+{/*
   bmx055.cal_angle();
   bmx055.show(false, false, false);
   if (Serial1.available())
@@ -29,4 +29,10 @@ void loop()
       bmx055.send();
     }
   }
+  else{
+    Serial.println("Ouch!");
+  }*/
+  Serial1.write(1);
+  Serial.println(1);
+  delay(10);
 }

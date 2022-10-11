@@ -38,12 +38,14 @@ void setup1()
 
 void loop1()
 {
-  while (!Serial1.available())
+  /*while (!Serial1.available())
   {
-  }
+  }*/
   int recv_data = Serial1.read();
   if (recv_data == 255)
   {
     ir.send();
   }
+  ir.IRpin_read();
+
 }
