@@ -49,73 +49,73 @@ private:
 void Axis::init()
 {
 
-    Wire2.beginTransmission(Addr_accl);
-    Wire2.write(0x0F); // Select PMU_Range register
-    Wire2.write(0x03); // Range = +/- 2g
-    Wire2.endTransmission();
+    Wire.beginTransmission(Addr_accl);
+    Wire.write(0x0F); // Select PMU_Range register
+    Wire.write(0x03); // Range = +/- 2g
+    Wire.endTransmission();
     delay(100);
 
-    Wire2.beginTransmission(Addr_accl);
-    Wire2.write(0x10); // Select PMU_BW register
-    Wire2.write(0x08); // Bandwidth = 7.81 Hz
-    Wire2.endTransmission();
+    Wire.beginTransmission(Addr_accl);
+    Wire.write(0x10); // Select PMU_BW register
+    Wire.write(0x08); // Bandwidth = 7.81 Hz
+    Wire.endTransmission();
     delay(100);
 
-    Wire2.beginTransmission(Addr_accl);
-    Wire2.write(0x11); // Select PMU_LPW register
-    Wire2.write(0x00); // Normal mode, Sleep duration = 0.5ms
-    Wire2.endTransmission();
+    Wire.beginTransmission(Addr_accl);
+    Wire.write(0x11); // Select PMU_LPW register
+    Wire.write(0x00); // Normal mode, Sleep duration = 0.5ms
+    Wire.endTransmission();
     delay(100);
 
-    Wire2.beginTransmission(Addr_gyro);
-    Wire2.write(0x0F); // Select Range register
-    Wire2.write(0x02); // Full scale = +/- 500 degree/s
-    Wire2.endTransmission();
+    Wire.beginTransmission(Addr_gyro);
+    Wire.write(0x0F); // Select Range register
+    Wire.write(0x02); // Full scale = +/- 500 degree/s
+    Wire.endTransmission();
     delay(100);
 
-    Wire2.beginTransmission(Addr_gyro);
-    Wire2.write(0x10); // Select Bandwidth register
-    Wire2.write(0x01); // ODR = 100 Hz
-    Wire2.endTransmission();
+    Wire.beginTransmission(Addr_gyro);
+    Wire.write(0x10); // Select Bandwidth register
+    Wire.write(0x01); // ODR = 100 Hz
+    Wire.endTransmission();
     delay(100);
 
-    Wire2.beginTransmission(Addr_gyro);
-    Wire2.write(0x11); // Select LPM1 register
-    Wire2.write(0x00); // Normal mode, Sleep duration = 2ms
-    Wire2.endTransmission();
+    Wire.beginTransmission(Addr_gyro);
+    Wire.write(0x11); // Select LPM1 register
+    Wire.write(0x00); // Normal mode, Sleep duration = 2ms
+    Wire.endTransmission();
     delay(100);
 
-    Wire2.beginTransmission(Addr_mag);
-    Wire2.write(0x4B); // Select Mag register
-    Wire2.write(0x83); // Soft reset
-    Wire2.endTransmission();
+    Wire.beginTransmission(Addr_mag);
+    Wire.write(0x4B); // Select Mag register
+    Wire.write(0x83); // Soft reset
+    Wire.endTransmission();
     delay(100);
 
-    Wire2.beginTransmission(Addr_mag);
-    Wire2.write(0x4B); // Select Mag register
-    Wire2.write(0x01); // Soft reset
-    Wire2.endTransmission();
+    Wire.beginTransmission(Addr_mag);
+    Wire.write(0x4B); // Select Mag register
+    Wire.write(0x01); // Soft reset
+    Wire.endTransmission();
     delay(100);
 
-    Wire2.beginTransmission(Addr_mag);
-    Wire2.write(0x4C); // Select Mag register
-    Wire2.write(0x00); // Normal Mode, ODR = 10 Hz
-    Wire2.endTransmission();
+    Wire.beginTransmission(Addr_mag);
+    Wire.write(0x4C); // Select Mag register
+    Wire.write(0x00); // Normal Mode, ODR = 10 Hz
+    Wire.endTransmission();
 
-    Wire2.beginTransmission(Addr_mag);
-    Wire2.write(0x4E); // Select Mag register
-    Wire2.write(0x84); // X, Y, Z-Axis enabled
-    Wire2.endTransmission();
+    Wire.beginTransmission(Addr_mag);
+    Wire.write(0x4E); // Select Mag register
+    Wire.write(0x84); // X, Y, Z-Axis enabled
+    Wire.endTransmission();
 
-    Wire2.beginTransmission(Addr_mag);
-    Wire2.write(0x51); // Select Mag register
-    Wire2.write(0x04); // No. of Repetitions for X-Y Axis = 9
-    Wire2.endTransmission();
+    Wire.beginTransmission(Addr_mag);
+    Wire.write(0x51); // Select Mag register
+    Wire.write(0x04); // No. of Repetitions for X-Y Axis = 9
+    Wire.endTransmission();
 
-    Wire2.beginTransmission(Addr_mag);
-    Wire2.write(0x52); // Select Mag register
-    Wire2.write(0x16); // No. of Repetitions for Z-Axis = 15
-    Wire2.endTransmission();
+    Wire.beginTransmission(Addr_mag);
+    Wire.write(0x52); // Select Mag register
+    Wire.write(0x16); // No. of Repetitions for Z-Axis = 15
+    Wire.endTransmission();
 
     calibration();
 
@@ -127,14 +127,14 @@ void Axis::gyro()
     unsigned int data[6];
     for (int i = 0; i < 6; i++)
     {
-        Wire2.beginTransmission(Addr_gyro);
-        Wire2.write((2 + i)); // Select data register
-        Wire2.endTransmission();
-        Wire2.requestFrom(Addr_gyro, 1); // Request 1 byte of data
+        Wire.beginTransmission(Addr_gyro);
+        Wire.write((2 + i)); // Select data register
+        Wire.endTransmission();
+        Wire.requestFrom(Addr_gyro, 1); // Request 1 byte of data
         // Read 6 bytes of data
         // xgyro lsb, xgyro msb, ygyro lsb, ygyro msb, zgyro lsb, zgyro msb
-        if (Wire2.available() == 1)
-            data[i] = Wire2.read();
+        if (Wire.available() == 1)
+            data[i] = Wire.read();
     }
     // Convert the data
     xgyro = (data[1] * 256) + data[0];

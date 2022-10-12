@@ -2,6 +2,10 @@
 
 #define MOTOR_NUM 4
 #define Kp 0.5
+#define Kd 0.001
+#define Ki 0.001
+#define DELTA_TIME 0.01
+#define MOTOR_POWER 200
 
 class motor_control
 {
@@ -9,12 +13,17 @@ public:
     void begin();
     void cal(float vel_x, float vel_y, int speed, float target_deg, float current_deg);
     void move(float power[MOTOR_NUM]);
+    void posture_spin(float gyro_degree);
 
 private:
     const int MOTOR_PIN[MOTOR_NUM][2] = {{3, 2}, {10, 9}, {12, 11}, {18, 13}};
     const int MOTOR_POS[MOTOR_NUM] = {240, 300, 60, 120};
     float COS[360];
     float SIN[360];
+    float P = 0;
+    float I = 0;
+    float D = 0;
+    float dir_diff[2] = {0,0};
 };
 
 void motor_control::begin()
@@ -90,4 +99,27 @@ void motor_control::move(float power[MOTOR_NUM])
         analogWrite(MOTOR_PIN[i][0], round(power[i]));
         digitalWriteFast(MOTOR_PIN[i][1], dir);
     }
+}
+
+void motor_control::posture_spin(float gyro_degree)
+{
+    dir_diff[1] = gyro_degree;
+    P = dir_diff[1] * Kp;
+    I = I + ((dir_diff[1] + dir_diff[0]) / 2) * DELTA_TIME * Ki;
+    D = (dir_diff[1] - dir_diff[0]) / DELTA_TIME * Kd;
+    float spin_power = P + I + D;
+    if (spin_power >= 0){
+         for (int i = 0; i < MOTOR_NUM; i++){
+            analogWrite(MOTOR_PIN[i][0], round(abs(spin_power)));
+            digitalWriteFast(MOTOR_PIN[i][1], 1);
+         }
+    }
+    else{
+        for (int i = 0; i < MOTOR_NUM; i++){
+            analogWrite(MOTOR_PIN[i][0], round(abs(spin_power)));
+            digitalWriteFast(MOTOR_PIN[i][1], 0);
+         }
+    }
+    //Serial.println(round(abs(spin_power)));
+    dir_diff[0] = dir_diff[1];
 }
