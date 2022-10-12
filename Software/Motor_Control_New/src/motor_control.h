@@ -1,9 +1,9 @@
 #include <Arduino.h>
 
 #define MOTOR_NUM 4
-#define Kp 0.5
-#define Kd 0.001
-#define Ki 0.001
+#define Kp 2.718
+#define Kd 0.1
+#define Ki 0.1
 #define DELTA_TIME 0.01
 #define MOTOR_POWER 200
 
@@ -68,7 +68,7 @@ void motor_control::cal(float vel_x, float vel_y, int speed, float target_deg, f
     float vel_theta = Kp * diff_deg;
     for (int i = 0; i < MOTOR_NUM; i++)
     {
-        power[i] += vel_theta;
+        power[i] -= vel_theta;
     }
     for (int i = 0; i < MOTOR_NUM; i++)
     {
@@ -111,13 +111,13 @@ void motor_control::posture_spin(float gyro_degree)
     if (spin_power >= 0){
          for (int i = 0; i < MOTOR_NUM; i++){
             analogWrite(MOTOR_PIN[i][0], round(abs(spin_power)));
-            digitalWriteFast(MOTOR_PIN[i][1], 1);
+            digitalWriteFast(MOTOR_PIN[i][1], 0);
          }
     }
     else{
         for (int i = 0; i < MOTOR_NUM; i++){
             analogWrite(MOTOR_PIN[i][0], round(abs(spin_power)));
-            digitalWriteFast(MOTOR_PIN[i][1], 0);
+            digitalWriteFast(MOTOR_PIN[i][1], 1);
          }
     }
     //Serial.println(round(abs(spin_power)));

@@ -27,14 +27,15 @@ void loop()
   // put your main code here, to run repeatedly:
   // ir_get();
   gyro_get();
-  //Serial.println(gyro_deg);
-  // Serial.print("ir_deg: ");
-  // Serial.print(ir_deg);
-  // Serial.print("  gyro_deg: ");
   // Serial.println(gyro_deg);
-  Motor.posture_spin(gyro_deg);
-  delay(10);
-  // Motor.cal(0, 0, 150, 0, gyro_deg);
+  //  Serial.print("ir_deg: ");
+  //  Serial.print(ir_deg);
+  //  Serial.print("  gyro_deg: ");
+  //  Serial.println(gyro_deg);
+  Serial.println(gyro_deg);
+  //Motor.posture_spin(gyro_deg);
+  delay(1);
+  Motor.cal(0, 1, 150, 0, gyro_deg);
   // delay(100);
 
   // Motor.cal(0, 0, CONST_ANG_VEL * gyro_deg, 255);
@@ -68,27 +69,23 @@ void ir_get()
 
 void gyro_get()
 {
-  /*Serial3.write(255);
+  Serial3.write(255);
   while (!Serial3.available())
   {
-    Serial.println("OH,NO!");
+    // Serial.println("OH,NO!");
   }
   int recv_data = Serial3.read();
-  if (recv_data == 255)
-  {
-    recv_data = Serial3.read();
-    Serial.println(recv_data);*/
+  //Serial.println(recv_data);
 
-    /*gyro_deg = recv_data;
-    gyro_deg /= 100.0;
-    gyro_deg -= 1.0;
-    gyro_deg *= 180.0;
-    if (gyro_deg > 180)
-    {
-      gyro_deg -= 360.0;
-    }
-    
-  }*/
-  Serial.println(Serial3.read());
-  delay(10);
+  gyro_deg = recv_data;
+  gyro_deg /= 100.0;
+  gyro_deg -= 1.0;
+  gyro_deg *= 180.0;
+  
+  Serial.println(gyro_deg);
+
+  /*
+  Serial3.write(255);
+  Serial.println(255);
+  delay(10);*/
 }

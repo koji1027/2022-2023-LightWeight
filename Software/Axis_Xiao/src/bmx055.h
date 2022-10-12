@@ -69,7 +69,7 @@ void Axis::init()
 
     Wire.beginTransmission(Addr_gyro);
     Wire.write(0x0F); // Select Range register
-    Wire.write(0x02); // Full scale = +/- 500 degree/s
+    Wire.write(0x00); // Full scale = +/- 500 degree/s
     Wire.endTransmission();
     delay(100);
 
@@ -147,9 +147,9 @@ void Axis::gyro()
     if (zgyro > 32767)
         zgyro -= 65536;
 
-    xgyro = xgyro * 0.0152587890625; //  Full scale = +/- 500 degree/s
-    ygyro = ygyro * 0.0152587890625; //  Full scale = +/- 500 degree/s
-    zgyro = zgyro * 0.0152587890625; //  Full scale = +/- 500 degree/s
+    xgyro = xgyro * 0.0152587890625*4; //  Full scale = +/- 500 degree/s
+    ygyro = ygyro * 0.0152587890625*4; //  Full scale = +/- 500 degree/s
+    zgyro = zgyro * 0.0152587890625*4; //  Full scale = +/- 500 degree/s
 
     xgyro += xgyro_offset;
     ygyro += ygyro_offset;
@@ -230,7 +230,7 @@ void Axis::send()
     rad = rad / PI;
     rad += 1;
     int data = rad * 100;
-    Serial1.write(255);
+    //Serial1.write(255);
     Serial1.write(data);
     Serial.println(data);
 }
