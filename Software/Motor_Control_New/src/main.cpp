@@ -25,37 +25,24 @@ void setup()
 void loop()
 {
   // put your main code here, to run repeatedly:
-  // ir_get();
+  ir_get();
   gyro_get();
-  // Serial.println(gyro_deg);
-  //  Serial.print("ir_deg: ");
-  //  Serial.print(ir_deg);
-  //  Serial.print("  gyro_deg: ");
-  //  Serial.println(gyro_deg);
-  Serial.println(gyro_deg);
-  //Motor.posture_spin(gyro_deg);
-  delay(1);
-  Motor.cal(0, 1, 150, 0, gyro_deg);
-  // delay(100);
-
-  // Motor.cal(0, 0, CONST_ANG_VEL * gyro_deg, 255);
+  float ir_rad = ir_deg * PI / 180;
+  Serial.print("gyro_deg : ");
+  Serial.print(gyro_deg);
+  Serial.print(" ir_deg : ");
+  Serial.print(ir_rad);
+  Serial.print(" x : ");
+  Serial.print(cos(ir_rad));
+  Serial.print(" y : ");
+  Serial.println(sin(ir_rad));
+  // Motor.cal(1, 0, 150, -20, gyro_deg);
+  Motor.cal(sin(ir_rad), cos(ir_rad), 255, 0, gyro_deg);
+  delay(10);
 }
 
 void ir_get()
 {
-  /*Serial2.write(255);
-  while (!Serial2.available())
-  {
-  }
-  int recv_data = Serial2.read();
-  if (recv_data == 255)
-  {
-    recv_data = Serial2.read();
-    gyro_deg = recv_data;
-    /*recv_data /= 100.0;
-    recv_data -= 1;
-    ir_deg = recv_data * 180;
-  }*/
   Serial2.write(255);
   while (!Serial2.available())
   {
@@ -75,14 +62,14 @@ void gyro_get()
     // Serial.println("OH,NO!");
   }
   int recv_data = Serial3.read();
-  //Serial.println(recv_data);
+  // Serial.println(recv_data);
 
   gyro_deg = recv_data;
   gyro_deg /= 100.0;
   gyro_deg -= 1.0;
   gyro_deg *= 180.0;
-  
-  Serial.println(gyro_deg);
+
+  // Serial.println(gyro_deg);
 
   /*
   Serial3.write(255);
