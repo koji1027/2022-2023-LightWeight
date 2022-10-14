@@ -2,8 +2,8 @@
 
 #define MOTOR_NUM 4
 #define Kp 2.718
-#define Kd 0.1
 #define Ki 0.1
+#define Kd 0.1
 #define DELTA_TIME 0.01
 #define MOTOR_POWER 200
 
@@ -13,17 +13,16 @@ public:
     void begin();
     void cal(float vel_x, float vel_y, int speed, float target_deg, float current_deg);
     void move(float power[MOTOR_NUM]);
-    void posture_spin(float gyro_degree);
+    //void posture_spin(float gyro_degree);
 
 private:
     const int MOTOR_PIN[MOTOR_NUM][2] = {{3, 2}, {10, 9}, {12, 11}, {18, 13}};
     const int MOTOR_POS[MOTOR_NUM] = {240, 300, 60, 120};
     float COS[360];
     float SIN[360];
-    float P = 0;
-    float I = 0;
-    float D = 0;
-    float dir_diff[2] = {0,0};
+    float dt, preTime;
+    float P, I, D;
+    float deg_diff[2] = {0,0};
 };
 
 void motor_control::begin()
@@ -64,8 +63,16 @@ void motor_control::cal(float vel_x, float vel_y, int speed, float target_deg, f
             power[i] = power[i] / max_power * speed;
         }
     }
-    float diff_deg = target_deg - current_deg;
-    float vel_theta = Kp * diff_deg;
+
+    dt = (micros() - preTime) / 1000000;
+    preTime = micros();
+    deg_diff[1] = target_deg - current_deg;
+    P = Kp * deg_diff[1];
+    I += deg_diff[1] * dt;
+    D = (deg_diff[1]-deg_diff[0]) / dt;
+    deg_diff[0] = deg_diff[1];
+    float vel_theta = P + I + D;
+
     for (int i = 0; i < MOTOR_NUM; i++)
     {
         power[i] -= vel_theta;
@@ -101,7 +108,7 @@ void motor_control::move(float power[MOTOR_NUM])
     }
 }
 
-void motor_control::posture_spin(float gyro_degree)
+/*void motor_control::posture_spin(float gyro_degree)
 {
     dir_diff[1] = gyro_degree;
     P = dir_diff[1] * Kp;
@@ -122,4 +129,4 @@ void motor_control::posture_spin(float gyro_degree)
     }
     //Serial.println(round(abs(spin_power)));
     dir_diff[0] = dir_diff[1];
-}
+}*/
