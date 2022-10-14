@@ -7,9 +7,45 @@ void ir_get();
 void gyro_get();
 void line_get();
 
-int line_val[32];
+int line_flag[32];
 float ir_deg = 0;
 float gyro_deg = 0;
+const float LINE_ANGLE[32] = {
+    1.0 * PI / 16.0,
+    2.0 * PI / 16.0,
+    3.0 * PI / 16.0,
+    4.0 * PI / 16.0,
+    5.0 * PI / 16.0,
+    6.0 * PI / 16.0,
+    7.0 * PI / 16.0,
+    8.0 * PI / 16.0,
+    9.0 * PI / 16.0,
+    10.0 * PI / 16.0,
+    11.0 * PI / 16.0,
+    12.0 * PI / 16.0,
+    13.0 * PI / 16.0,
+    14.0 * PI / 16.0,
+    15.0 * PI / 16.0,
+    16.0 * PI / 16.0,
+    -15.0 * PI / 16.0,
+    -14.0 * PI / 16.0,
+    -13.0 * PI / 16.0,
+    -12.0 * PI / 16.0,
+    -11.0 * PI / 16.0,
+    -10.0 * PI / 16.0,
+    -9.0 * PI / 16.0,
+    -8.0 * PI / 16.0,
+    -7.0 * PI / 16.0,
+    -6.0 * PI / 16.0,
+    -5.0 * PI / 16.0,
+    -4.0 * PI / 16.0,
+    -3.0 * PI / 16.0,
+    -2.0 * PI / 16.0,
+    -1.0 * PI / 16.0,
+    0.0 * PI / 16.0,
+};
+
+float line[2] = {0.00, 0.00};
 
 motor_control Motor;
 
@@ -51,13 +87,34 @@ void loop()
     Serial.println();
   }*/
   line_get();
-  for (int i = 0; i < 32; i++)
+  for (int i = 0; i < 8; i++)
   {
-    Serial.print(line_val[i]);
-    Serial.print("\t");
+    Serial.print(i * 4);
+    Serial.print(" : ");
+    Serial.print(line_flag[i * 4]);
+    Serial.print(" ");
+    Serial.print(i * 4 + 1);
+    Serial.print(" : ");
+    Serial.print(line_flag[i * 4 + 1]);
+    Serial.print(" ");
+    Serial.print(i * 4 + 2);
+    Serial.print(" : ");
+    Serial.print(line_flag[i * 4 + 2]);
+    Serial.print(" ");
+    Serial.print(i * 4 + 3);
+    Serial.print(" : ");
+    Serial.print(line_flag[i * 4 + 3]);
+    Serial.println();
   }
-  Serial.println();
-  delay(100);
+  float line_rad = atan2(line[1], line[0]);
+  float line_deg = line_rad * 180.0 / PI;
+  Serial.print("LINE_X : ");
+  Serial.print(line[0]);
+  Serial.print(" LINE_Y : ");
+  Serial.print(line[1]);
+  Serial.print(" LINE : ");
+  Serial.println(line_deg);
+  delay(300);
 }
 
 void ir_get()
@@ -98,7 +155,10 @@ void gyro_get()
 
 void line_get()
 {
-  byte header = 252;
+  line[0] = 0.00;
+  line[1] = 0.00;
+  float _line_flag[32];
+  byte header = 254;
   Serial4.write(header);
   int recv_data = Serial4.read();
   while (!Serial4.available())
@@ -112,7 +172,7 @@ void line_get()
       {
       }
       recv_data = Serial4.read();
-      line_val[i] = recv_data;
+      _line_flag[i] = recv_data;
     }
   }
   Serial5.write(header);
@@ -128,7 +188,25 @@ void line_get()
       {
       }
       recv_data = Serial5.read();
-      line_val[i] = recv_data;
+      _line_flag[i] = recv_data;
+    }
+  }
+  for (int i = 0; i < 32; i++)
+  {
+    int _i = i - 16 + 32;
+    _i %= 32;
+    line_flag[_i] = _line_flag[i];
+  }
+  for (int i = 0; i < 32; i++)
+  {
+    if (line_flag[i] == 1)
+    {
+      line[0] += cos(LINE_ANGLE[i]);
+      line[1] += sin(LINE_ANGLE[i]);
+      Serial.print("cos : ");
+      Serial.print(cos(LINE_ANGLE[i]));
+      Serial.print(" sin : ");
+      Serial.println(sin(LINE_ANGLE[i]));
     }
   }
 }

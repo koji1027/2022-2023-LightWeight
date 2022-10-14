@@ -10,12 +10,9 @@
 #define SELECT_PIN3 D4
 #define BUFFER_SIZE 5
 
-int threshold[SENSOR_NUM] = {250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250};
+int threshold[SENSOR_NUM] = {90, 90, 90, 90, 90, 90, 90, 90, 90, 90, 90, 90, 90, 90, 90, 90};
 
-const float SENSOR_THETA[SENSOR_NUM] =
-    {
-        PI, -PI * 15.0 / 16.0, -PI * 14.0 / 16.0, -PI * 13.0 / 16.0, -PI * 12.0 / 16.0, -PI * 11.0 / 16.0, -PI * 10.0 / 16.0, -PI * 9.0 / 16.0,
-        -PI * 8.0 / 16.0, -PI * 7.0 / 16.0, -PI * 6.0 / 16.0, -PI * 5.0 / 16.0, -PI * 4.0 / 16.0, -PI * 3.0 / 16.0, -PI * 2.0 / 16.0, -PI * 1.0 / 16.0};
+const float SENSOR_THETA[SENSOR_NUM] = {-15.0 * PI / 16.0, -14.0 * PI / 16.0, -13.0 * PI / 16.0, -12.0 * PI / 16.0, -11.0 * PI / 16.0, -10.0 * PI / 16.0, -9.0 * PI / 16.0, -8.0 * PI / 16.0, -7.0 * PI / 16.0, -6.0 * PI / 16.0, -5.0 * PI / 16.0, -4.0 * PI / 16.0, -3.0 * PI / 16.0, -2.0 * PI / 16.0, -1.0 * PI / 16.0, 0.0 * PI / 16.0};
 
 float sensor_x[SENSOR_NUM] = {};
 float sensor_y[SENSOR_NUM] = {};
@@ -23,8 +20,8 @@ uint8_t mode = 0;
 int line_flag[SENSOR_NUM] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 int sensor_value[SENSOR_NUM] = {};
 int sensor_value_buff[SENSOR_NUM][BUFFER_SIZE];
-// float line_x = 0;
-// float line_y = 0;
+float line_x = 0;
+float line_y = 0;
 
 void setup()
 {
@@ -63,22 +60,22 @@ void loop()
     _sensor_value[i] = analogRead(COM);
     delayMicroseconds(10);
   }
-  sensor_value[8] = _sensor_value[0];
-  sensor_value[9] = _sensor_value[1];
-  sensor_value[10] = _sensor_value[2];
-  sensor_value[11] = _sensor_value[3];
-  sensor_value[12] = _sensor_value[4];
-  sensor_value[13] = _sensor_value[5];
-  sensor_value[14] = _sensor_value[6];
-  sensor_value[15] = _sensor_value[7];
-  sensor_value[0] = _sensor_value[8];
-  sensor_value[1] = _sensor_value[9];
-  sensor_value[2] = _sensor_value[10];
-  sensor_value[3] = _sensor_value[11];
-  sensor_value[4] = _sensor_value[12];
-  sensor_value[5] = _sensor_value[13];
-  sensor_value[6] = _sensor_value[14];
-  sensor_value[7] = _sensor_value[15];
+  sensor_value[7] = _sensor_value[0];
+  sensor_value[6] = _sensor_value[1];
+  sensor_value[5] = _sensor_value[2];
+  sensor_value[4] = _sensor_value[3];
+  sensor_value[3] = _sensor_value[4];
+  sensor_value[2] = _sensor_value[5];
+  sensor_value[1] = _sensor_value[6];
+  sensor_value[0] = _sensor_value[7];
+  sensor_value[15] = _sensor_value[8];
+  sensor_value[14] = _sensor_value[9];
+  sensor_value[13] = _sensor_value[10];
+  sensor_value[12] = _sensor_value[11];
+  sensor_value[11] = _sensor_value[12];
+  sensor_value[10] = _sensor_value[13];
+  sensor_value[9] = _sensor_value[14];
+  sensor_value[8] = _sensor_value[15];
 
   for (int i = 0; i < SENSOR_NUM; i++)
   {
@@ -115,14 +112,14 @@ void loop()
   Serial.println();
   delay(100);
 
-  /* for (int i = 0; i < SENSOR_NUM; i++) ベクトルの計算 今は使わない予定
+  for (int i = 0; i < SENSOR_NUM; i++)
   {
     if (line_flag[i] == 1)
     {
       line_x += sensor_x[i] * line_flag[i];
       line_y += sensor_y[i] * line_flag[i];
     }
-  } */
+  }
 }
 
 void setup1()
@@ -151,7 +148,10 @@ void loop1()
     for (int i = 0; i < SENSOR_NUM; i++)
     {
       Serial1.write(line_flag[i]);
+      Serial.print(line_flag[i]);
+      Serial.print("\t");
     }
+    Serial.println();
   }
   /*else if (int(recv_data) == 253)
   {
