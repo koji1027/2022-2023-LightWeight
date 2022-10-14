@@ -36,7 +36,7 @@ void loop()
   Serial.print(cos(ir_rad));
   Serial.print(" y : ");
   Serial.println(sin(ir_rad));
-  // Motor.cal(1, 0, 150, -20, gyro_deg);
+  // Motor.cal(0, 1, 150, 0, 0);
   Motor.cal(sin(ir_rad), cos(ir_rad), 255, 0, gyro_deg);
   delay(10);
 }
