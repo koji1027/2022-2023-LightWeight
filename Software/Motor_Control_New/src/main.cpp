@@ -5,7 +5,9 @@
 
 void ir_get();
 void gyro_get();
+void line_get();
 
+int line_val[32];
 float ir_deg = 0;
 float gyro_deg = 0;
 
@@ -18,6 +20,8 @@ void setup()
   Serial.begin(115200);
   Serial2.begin(115200);
   Serial3.begin(115200);
+  Serial4.begin(9600);
+  Serial5.begin(9600);
   Motor.begin();
   delay(2000);
 }
@@ -25,7 +29,7 @@ void setup()
 void loop()
 {
   // put your main code here, to run repeatedly:
-  ir_get();
+  /*ir_get();
   gyro_get();
   float ir_rad = ir_deg * PI / 180;
   Serial.print("gyro_deg : ");
@@ -38,7 +42,22 @@ void loop()
   Serial.println(sin(ir_rad));
   // Motor.cal(0, 1, 150, 0, 0);
   Motor.cal(sin(ir_rad), cos(ir_rad), 255, 0, gyro_deg);
-  delay(10);
+  delay(10);*/
+  /*while (1)
+  {
+    while (!Serial4.available())
+    {
+    }
+    Serial.println();
+  }*/
+  line_get();
+  for (int i = 0; i < 32; i++)
+  {
+    Serial.print(line_val[i]);
+    Serial.print("\t");
+  }
+  Serial.println();
+  delay(100);
 }
 
 void ir_get()
@@ -75,4 +94,41 @@ void gyro_get()
   Serial3.write(255);
   Serial.println(255);
   delay(10);*/
+}
+
+void line_get()
+{
+  byte header = 252;
+  Serial4.write(header);
+  int recv_data = Serial4.read();
+  while (!Serial4.available())
+  {
+  }
+  if (recv_data == 255)
+  {
+    for (int i = 0; i < 16; i++)
+    {
+      while (!Serial4.available())
+      {
+      }
+      recv_data = Serial4.read();
+      line_val[i] = recv_data;
+    }
+  }
+  Serial5.write(header);
+  recv_data = Serial5.read();
+  while (!Serial5.available())
+  {
+  }
+  if (recv_data == 255)
+  {
+    for (int i = 16; i < 32; i++)
+    {
+      while (!Serial5.available())
+      {
+      }
+      recv_data = Serial5.read();
+      line_val[i] = recv_data;
+    }
+  }
 }

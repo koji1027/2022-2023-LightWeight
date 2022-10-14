@@ -45,6 +45,7 @@ void setup()
     sensor_y[i] = sin(SENSOR_THETA[i]);
   }
   Serial.begin(115200);
+  Serial1.begin(9600);
 }
 
 void loop()
@@ -130,7 +131,6 @@ void setup1()
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(KICKER_PIN, LOW);
   digitalWrite(LED_PIN, HIGH);
-  Serial1.begin(115200);
 }
 
 void loop1()

@@ -134,7 +134,7 @@ void setup1()
   pinMode(NEOPIXEL_DIN, OUTPUT);
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, HIGH);
-  Serial1.begin(115200);
+  Serial1.begin(9600);
   pixels.begin();
   pixels_init();
 }
@@ -173,7 +173,7 @@ void loop1()
   }*/
   else if (int(recv_data) == 252)
   {
-    Serial1.write(255);
+    Serial1.write(byte(255));
     for (int i = 0; i < SENSOR_NUM; i++)
     {
       Serial1.write(sensor_value[i]);
