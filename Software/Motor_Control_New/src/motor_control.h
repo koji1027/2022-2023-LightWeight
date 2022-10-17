@@ -70,8 +70,8 @@ void motor_control::cal(float vel_x, float vel_y, int speed, float target_deg, f
     preTime = micros();
     deg_diff[1] = target_deg - current_deg;
     P = Kp * deg_diff[1];
-    I += deg_diff[1] * dt;
-    D = (deg_diff[1]-deg_diff[0]) / dt;
+    I += Ki * deg_diff[1] * dt;
+    D = Kd * (deg_diff[1]-deg_diff[0]) / dt;
     deg_diff[0] = deg_diff[1];
     float vel_theta = P + I + D;
 
