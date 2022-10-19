@@ -46,6 +46,8 @@ void loop1()
   {
     ir.send();
   }
-  ir.IRpin_read();
-
+  // ir.IRpin_read();
+  // ir.radius_read();
+  ir.angle_read();
+  delay(100);
 }

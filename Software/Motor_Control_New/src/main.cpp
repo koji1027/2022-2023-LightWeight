@@ -65,20 +65,18 @@ void setup()
 void loop()
 {
   // put your main code here, to run repeatedly:
-  /*ir_get();
+  ir_get();
+  float ir_rad = ir_deg * PI / 180.0;
   gyro_get();
-  float ir_rad = ir_deg * PI / 180;
   Serial.print("gyro_deg : ");
   Serial.print(gyro_deg);
   Serial.print(" ir_deg : ");
-  Serial.print(ir_rad);
-  Serial.print(" x : ");
-  Serial.print(cos(ir_rad));
-  Serial.print(" y : ");
-  Serial.println(sin(ir_rad));
-  // Motor.cal(0, 1, 150, 0, 0);
-  Motor.cal(sin(ir_rad), cos(ir_rad), 255, 0, gyro_deg);
-  delay(10);*/
+  Serial.print(ir_deg);
+  // Serial.print(" x : ");
+  // Serial.print(cos(ir_rad));
+  // Serial.print(" y : ");
+  // Serial.println(sin(ir_rad));
+  //  Motor.cal(0, 1, 150, 0, 0);
   /*while (1)
   {
     while (!Serial4.available())
@@ -87,7 +85,7 @@ void loop()
     Serial.println();
   }*/
   line_get();
-  for (int i = 0; i < 8; i++)
+  /*for (int i = 0; i < 8; i++)
   {
     Serial.print(i * 4);
     Serial.print(" : ");
@@ -105,16 +103,17 @@ void loop()
     Serial.print(" : ");
     Serial.print(line_flag[i * 4 + 3]);
     Serial.println();
-  }
+  }*/
   float line_rad = atan2(line[1], line[0]);
   float line_deg = line_rad * 180.0 / PI;
-  Serial.print("LINE_X : ");
+  Serial.print(" LINE_X : ");
   Serial.print(line[0]);
   Serial.print(" LINE_Y : ");
   Serial.print(line[1]);
   Serial.print(" LINE : ");
   Serial.println(line_deg);
-  delay(300);
+  Motor.cal(sin(ir_rad), cos(ir_rad), 255, 0, gyro_deg);
+  delay(10);
 }
 
 void ir_get()
@@ -203,10 +202,10 @@ void line_get()
     {
       line[0] += cos(LINE_ANGLE[i]);
       line[1] += sin(LINE_ANGLE[i]);
-      Serial.print("cos : ");
-      Serial.print(cos(LINE_ANGLE[i]));
-      Serial.print(" sin : ");
-      Serial.println(sin(LINE_ANGLE[i]));
+      // Serial.print("cos : ");
+      // Serial.print(cos(LINE_ANGLE[i]));
+      // Serial.print(" sin : ");
+      // Serial.println(sin(LINE_ANGLE[i]));
     }
   }
 }

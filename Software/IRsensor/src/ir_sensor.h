@@ -98,7 +98,7 @@ void IR::begin()
 void IR::IR_get()
 {
     int controlPin[] = {s0, s1, s2, s3};
-    for (int i = 0; i < IR_NUM - 1; i++)
+    for (int i = 0; i < IR_NUM; i++)
     {
         for (int j = 0; j < 4; j++)
         {
@@ -107,9 +107,23 @@ void IR::IR_get()
         IR_Cur[i] = IR_CUR_MAX - analogRead(SIG_pin);
     }
 
-    IR_Cur[15] = IR_CUR_MAX - analogRead(A0);
+    // IR_Cur[15] = IR_CUR_MAX - analogRead(A0);
 
+    int maxVal = 0;
+    int maxIndex = 0;
+    for (int i = 0; i < IR_NUM; i++)
+    {
+        if (IR_Cur[i] > maxVal)
+        {
+            maxVal = IR_Cur[i];
+            maxIndex = i;
+        }
+    }
     vector_XY = {0, 0};
+    int a = maxIndex + 16 - 3;
+    a = a % 16;
+    int b = maxIndex + 16 + 4;
+    b = b % 16;
     for (int i = 0; i < IR_NUM; i++)
     {
         vector_XY.x += IR_Cur[i] * unit_cos[i];
@@ -163,7 +177,7 @@ void IR::send()
     Serial.print(angle_PI);
     Serial.print(", ");
     Serial.println(angle);
-    //Serial1.write(255);
+    // Serial1.write(255);
     Serial1.write(angle);
 }
 #endif
