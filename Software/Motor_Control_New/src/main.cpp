@@ -115,7 +115,6 @@ void loop()
   Serial.print(" LINE : ");
   Serial.println(line_deg);
   delay(300);
-  * /
 }
 
 void ir_get()
