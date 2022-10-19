@@ -66,17 +66,18 @@ void loop()
 {
   // put your main code here, to run repeatedly:
   ir_get();
-  float ir_rad = ir_deg * PI / 180.0;
   gyro_get();
   Serial.print("gyro_deg : ");
   Serial.print(gyro_deg);
   Serial.print(" ir_deg : ");
-  Serial.print(ir_deg);
-  // Serial.print(" x : ");
-  // Serial.print(cos(ir_rad));
-  // Serial.print(" y : ");
-  // Serial.println(sin(ir_rad));
-  //  Motor.cal(0, 1, 150, 0, 0);
+  Serial.print(ir_rad);
+  Serial.print(" x : ");
+  Serial.print(cos(ir_rad));
+  Serial.print(" y : ");
+  Serial.println(sin(ir_rad));
+  // Motor.cal(0, 1, 150, 0, 0);
+  Motor.cal(cos(ir_rad), sin(ir_rad), 255, 0, gyro_deg);
+  delay(10);
   /*while (1)
   {
     while (!Serial4.available())
@@ -84,8 +85,8 @@ void loop()
     }
     Serial.println();
   }*/
-  line_get();
-  /*for (int i = 0; i < 8; i++)
+  /*line_get();
+  for (int i = 0; i < 8; i++)
   {
     Serial.print(i * 4);
     Serial.print(" : ");
@@ -112,8 +113,8 @@ void loop()
   Serial.print(line[1]);
   Serial.print(" LINE : ");
   Serial.println(line_deg);
-  Motor.cal(sin(ir_rad), cos(ir_rad), 255, 0, gyro_deg);
-  delay(10);
+  delay(300);
+  * /
 }
 
 void ir_get()
