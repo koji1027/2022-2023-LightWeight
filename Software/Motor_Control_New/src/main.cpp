@@ -64,9 +64,8 @@ void setup()
 
 void loop()
 {
-  // put your main code here, to run repeatedly:
-  ir_get();
   gyro_get();
+  ir_get();
   float ir_rad = ir_deg * PI / 180;
   Serial.print("gyro_deg : ");
   Serial.print(gyro_deg);
@@ -77,7 +76,8 @@ void loop()
   Serial.print(" y : ");
   Serial.println(sin(ir_rad));
   // Motor.cal(0, 1, 150, 0, 0);
-  Motor.cal(cos(ir_rad), sin(ir_rad), 255, 0, gyro_deg);
+  //Motor.cal(0, 0, 200, 0, gyro_deg);
+  Motor.cal(sin(ir_rad), cos(ir_rad), 200, 0, gyro_deg);
   delay(10);
   /*while (1)
   {
@@ -122,6 +122,7 @@ void ir_get()
   Serial2.write(255);
   while (!Serial2.available())
   {
+    //Serial.println("ir_Ouch!");
   }
   int recv_data = Serial2.read();
   ir_deg = recv_data;
@@ -135,7 +136,7 @@ void gyro_get()
   Serial3.write(255);
   while (!Serial3.available())
   {
-    // Serial.println("OH,NO!");
+    //Serial.println("gyro_Ouch!");
   }
   int recv_data = Serial3.read();
   // Serial.println(recv_data);

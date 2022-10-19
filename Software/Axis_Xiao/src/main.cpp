@@ -20,7 +20,7 @@ void setup()
 void loop()
 {
   bmx055.cal_angle();
-  //bmx055.show(false, false, false);
+  bmx055.show(false, false, false);
   if (Serial1.available())
   {
     int recv_data = Serial1.read();
@@ -32,9 +32,9 @@ void loop()
   else{
     //Serial.println("Ouch!");
   }
-  
   /*while(!Serial1.available())
   {Serial.println("OH");}
   Serial.println(Serial1.read());
   delay(10);*/
-}
+  
+  }

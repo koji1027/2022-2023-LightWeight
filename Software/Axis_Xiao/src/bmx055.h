@@ -217,6 +217,7 @@ void Axis::cal_angle()
         gyro_degree -= 360;
     else if (gyro_degree <= -180)
         gyro_degree += 360;
+    Serial.println(gyro_degree);
 }
 
 void Axis::gyro_reset()

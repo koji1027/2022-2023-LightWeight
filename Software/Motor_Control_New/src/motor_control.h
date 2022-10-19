@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 #define MOTOR_NUM 4
-#define Kp 2.7
+#define Kp 2.2
 #define Ki 0
 #define Kd 0
 #define DELTA_TIME 0.01
@@ -16,7 +16,7 @@ public:
     //void posture_spin(float gyro_degree);
 
 private:
-    const int MOTOR_PIN[MOTOR_NUM][2] = {{3, 2}, {10, 9}, {12, 11}, {18, 13}};
+    const int MOTOR_PIN[MOTOR_NUM][2] = {{3, 2}, {10, 9}, {12, 11}, {13, 18}};
     const int MOTOR_POS[MOTOR_NUM] = {240, 300, 60, 120};
     float COS[360];
     float SIN[360];
@@ -34,7 +34,7 @@ void motor_control::begin()
         analogWriteResolution(9);
         analogWriteFrequency(MOTOR_PIN[i][1], 80000);
         digitalWriteFast(MOTOR_PIN[i][0], HIGH);
-        analogWrite(MOTOR_PIN[i][1], 256);
+        analogWrite(MOTOR_PIN[i][1], 255);
     }
     for (int i = 0; i < 360; i++)
     {
@@ -85,24 +85,21 @@ void motor_control::cal(float vel_x, float vel_y, int speed, float target_deg, f
     }
     // Serial.print("current_deg: ");
     // Serial.print(current_deg);
-    Serial.print(" power: ");
-    for (int i = 0; i < MOTOR_NUM; i++)
-    {
-        Serial.print(power[i]);
-        Serial.print(" ");
-    }
     move(power);
 }
 
 void motor_control::move(float power[MOTOR_NUM])
 {
-    Serial.println();
+    Serial.print("power : ");
     for (int i = 0; i < MOTOR_NUM; i++)
     {
         power[i] += 256;
         power[i] = 511 - power[i];
-        analogWrite(MOTOR_PIN[i][1], power[i]);
+        Serial.print(power[i]);
+        Serial.print(", ");
+        analogWrite(MOTOR_PIN[i][1], (int)power[i]);
     }
+    Serial.println();
 }
 
 /*void motor_control::posture_spin(float gyro_degree)
