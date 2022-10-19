@@ -105,16 +105,17 @@ void loop()
     Serial.print(" : ");
     Serial.print(line_flag[i * 4 + 3]);
     Serial.println();
-  }
+  }*/
   float line_rad = atan2(line[1], line[0]);
   float line_deg = line_rad * 180.0 / PI;
-  Serial.print("LINE_X : ");
+  Serial.print(" LINE_X : ");
   Serial.print(line[0]);
   Serial.print(" LINE_Y : ");
   Serial.print(line[1]);
   Serial.print(" LINE : ");
   Serial.println(line_deg);
-  delay(300);*/
+  delay(300);
+  * /
 }
 
 void ir_get()
@@ -204,10 +205,10 @@ void line_get()
     {
       line[0] += cos(LINE_ANGLE[i]);
       line[1] += sin(LINE_ANGLE[i]);
-      Serial.print("cos : ");
-      Serial.print(cos(LINE_ANGLE[i]));
-      Serial.print(" sin : ");
-      Serial.println(sin(LINE_ANGLE[i]));
+      // Serial.print("cos : ");
+      // Serial.print(cos(LINE_ANGLE[i]));
+      // Serial.print(" sin : ");
+      // Serial.println(sin(LINE_ANGLE[i]));
     }
   }
 }

@@ -13,7 +13,7 @@ public:
     void begin();
     void cal(float vel_x, float vel_y, int speed, float target_deg, float current_deg);
     void move(float power[MOTOR_NUM]);
-    //void posture_spin(float gyro_degree);
+    // void posture_spin(float gyro_degree);
 
 private:
     const int MOTOR_PIN[MOTOR_NUM][2] = {{3, 2}, {10, 9}, {12, 11}, {13, 18}};
@@ -22,7 +22,7 @@ private:
     float SIN[360];
     float dt, preTime;
     float P, I, D;
-    float deg_diff[2] = {0,0};
+    float deg_diff[2] = {0, 0};
 };
 
 void motor_control::begin()
@@ -71,7 +71,7 @@ void motor_control::cal(float vel_x, float vel_y, int speed, float target_deg, f
     deg_diff[1] = target_deg - current_deg;
     P = Kp * deg_diff[1];
     I += Ki * deg_diff[1] * dt;
-    D = Kd * (deg_diff[1]-deg_diff[0]) / dt;
+    D = Kd * (deg_diff[1] - deg_diff[0]) / dt;
     deg_diff[0] = deg_diff[1];
     float vel_theta = P + I + D;
 
@@ -85,6 +85,12 @@ void motor_control::cal(float vel_x, float vel_y, int speed, float target_deg, f
     }
     // Serial.print("current_deg: ");
     // Serial.print(current_deg);
+    /*Serial.print(" power: ");
+    for (int i = 0; i < MOTOR_NUM; i++)
+    {
+        Serial.print(power[i]);
+        Serial.print(" ");
+    }*/
     move(power);
 }
 
