@@ -48,6 +48,7 @@ void setup()
     sensor_y[i] = sin(SENSOR_THETA[i]);
   }
   Serial.begin(115200);
+  Serial1.begin(115200);
 }
 
 void loop()

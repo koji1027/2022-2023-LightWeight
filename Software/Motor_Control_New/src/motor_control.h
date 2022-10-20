@@ -13,6 +13,7 @@ public:
     void begin();
     void cal(float vel_x, float vel_y, int speed, float target_deg, float current_deg);
     void move(float power[MOTOR_NUM]);
+    void break_all();
     // void posture_spin(float gyro_degree);
 
 private:
@@ -96,16 +97,24 @@ void motor_control::cal(float vel_x, float vel_y, int speed, float target_deg, f
 
 void motor_control::move(float power[MOTOR_NUM])
 {
-    Serial.print("power : ");
+    // Serial.print("power : ");
     for (int i = 0; i < MOTOR_NUM; i++)
     {
         power[i] += 256;
         power[i] = 511 - power[i];
-        Serial.print(power[i]);
-        Serial.print(", ");
+        // Serial.print(power[i]);
+        // Serial.print(", ");
         analogWrite(MOTOR_PIN[i][1], (int)power[i]);
     }
     Serial.println();
+}
+
+void motor_control::break_all()
+{
+    for (int i = 0; i < MOTOR_NUM; i++)
+    {
+        analogWrite(MOTOR_PIN[i][1], 255);
+    }
 }
 
 /*void motor_control::posture_spin(float gyro_degree)
