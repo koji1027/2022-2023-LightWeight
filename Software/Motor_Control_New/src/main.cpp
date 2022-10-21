@@ -9,6 +9,7 @@ void gyro_get();
 void line_get();
 
 int line_flag[32];
+bool line_whole_flag;
 float ir_deg = 0;
 float gyro_deg = 0;
 const float LINE_ANGLE[32] = {
@@ -108,24 +109,24 @@ void loop()
   }*/
   float line_rad = atan2(line[1], line[0]);
   float line_deg = line_rad * 180.0 / PI;
-  Serial.print(" LINE_X : ");
+  /*Serial.print(" LINE_X : ");
   Serial.print(line[0]);
   Serial.print(" LINE_Y : ");
   Serial.print(line[1]);
   Serial.print(" LINE : ");
-  Serial.println(line_deg);
+  Serial.println(line_deg);*/
   // delay(300);
-  if (line_deg != 0)
+  if (line_whole_flag)
   {
-    Serial.println("Stop");
-    while (1)
-    {
-      Motor.break_all();
-
-    }
+    Motor.cal(-sin(line_rad),-cos(line_rad), 169, 0, gyro_deg);
   }
+  else{
+    Motor.break_all();
+  }
+  //Motor.cal(0,1,100,0,0);
+  //Motor.break_all();
   // Motor.cal(sin(ir_rad), cos(ir_rad), 100, 0, gyro_deg);
-  Motor.cal(0, 1, 250, 0, gyro_deg);
+  //Motor.cal(0, 1, 250, 0, gyro_deg);
   // delay(10);
   time2 = millis();
   float f = 1000.0 / (time2 - time1);
@@ -174,6 +175,7 @@ void line_get()
 {
   line[0] = 0.00;
   line[1] = 0.00;
+  line_whole_flag = 0;
   float _line_flag[32];
   byte header = 254;
   Serial4.write(header);
@@ -224,6 +226,7 @@ void line_get()
       // Serial.print(cos(LINE_ANGLE[i]));
       // Serial.print(" sin : ");
       // Serial.println(sin(LINE_ANGLE[i]));
+      line_whole_flag = 1;
     }
   }
 }
