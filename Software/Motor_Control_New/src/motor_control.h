@@ -11,14 +11,14 @@ class motor_control
 {
 public:
     void begin();
-    void cal(float vel_x, float vel_y, int speed, float target_deg, float current_deg);
+    void cal(float ir_deg, int speed, float target_deg, float current_deg);
     void move(float power[MOTOR_NUM]);
     void break_all();
     // void posture_spin(float gyro_degree);
 
 private:
     const int MOTOR_PIN[MOTOR_NUM][2] = {{3, 2}, {10, 9}, {12, 11}, {13, 18}};
-    const int MOTOR_POS[MOTOR_NUM] = {240, 300, 60, 120};
+    const int MOTOR_POS[MOTOR_NUM] = {60, 120, 240, 300};
     float COS[360];
     float SIN[360];
     float dt, preTime;
@@ -44,12 +44,14 @@ void motor_control::begin()
     }
 }
 
-void motor_control::cal(float vel_x, float vel_y, int speed, float target_deg, float current_deg)
+void motor_control::cal(float ir_deg, int speed, float target_deg, float current_deg)
 {
     float power[MOTOR_NUM];
     for (int i = 0; i < MOTOR_NUM; i++)
     {
-        power[i] = -vel_x * COS[MOTOR_POS[i]] + vel_y * SIN[MOTOR_POS[i]];
+        float deg = ir_deg - MOTOR_POS[i];
+        float rad = deg * PI / 180.0;
+        power[i] = sin(rad) * speed;
     }
     float max_power = 0;
     for (int i = 0; i < MOTOR_NUM; i++)

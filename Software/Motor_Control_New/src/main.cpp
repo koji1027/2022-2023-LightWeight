@@ -115,22 +115,18 @@ void loop()
   Serial.print(" LINE : ");
   Serial.println(line_deg);
   // delay(300);
-  if (line_deg != 0)
+  /*if (line_deg != 0)
   {
     Serial.println("Stop");
     while (1)
     {
       Motor.break_all();
-
     }
-  }
+  }*/
   // Motor.cal(sin(ir_rad), cos(ir_rad), 100, 0, gyro_deg);
-  Motor.cal(0, 1, 250, 0, gyro_deg);
+  Motor.cal(90, 150, 0, gyro_deg);
   // delay(10);
   time2 = millis();
-  float f = 1000.0 / (time2 - time1);
-  //Serial.print("FPS : ");
-  Serial.println(f);
 }
 
 void ir_get()
