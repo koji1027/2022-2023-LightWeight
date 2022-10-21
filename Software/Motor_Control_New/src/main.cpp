@@ -129,9 +129,6 @@ void loop()
   //Motor.cal(0, 1, 250, 0, gyro_deg);
   // delay(10);
   time2 = millis();
-  float f = 1000.0 / (time2 - time1);
-  //Serial.print("FPS : ");
-  Serial.println(f);
 }
 
 void ir_get()
