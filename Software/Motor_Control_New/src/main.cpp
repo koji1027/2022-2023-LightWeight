@@ -109,6 +109,7 @@ void loop()
   }*/
   float line_rad = atan2(line[1], line[0]);
   float line_deg = line_rad * 180.0 / PI;
+  float pre_line_deg = 0;
   /*Serial.print(" LINE_X : ");
   Serial.print(line[0]);
   Serial.print(" LINE_Y : ");
@@ -116,15 +117,18 @@ void loop()
   Serial.print(" LINE : ");
   Serial.println(line_deg);*/
   // delay(300);
-  if (line_whole_flag)
+  /*if (line_whole_flag)
   {
-    Motor.cal(-sin(line_rad),-cos(line_rad), 169, 0, gyro_deg);
+    Motor.cal(-line_deg, 169, 0, -gyro_deg);
+    pre_line_deg = -line_deg;
   }
   else{
-    Motor.break_all();
-  }
-  //Motor.cal(0,1,100,0,0);
-  //Motor.break_all();
+    Motor.cal(pre_line_deg, 169, 0, -gyro_deg);
+    delay(20);
+    pre_line_deg = 0;
+  }*/
+  Motor.break_all();
+
   // Motor.cal(sin(ir_rad), cos(ir_rad), 100, 0, gyro_deg);
   //Motor.cal(0, 1, 250, 0, gyro_deg);
   // delay(10);

@@ -103,10 +103,9 @@ void motor_control::move(float power[MOTOR_NUM])
     for (int i = 0; i < MOTOR_NUM; i++)
     {
         power[i] += 256;
-        power[i] = 511 - power[i];
+        //power[i] = 511 - power[i];
         Serial.print(power[i]);
         Serial.print(", ");
-        pinMode(MOTOR_PIN[i][1], OUTPUT);
         digitalWriteFast(MOTOR_PIN[i][0], HIGH);
         analogWrite(MOTOR_PIN[i][1], (int)power[i]);
     }
@@ -118,7 +117,6 @@ void motor_control::break_all()
     for (int i = 0; i < MOTOR_NUM; i++)
     {
         digitalWriteFast(MOTOR_PIN[i][0], LOW);
-        pinMode(MOTOR_PIN[i][1], INPUT);
     }
 }
 
