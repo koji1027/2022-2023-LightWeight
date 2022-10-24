@@ -13,6 +13,9 @@
 #define SIG_pin A1
 MovingAverage ave(20);
 
+int MaxPinVal = 0;
+int MaxPinIndex = 0;
+
 class IR
 {
 public:
@@ -104,7 +107,12 @@ void IR::IR_get()
         {
             digitalWrite(controlPin[j], muxChannel[i][j]);
         }
+        delayMicroseconds(10);
         IR_Cur[i] = IR_CUR_MAX - analogRead(SIG_pin);
+        if (IR_Cur[i] > 1000)
+        {
+            IR_Cur[i] = 0;
+        }
     }
 
     // IR_Cur[15] = IR_CUR_MAX - analogRead(A0);
@@ -119,12 +127,19 @@ void IR::IR_get()
             maxIndex = i;
         }
     }
+    maxPinVal = maxVal;
+    MaxPinIndex = maxIndex;
     vector_XY = {0, 0};
-    int a = maxIndex + 16 - 3;
+    /*int a = maxIndex + 16 - 3;
     a = a % 16;
-    int b = maxIndex + 16 + 4;
-    b = b % 16;
-    for (int i = 0; i < IR_NUM; i++)
+    for (int i = 0; i < 7; i++)
+    {
+        int b = a + i;
+        b = b % 16;
+        vector_XY.x += IR_Cur[b] * unit_cos[b];
+        vector_XY.y += IR_Cur[b] * unit_sin[b];
+    }*/
+    for (int i = 0; i < 16; i++)
     {
         vector_XY.x += IR_Cur[i] * unit_cos[i];
         vector_XY.y += IR_Cur[i] * unit_sin[i];
@@ -138,7 +153,6 @@ void IR::IR_get()
 
 void IR::IRpin_read()
 {
-
     for (int i = 0; i < IR_NUM; i++)
     {
         Serial.print(i);
@@ -146,14 +160,6 @@ void IR::IRpin_read()
         Serial.println(IR_Cur[i]);
     }
     Serial.println("ー－－－－");
-    /*
-    for (int i = maxPin - 2 + 16; i < maxPin - 2 + 16 + 5; i++)
-    {
-        i = i % 16;
-        Serial.print(i);
-        Serial.print(": ");
-        Serial.println(IR_Cur[i]);
-    }*/
 }
 
 void IR::radius_read()

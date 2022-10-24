@@ -25,10 +25,20 @@ void setup()
 
 void loop()
 {
+  while (0)
+  {
+    digitalWrite(s0, HIGH);
+    digitalWrite(s1, HIGH);
+    digitalWrite(s2, HIGH);
+    digitalWrite(s3, HIGH);
+    delayMicroseconds(10);
+    int a = analogRead(A1);
+    Serial.println(a);
+  }
   ir.IR_get();
   // ir.IRpin_read();
   // ir.radius_read();
-  // ir.angle_read();
+  //ir.angle_read();
 }
 
 void setup1()
@@ -48,6 +58,4 @@ void loop1()
   }
   // ir.IRpin_read();
   // ir.radius_read();
-  ir.angle_read();
-  delay(100);
 }

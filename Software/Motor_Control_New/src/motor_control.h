@@ -99,18 +99,18 @@ void motor_control::cal(float ir_deg, int speed, float target_deg, float current
 
 void motor_control::move(float power[MOTOR_NUM])
 {
-    Serial.print("power : ");
+    // Serial.print("power : ");
     for (int i = 0; i < MOTOR_NUM; i++)
     {
         power[i] += 256;
         power[i] = 511 - power[i];
-        Serial.print(power[i]);
-        Serial.print(", ");
+        // Serial.print(power[i]);
+        // Serial.print(", ");
         pinMode(MOTOR_PIN[i][1], OUTPUT);
         digitalWriteFast(MOTOR_PIN[i][0], HIGH);
         analogWrite(MOTOR_PIN[i][1], (int)power[i]);
     }
-    Serial.println();
+    // Serial.println();
 }
 
 void motor_control::break_all()

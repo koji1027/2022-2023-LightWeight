@@ -2,8 +2,6 @@
 #include <motor_control.h>
 
 #define CONST_ANG_VEL 0.5
-unsigned long long time1 = 0;
-unsigned long long time2 = 0;
 void ir_get();
 void gyro_get();
 void line_get();
@@ -66,69 +64,15 @@ void setup()
 
 void loop()
 {
-  time1 = millis();
   gyro_get();
   ir_get();
   float ir_rad = ir_deg * PI / 180;
-  /*Serial.print("gyro_deg : ");
-  Serial.print(gyro_deg);
-  Serial.print(" ir_deg : ");
-  Serial.print(ir_rad);
-  Serial.print(" x : ");
-  Serial.print(cos(ir_rad));
-  Serial.print(" y : ");
-  Serial.println(sin(ir_rad));*/
-  // Motor.cal(0, 1, 150, 0, 0);
-  // Motor.cal(-1, 0, 100, 0, gyro_deg);
-  /*while (1)
-  {
-    while (!Serial4.available())
-    {
-    }
-    Serial.println();
-  }*/
   line_get();
-  /*for (int i = 0; i < 8; i++)
-  {
-    Serial.print(i * 4);
-    Serial.print(" : ");
-    Serial.print(line_flag[i * 4]);
-    Serial.print(" ");
-    Serial.print(i * 4 + 1);
-    Serial.print(" : ");
-    Serial.print(line_flag[i * 4 + 1]);
-    Serial.print(" ");
-    Serial.print(i * 4 + 2);
-    Serial.print(" : ");
-    Serial.print(line_flag[i * 4 + 2]);
-    Serial.print(" ");
-    Serial.print(i * 4 + 3);
-    Serial.print(" : ");
-    Serial.print(line_flag[i * 4 + 3]);
-    Serial.println();
-  }*/
   float line_rad = atan2(line[1], line[0]);
   float line_deg = line_rad * 180.0 / PI;
-  /*Serial.print(" LINE_X : ");
-  Serial.print(line[0]);
-  Serial.print(" LINE_Y : ");
-  Serial.print(line[1]);
-  Serial.print(" LINE : ");
-  Serial.println(line_deg);*/
-  // delay(300);
-  if (line_whole_flag)
-  {
-    Motor.cal(-sin(line_rad),-cos(line_rad), 169, 0, gyro_deg);
-  }
-  else{
-    Motor.break_all();
-  }
-  //Motor.cal(0,1,100,0,0);
-  //Motor.break_all();
-  // Motor.cal(sin(ir_rad), cos(ir_rad), 100, 0, gyro_deg);
-  //Motor.cal(0, 1, 250, 0, gyro_deg);
-  // delay(10);
-  time2 = millis();
+  Motor.cal(ir_deg, 150, 0, gyro_deg);
+  Serial.println(ir_deg);
+  //delay(100);
 }
 
 void ir_get()
