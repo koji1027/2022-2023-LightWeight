@@ -72,7 +72,7 @@ void loop()
   float line_deg = line_rad * 180.0 / PI;
   Motor.cal(ir_deg, 150, 0, gyro_deg);
   Serial.println(ir_deg);
-  //delay(100);
+  // delay(100);
 }
 
 void ir_get()

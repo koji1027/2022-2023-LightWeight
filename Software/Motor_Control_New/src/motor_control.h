@@ -118,7 +118,6 @@ void motor_control::break_all()
     for (int i = 0; i < MOTOR_NUM; i++)
     {
         digitalWriteFast(MOTOR_PIN[i][0], LOW);
-        pinMode(MOTOR_PIN[i][1], INPUT);
     }
 }
 
