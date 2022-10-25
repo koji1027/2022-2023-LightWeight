@@ -1,9 +1,9 @@
 #include <Arduino.h>
 
 #define MOTOR_NUM 4
-#define Kp 2.2
+#define Kp 1.8
 #define Ki 0
-#define Kd 0
+#define Kd 0.17
 #define DELTA_TIME 0.01
 #define MOTOR_POWER 200
 
@@ -70,13 +70,13 @@ void motor_control::cal(float ir_deg, int speed, float target_deg, float current
     }
 
     dt = (micros() - preTime) / 1000000;
-    preTime = micros();
     deg_diff[1] = target_deg - current_deg;
     P = Kp * deg_diff[1];
     I += Ki * deg_diff[1] * dt;
     D = Kd * (deg_diff[1] - deg_diff[0]) / dt;
     deg_diff[0] = deg_diff[1];
     float vel_theta = P + I + D;
+    preTime = micros();
 
     for (int i = 0; i < MOTOR_NUM; i++)
     {

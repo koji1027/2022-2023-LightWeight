@@ -65,44 +65,54 @@ void setup()
 void loop()
 {
   gyro_get();
+  Serial.println(gyro_deg);
   ir_get();
+  Serial.println(ir_deg);
   float ir_rad = ir_deg * PI / 180;
+  /*
   line_get();
   float line_rad = atan2(line[1], line[0]);
   float line_deg = line_rad * 180.0 / PI;
+  */
   Motor.cal(ir_deg, 150, 0, gyro_deg);
-  Serial.println(ir_deg);
-  // delay(100);
+  //Motor.cal(0, 0, 0, gyro_deg);
+  //Serial.println(ir_deg);
+  delay(100);
 }
 
 void ir_get()
 {
-  Serial2.write(255);
+  int recv_data;
+  //Serial2.write(255);
   while (!Serial2.available())
   {
-    // Serial.println("ir_Ouch!");
+     Serial.println("ir_Ouch!");
   }
-  int recv_data = Serial2.read();
+  while(Serial3.available()){
+    recv_data = Serial2.read();
+  }
+  if (recv_data != -1){
   ir_deg = recv_data;
   ir_deg /= 100.0;
   ir_deg -= 1.0;
   ir_deg *= 180.0;
+  }
 }
 
 void gyro_get()
 {
-  Serial3.write(255);
-  while (!Serial3.available())
-  {
-    // Serial.println("gyro_Ouch!");
+  int recv_data;
+  //Serial3.write(255);
+  while(Serial3.available()){
+    recv_data = Serial3.read();
   }
-  int recv_data = Serial3.read();
-  // Serial.println(recv_data);
-
-  gyro_deg = recv_data;
-  gyro_deg /= 100.0;
-  gyro_deg -= 1.0;
-  gyro_deg *= 180.0;
+  if (recv_data != -1) {
+    Serial.println(recv_data);
+    gyro_deg = recv_data;
+    gyro_deg /= 100.0;
+    gyro_deg -= 1.0;
+    gyro_deg *= 180.0;
+  }
 
   // Serial.println(gyro_deg);
 
