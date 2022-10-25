@@ -56,6 +56,8 @@ void loop1()
   {
     ir.send();
   }
+  ir.send();
+  delay(10);
   // ir.IRpin_read();
   // ir.radius_read();
 }
