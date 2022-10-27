@@ -117,9 +117,9 @@ void Axis::init()
     Wire.write(0x16); // No. of Repetitions for Z-Axis = 15
     Wire.endTransmission();
 
-    calibration();
+    //calibration();
 
-    delay(500);
+    //delay(500);
 }
 
 void Axis::gyro()
@@ -217,7 +217,7 @@ void Axis::cal_angle()
         gyro_degree -= 360;
     else if (gyro_degree <= -180)
         gyro_degree += 360;
-    Serial.println(gyro_degree);
+    //Serial.println(gyro_degree);
 }
 
 void Axis::gyro_reset()
@@ -233,7 +233,7 @@ void Axis::send()
     int data = rad * 100;
     //Serial1.write(255);
     Serial1.write(data);
-    Serial.println(data);
+    //Serial.println(data);
 }
 
 void Axis::calibration()

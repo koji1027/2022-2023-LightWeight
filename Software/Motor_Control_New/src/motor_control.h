@@ -1,9 +1,9 @@
 #include <Arduino.h>
 
 #define MOTOR_NUM 4
-#define Kp 1.8
+#define Kp 2
 #define Ki 0
-#define Kd 0.17
+#define Kd 0.02
 #define DELTA_TIME 0.01
 #define MOTOR_POWER 200
 
@@ -68,7 +68,9 @@ void motor_control::cal(float ir_deg, int speed, float target_deg, float current
             power[i] = power[i] / max_power * speed;
         }
     }
-
+    if (current_deg == 0) {
+        I = 0;
+    }
     dt = (micros() - preTime) / 1000000;
     deg_diff[1] = target_deg - current_deg;
     P = Kp * deg_diff[1];
@@ -77,6 +79,7 @@ void motor_control::cal(float ir_deg, int speed, float target_deg, float current
     deg_diff[0] = deg_diff[1];
     float vel_theta = P + I + D;
     preTime = micros();
+    vel_theta = constrain(vel_theta, -150,150);
 
     for (int i = 0; i < MOTOR_NUM; i++)
     {
@@ -99,9 +102,11 @@ void motor_control::cal(float ir_deg, int speed, float target_deg, float current
 
 void motor_control::move(float power[MOTOR_NUM])
 {
-    // Serial.print("power : ");
+    Serial.print("power : ");
     for (int i = 0; i < MOTOR_NUM; i++)
     {
+        Serial.print(power[i]);
+        Serial.print(" , ");
         power[i] += 256;
         power[i] = 511 - power[i];
         // Serial.print(power[i]);
@@ -110,7 +115,7 @@ void motor_control::move(float power[MOTOR_NUM])
         digitalWriteFast(MOTOR_PIN[i][0], HIGH);
         analogWrite(MOTOR_PIN[i][1], (int)power[i]);
     }
-    // Serial.println();
+    Serial.println();
 }
 
 void motor_control::break_all()
