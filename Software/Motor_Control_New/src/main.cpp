@@ -65,7 +65,7 @@ void setup()
 void loop()
 {
   gyro_get();
-  Serial.println(gyro_deg);
+  //Serial.println(gyro_deg);
   //ir_get();
   //Serial.println(ir_deg);
   //float ir_rad = ir_deg * PI / 180;
@@ -74,7 +74,7 @@ void loop()
   float line_rad = atan2(line[1], line[0]);
   float line_deg = line_rad * 180.0 / PI;
   */
-  Motor.cal(0, 100, 0, 0);
+  Motor.cal(90, 150, 0, gyro_deg);
   //Motor.cal(0, 0, 0, gyro_deg);
   //Serial.println(ir_deg);
   delay(10);

@@ -2,8 +2,8 @@
 
 #define MOTOR_NUM 4
 #define Kp 2
-#define Ki 0
-#define Kd 0.02
+#define Ki 0.015
+#define Kd 0.04
 #define DELTA_TIME 0.01
 #define MOTOR_POWER 200
 
@@ -22,7 +22,7 @@ private:
     float COS[360];
     float SIN[360];
     float dt, preTime;
-    float P, I, D;
+    float P, I = 0, D;
     float deg_diff[2] = {0, 0};
 };
 
@@ -47,6 +47,10 @@ void motor_control::begin()
 void motor_control::cal(float ir_deg, int speed, float target_deg, float current_deg)
 {
     float power[MOTOR_NUM];
+    power[0] = -2;
+    power[1] = -2;
+    power[2] = -2;
+    power[3] = -1;
     for (int i = 0; i < MOTOR_NUM; i++)
     {
         float deg = ir_deg - MOTOR_POS[i];
@@ -68,9 +72,9 @@ void motor_control::cal(float ir_deg, int speed, float target_deg, float current
             power[i] = power[i] / max_power * speed;
         }
     }
-    if (current_deg == 0) {
-        I = 0;
-    }
+    /*if (current_deg < 3 && current_deg > -3) {
+        I = 0;  //要検討
+    }*/
     dt = (micros() - preTime) / 1000000;
     deg_diff[1] = target_deg - current_deg;
     P = Kp * deg_diff[1];
@@ -80,6 +84,8 @@ void motor_control::cal(float ir_deg, int speed, float target_deg, float current
     float vel_theta = P + I + D;
     preTime = micros();
     vel_theta = constrain(vel_theta, -150,150);
+    Serial.print("I : ");
+    Serial.println(I);
 
     for (int i = 0; i < MOTOR_NUM; i++)
     {
@@ -102,11 +108,11 @@ void motor_control::cal(float ir_deg, int speed, float target_deg, float current
 
 void motor_control::move(float power[MOTOR_NUM])
 {
-    Serial.print("power : ");
+    //Serial.print("power : ");
     for (int i = 0; i < MOTOR_NUM; i++)
     {
-        Serial.print(power[i]);
-        Serial.print(" , ");
+        //Serial.print(power[i]);
+        //Serial.print(" , ");
         power[i] += 256;
         power[i] = 511 - power[i];
         // Serial.print(power[i]);
@@ -115,7 +121,7 @@ void motor_control::move(float power[MOTOR_NUM])
         digitalWriteFast(MOTOR_PIN[i][0], HIGH);
         analogWrite(MOTOR_PIN[i][1], (int)power[i]);
     }
-    Serial.println();
+    //Serial.println();
 }
 
 void motor_control::break_all()
