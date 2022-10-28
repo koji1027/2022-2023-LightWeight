@@ -12,12 +12,12 @@ public:
     void calibration();
     void gyro_reset();
     void gyro();
-    void cal_angle();
+    void cal();
     void send();
     void show(bool accl, bool gyro, bool mag);
     // void cal_angle_mag();
     // void mag();
-    // void accl();
+    void accl();
     // void adjust_angle();
 
 private:
@@ -30,9 +30,15 @@ private:
     unsigned long long pre_time = 0;
     float pre_zgyro = 0.00;
     float gyro_degree = 0.00;
-    // float xaccl = 0.00;
-    // float yaccl = 0.00;
-    // float zaccl = 0.00;
+    float xaccl = 0.00;
+    float yaccl = 0.00;
+    float zaccl = 0.00;
+    float xaccl_offset = 0.00;
+    float yaccl_offset = 0.00;
+    float zaccl_offset = 0.00;
+    float go_dir = 0.00;
+    float vx = 0.00;
+    float vy = 0.00;
     // int xmag = 0;
     // int ymag = 0;
     // int zmag = 0;
@@ -160,12 +166,10 @@ void Axis::show(bool accl, bool gyro, bool mag)
 {
     if (accl)
     {
-        /*Serial.print("xaccl = ");
-        Serial.print(xaccl);
-        Serial.print(" yaccl = ");
-        Serial.print(yaccl);
-        Serial.print(" zaccl = ");
-        Serial.println(zaccl);*/
+        Serial.print("Vx = ");
+        Serial.print(vx);
+        Serial.print("  Vy = ");
+        Serial.println(vy);
     }
     if (gyro)
     {
@@ -195,8 +199,10 @@ void Axis::show(bool accl, bool gyro, bool mag)
     }
     if (!accl && !gyro && !mag)
     {
-        Serial.print("gyro_degree = ");
-        Serial.println(gyro_degree);
+        Serial.print("gyro_deg = ");
+        Serial.print(gyro_degree);
+        Serial.print(" go_dir = ");
+        Serial.println(go_dir);
         /*Serial.print(" mag_degree = ");
         Serial.print(degrees(mag_radian));
         Serial.print(" integrated_degree = ");
@@ -204,19 +210,23 @@ void Axis::show(bool accl, bool gyro, bool mag)
     }
 }
 
-void Axis::cal_angle()
+void Axis::cal()
 {
     gyro();
+    accl();
     unsigned long long now = micros();
     float dt = (now - pre_time) / 1000000.0;
     pre_time = now;
     float dtheta = (zgyro + pre_zgyro) / 2.0 * dt;
+    vx += xaccl * dt;
+    vy += yaccl * dt;
     pre_zgyro = zgyro;
     gyro_degree += dtheta;
     if (gyro_degree > 180)
         gyro_degree -= 360;
     else if (gyro_degree <= -180)
         gyro_degree += 360;
+    go_dir = atan2(vy, vx) * 180.0 / PI;
     //Serial.println(gyro_degree);
 }
 
@@ -227,13 +237,17 @@ void Axis::gyro_reset()
 
 void Axis::send()
 {
-    float rad = radians(gyro_degree);
-    rad = rad / PI;
-    rad += 1;
-    int data = rad * 100;
-    //Serial1.write(255);
-    Serial1.write(data);
-    //Serial.println(data);
+    int sign = 0; // 0:正 1:負
+    float _gyro_degree = gyro_degree;
+    if (_gyro_degree < 0)
+    {
+        sign = 1;
+        _gyro_degree *= -1;
+    }
+    int strech_deg = round(_gyro_degree / 180.0 * 255.0);
+    Serial1.write(255);
+    Serial1.write(sign);
+    Serial1.write(strech_deg);
 }
 
 void Axis::calibration()
@@ -243,11 +257,15 @@ void Axis::calibration()
     float sum_xgyro = 0.00;
     float sum_ygyro = 0.00;
     float sum_zgyro = 0.00;
+    float sum_xaccl = 0.00; 
+    float sum_yaccl = 0.00;
+    float sum_zaccl = 0.00;
     for (int i = 0; i < 351; i++)
     {
         if (i < 50)
         {
             gyro();
+            accl();
             delay(5);
         }
         else if (i < 350)
@@ -256,6 +274,9 @@ void Axis::calibration()
             sum_xgyro -= xgyro;
             sum_ygyro -= ygyro;
             sum_zgyro -= zgyro;
+            sum_xaccl -= xaccl;
+            sum_yaccl -= yaccl;
+            sum_zaccl -= zaccl;
             delay(5);
         }
         else
@@ -263,6 +284,9 @@ void Axis::calibration()
             xgyro_offset = sum_xgyro / 300.0;
             ygyro_offset = sum_ygyro / 300.0;
             zgyro_offset = sum_zgyro / 300.0;
+            xaccl_offset = sum_xaccl / 300.0;
+            yaccl_offset = sum_yaccl / 300.0;
+            zaccl_offset = sum_zaccl / 300.0;
         }
     }
 
@@ -315,20 +339,19 @@ void Axis::calibration()
     Serial.println(zgyro_offset);*/
 }
 
-/*
 void Axis::accl()
 {
     unsigned int data[6];
     for (int i = 0; i < 6; i++)
     {
-        Wire2.beginTransmission(Addr_accl);
-        Wire2.write((2 + i)); // Select data register
-        Wire2.endTransmission();
-        Wire2.requestFrom(Addr_accl, 1); // Request 1 byte of data
+        Wire.beginTransmission(Addr_accl);
+        Wire.write((2 + i)); // Select data register
+        Wire.endTransmission();
+        Wire.requestFrom(Addr_accl, 1); // Request 1 byte of data
         // Read 6 bytes of data
         // xaccl lsb, xaccl msb, yaccl lsb, yaccl msb, zaccl lsb, zaccl msb
-        if (Wire2.available() == 1)
-            data[i] = Wire2.read();
+        if (Wire.available() == 1)
+            data[i] = Wire.read();
     }
     // Convert the data to 12-bits
     xaccl = ((data[1] * 256) + (data[0] & 0xF0)) / 16;
@@ -349,6 +372,7 @@ void Axis::accl()
     zaccl += zaccl_offset;
 }
 
+/*
 void Axis::mag()
 {
     unsigned int data[8];

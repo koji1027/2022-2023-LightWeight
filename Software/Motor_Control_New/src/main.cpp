@@ -6,6 +6,7 @@ void ir_get();
 void gyro_get();
 void line_get();
 
+int battery_voltage = 12.0;
 int line_flag[32];
 bool line_whole_flag;
 float ir_deg = 0;
@@ -61,22 +62,29 @@ void setup()
   Motor.begin();
   delay(1000);
 }
-
+int cnt = 0;
 void loop()
 {
+  while (battery_voltage < 10.8 && battery_voltage > 6.0) {
+    Motor.stop();
+    Serial.println("Please charge the battery");
+  }
   gyro_get();
-  //Serial.println(gyro_deg);
+  ir_deg += 1.2;
+  //Serial.print("battery_voltage: ");
+  //Serial.print(battery_voltage);
   //ir_get();
-  //Serial.println(ir_deg);
+  //Serial.print("  gyro_deg: ");
+  //Serial.println(gyro_deg);
   //float ir_rad = ir_deg * PI / 180;
   /*
   line_get();
   float line_rad = atan2(line[1], line[0]);
   float line_deg = line_rad * 180.0 / PI;
   */
-  Motor.cal(90, 150, 0, gyro_deg);
-  //Motor.cal(0, 0, 0, gyro_deg);
+  Motor.cal(90, 100, 0, gyro_deg);
   //Serial.println(ir_deg);
+  cnt++;
   delay(10);
 }
 
@@ -86,7 +94,6 @@ void ir_get()
   //Serial2.write(255);
   while (!Serial2.available())
   {
-     Serial.println("ir_Ouch!");
   }
   while(Serial3.available()){
     recv_data = Serial2.read();
@@ -101,28 +108,21 @@ void ir_get()
 
 void gyro_get()
 {
-  int recv_data;
-  //Serial3.write(255);
-  /*Serial3.write(255);
+  Serial3.write(255);
   while (!Serial3.available())
   {
-  }*/
-  while (Serial3.available()) {
-    recv_data = Serial3.read();
   }
-  if (recv_data != -1){
-    gyro_deg = recv_data;
-    gyro_deg /= 100.0;
-    gyro_deg -= 1.0;
-    gyro_deg *= 180.0;
+  int recv_data = Serial3.read();
+  if (recv_data == 255) {
+    int sign = Serial3.read();
+    int strech_deg = Serial3.read();
+    int strech_battery_voltage = Serial3.read();
+    battery_voltage = (float)strech_battery_voltage / 10.0;
+    gyro_deg = (float)strech_deg / 255.0 * 180.0;
+    if (sign == 1) {
+      gyro_deg *= -1.0;
+    }
   }
-
-  // Serial.println(gyro_deg);
-
-  /*
-  Serial3.write(255);
-  Serial.println(255);
-  delay(10);*/
 }
 
 void line_get()

@@ -17,14 +17,27 @@ void setup()
 
 void setup1(){
   Serial1.begin(SERIAL_BAUD);
+  pinMode(A0, INPUT);
+  analogReadResolution(10);
 }
 
 void loop()
 {
-  bmx055.cal_angle();
-  //bmx055.show(false, false, false);
+  bmx055.cal();
+  bmx055.show(true, false, false);
   }
 
 void loop1(){
-  bmx055.send();
+  if (Serial1.available() > 0)
+  {
+    int recv_data = Serial1.read();
+    if (recv_data == 255) {
+      bmx055.send();
+      float battery_voltage = analogRead(A0);
+      battery_voltage = battery_voltage * 3.3 / 1023.0;
+      battery_voltage *= 4.0;
+      int strech_battery_voltage = battery_voltage * 10;
+      Serial1.write(strech_battery_voltage);
+    }
+  }
 }
