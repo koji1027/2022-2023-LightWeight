@@ -16,9 +16,8 @@ MovingAverage ave(20);
 int MaxPinVal = 0;
 int MaxPinIndex = 0;
 
-class IR
-{
-public:
+class IR {
+   public:
     void begin();
     void IR_get();
     void IRpin_read();
@@ -27,41 +26,38 @@ public:
     void send();
     float angle_PI;
 
-private:
+   private:
     int muxChannel[16][4] = {
-        {0, 0, 0, 0}, // channel 0
-        {1, 0, 0, 0}, // channel 1
-        {0, 1, 0, 0}, // channel 2
-        {1, 1, 0, 0}, // channel 3
-        {0, 0, 1, 0}, // channel 4
-        {1, 0, 1, 0}, // channel 5
-        {0, 1, 1, 0}, // channel 6
-        {1, 1, 1, 0}, // channel 7
-        {0, 0, 0, 1}, // channel 8
-        {1, 0, 0, 1}, // channel 9
-        {0, 1, 0, 1}, // channel 10
-        {1, 1, 0, 1}, // channel 11
-        {0, 0, 1, 1}, // channel 12
-        {1, 0, 1, 1}, // channel 13
-        {0, 1, 1, 1}, // channel 14
-        {1, 1, 1, 1}  // channel 15
+        {0, 0, 0, 0},  // channel 0
+        {1, 0, 0, 0},  // channel 1
+        {0, 1, 0, 0},  // channel 2
+        {1, 1, 0, 0},  // channel 3
+        {0, 0, 1, 0},  // channel 4
+        {1, 0, 1, 0},  // channel 5
+        {0, 1, 1, 0},  // channel 6
+        {1, 1, 1, 0},  // channel 7
+        {0, 0, 0, 1},  // channel 8
+        {1, 0, 0, 1},  // channel 9
+        {0, 1, 0, 1},  // channel 10
+        {1, 1, 0, 1},  // channel 11
+        {0, 0, 1, 1},  // channel 12
+        {1, 0, 1, 1},  // channel 13
+        {0, 1, 1, 1},  // channel 14
+        {1, 1, 1, 1}   // channel 15
     };
 
-    typedef struct
-    {
-        int active_num; // 反応したセンサの個数
-        int max_val;    // 最大のセンサ値
-        int max_index;  // 最大の値を観測したセンサの番号
+    typedef struct {
+        int active_num;  // 反応したセンサの個数
+        int max_val;     // 最大のセンサ値
+        int max_index;   // 最大の値を観測したセンサの番号
     } sensorInfo_t;
 
-    typedef struct
-    {
+    typedef struct {
         float x;
         float y;
     } vectorXY_t;
 
-    typedef struct
-    {
+    typedef struct {
         float radius;
         float angle;
     } vectorRT_t;
@@ -77,8 +73,13 @@ private:
     // float R = boal_radius + unit_radius;
     // int MAX_R = 1600;
     int IR_Cur[IR_NUM];
-    float IR_IN[IR_NUM] = {0, -PI / 8, -PI * 2 / 8, -PI * 3 / 8, -PI * 4 / 8, -PI * 5 / 8, -PI * 6 / 8, -PI * 7 / 8, PI, PI * 7 / 8, PI * 6 / 8, PI * 5 / 8, PI * 4 / 8, PI * 3 / 8, PI * 2 / 8, PI / 8}; //ピンの角度
-    float IR_cor[IR_NUM] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+    float IR_IN[IR_NUM] = {
+        0,           -PI / 8,     -PI * 2 / 8, -PI * 3 / 8,
+        -PI * 4 / 8, -PI * 5 / 8, -PI * 6 / 8, -PI * 7 / 8,
+        PI,          PI * 7 / 8,  PI * 6 / 8,  PI * 5 / 8,
+        PI * 4 / 8,  PI * 3 / 8,  PI * 2 / 8,  PI / 8};  // ピンの角度
+    float IR_cor[IR_NUM] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+                            1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
     float unit_angle[IR_NUM];
     float unit_sin[IR_NUM];
     float unit_cos[IR_NUM];
@@ -88,29 +89,23 @@ private:
     int maxPin = 0;
 };
 
-void IR::begin()
-{
-    for (int i = 0; i < IR_NUM; i++)
-    {
+void IR::begin() {
+    for (int i = 0; i < IR_NUM; i++) {
         unit_angle[i] = IR_IN[i];
         unit_cos[i] = cos(unit_angle[i]);
         unit_sin[i] = sin(unit_angle[i]);
     }
 }
 
-void IR::IR_get()
-{
+void IR::IR_get() {
     int controlPin[] = {s0, s1, s2, s3};
-    for (int i = 0; i < IR_NUM; i++)
-    {
-        for (int j = 0; j < 4; j++)
-        {
+    for (int i = 0; i < IR_NUM; i++) {
+        for (int j = 0; j < 4; j++) {
             digitalWrite(controlPin[j], muxChannel[i][j]);
         }
         delayMicroseconds(10);
         IR_Cur[i] = IR_CUR_MAX - analogRead(SIG_pin);
-        if (IR_Cur[i] > 1000)
-        {
+        if (IR_Cur[i] > 1000) {
             IR_Cur[i] = 0;
         }
     }
@@ -119,10 +114,8 @@ void IR::IR_get()
 
     int maxVal = 0;
     int maxIndex = 0;
-    for (int i = 0; i < IR_NUM; i++)
-    {
-        if (IR_Cur[i] > maxVal)
-        {
+    for (int i = 0; i < IR_NUM; i++) {
+        if (IR_Cur[i] > maxVal) {
             maxVal = IR_Cur[i];
             maxIndex = i;
         }
@@ -139,22 +132,19 @@ void IR::IR_get()
         vector_XY.x += IR_Cur[b] * unit_cos[b];
         vector_XY.y += IR_Cur[b] * unit_sin[b];
     }*/
-    for (int i = 0; i < 16; i++)
-    {
+    for (int i = 0; i < 16; i++) {
         vector_XY.x += IR_Cur[i] * unit_cos[i];
         vector_XY.y += IR_Cur[i] * unit_sin[i];
     }
     vector_RT.radius = sqrt(pow(vector_XY.x, 2.0) + pow(vector_XY.y, 2.0));
-    now_radius = ave.updateData(vector_RT.radius); //半径
+    now_radius = ave.updateData(vector_RT.radius);  // 半径
 
     vector_RT.angle = atan2(vector_XY.y, vector_XY.x);
-    angle_PI = vector_RT.angle / PI; //角度
+    angle_PI = vector_RT.angle / PI;  // 角度
 }
 
-void IR::IRpin_read()
-{
-    for (int i = 0; i < IR_NUM; i++)
-    {
+void IR::IRpin_read() {
+    for (int i = 0; i < IR_NUM; i++) {
         Serial.print(i);
         Serial.print(": ");
         Serial.println(IR_Cur[i]);
@@ -162,28 +152,27 @@ void IR::IRpin_read()
     Serial.println("ー－－－－");
 }
 
-void IR::radius_read()
-{
+void IR::radius_read() {
     Serial.print("radius:");
     Serial.println(now_radius);
 }
 
-void IR::angle_read()
-{
+void IR::angle_read() {
     Serial.print("angle:");
     Serial.print(angle_PI);
     Serial.println("π");
 }
 
-void IR::send()
-{
-    float _angle = angle_PI;
-    _angle += 1;
-    int angle = _angle * 100;
-    Serial.print(angle_PI);
-    Serial.print(", ");
-    Serial.println(angle);
-    // Serial1.write(255);
-    Serial1.write(angle);
+void IR::send() {
+    float ir_deg = angle_PI * 180;
+    int sign;
+    if (ir_deg < 0) {
+        sign = 1;
+        ir_deg *= -1;
+    }
+    int strech_deg = round(ir_deg / 180.0 * 255.0);
+    Serial1.write(255);
+    Serial1.write(sign);
+    Serial1.write(strech_deg);
 }
 #endif

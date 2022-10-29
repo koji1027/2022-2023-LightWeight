@@ -5,9 +5,8 @@
 #define Addr_gyro 0x69
 #define Addr_mag 0x13
 
-class Axis
-{
-public:
+class Axis {
+   public:
     void init();
     void calibration();
     void gyro_reset();
@@ -20,7 +19,7 @@ public:
     void accl();
     // void adjust_angle();
 
-private:
+   private:
     float xgyro = 0.00;
     float ygyro = 0.00;
     float zgyro = 0.00;
@@ -30,15 +29,6 @@ private:
     unsigned long long pre_time = 0;
     float pre_zgyro = 0.00;
     float gyro_degree = 0.00;
-    float xaccl = 0.00;
-    float yaccl = 0.00;
-    float zaccl = 0.00;
-    float xaccl_offset = 0.00;
-    float yaccl_offset = 0.00;
-    float zaccl_offset = 0.00;
-    float go_dir = 0.00;
-    float vx = 0.00;
-    float vy = 0.00;
     // int xmag = 0;
     // int ymag = 0;
     // int zmag = 0;
@@ -52,127 +42,112 @@ private:
     // float mag_radian_offset = 0.00;
 };
 
-void Axis::init()
-{
-
+void Axis::init() {
     Wire.beginTransmission(Addr_accl);
-    Wire.write(0x0F); // Select PMU_Range register
-    Wire.write(0x03); // Range = +/- 2g
+    Wire.write(0x0F);  // Select PMU_Range register
+    Wire.write(0x03);  // Range = +/- 2g
     Wire.endTransmission();
     delay(100);
 
     Wire.beginTransmission(Addr_accl);
-    Wire.write(0x10); // Select PMU_BW register
-    Wire.write(0x08); // Bandwidth = 7.81 Hz
+    Wire.write(0x10);  // Select PMU_BW register
+    Wire.write(0x08);  // Bandwidth = 7.81 Hz
     Wire.endTransmission();
     delay(100);
 
     Wire.beginTransmission(Addr_accl);
-    Wire.write(0x11); // Select PMU_LPW register
-    Wire.write(0x00); // Normal mode, Sleep duration = 0.5ms
+    Wire.write(0x11);  // Select PMU_LPW register
+    Wire.write(0x00);  // Normal mode, Sleep duration = 0.5ms
     Wire.endTransmission();
     delay(100);
 
     Wire.beginTransmission(Addr_gyro);
-    Wire.write(0x0F); // Select Range register
-    Wire.write(0x00); // Full scale = +/- 500 degree/s
+    Wire.write(0x0F);  // Select Range register
+    Wire.write(0x00);  // Full scale = +/- 500 degree/s
     Wire.endTransmission();
     delay(100);
 
     Wire.beginTransmission(Addr_gyro);
-    Wire.write(0x10); // Select Bandwidth register
-    Wire.write(0x01); // ODR = 100 Hz
+    Wire.write(0x10);  // Select Bandwidth register
+    Wire.write(0x01);  // ODR = 100 Hz
     Wire.endTransmission();
     delay(100);
 
     Wire.beginTransmission(Addr_gyro);
-    Wire.write(0x11); // Select LPM1 register
-    Wire.write(0x00); // Normal mode, Sleep duration = 2ms
+    Wire.write(0x11);  // Select LPM1 register
+    Wire.write(0x00);  // Normal mode, Sleep duration = 2ms
     Wire.endTransmission();
     delay(100);
 
     Wire.beginTransmission(Addr_mag);
-    Wire.write(0x4B); // Select Mag register
-    Wire.write(0x83); // Soft reset
+    Wire.write(0x4B);  // Select Mag register
+    Wire.write(0x83);  // Soft reset
     Wire.endTransmission();
     delay(100);
 
     Wire.beginTransmission(Addr_mag);
-    Wire.write(0x4B); // Select Mag register
-    Wire.write(0x01); // Soft reset
+    Wire.write(0x4B);  // Select Mag register
+    Wire.write(0x01);  // Soft reset
     Wire.endTransmission();
     delay(100);
 
     Wire.beginTransmission(Addr_mag);
-    Wire.write(0x4C); // Select Mag register
-    Wire.write(0x00); // Normal Mode, ODR = 10 Hz
+    Wire.write(0x4C);  // Select Mag register
+    Wire.write(0x00);  // Normal Mode, ODR = 10 Hz
     Wire.endTransmission();
 
     Wire.beginTransmission(Addr_mag);
-    Wire.write(0x4E); // Select Mag register
-    Wire.write(0x84); // X, Y, Z-Axis enabled
+    Wire.write(0x4E);  // Select Mag register
+    Wire.write(0x84);  // X, Y, Z-Axis enabled
     Wire.endTransmission();
 
     Wire.beginTransmission(Addr_mag);
-    Wire.write(0x51); // Select Mag register
-    Wire.write(0x04); // No. of Repetitions for X-Y Axis = 9
+    Wire.write(0x51);  // Select Mag register
+    Wire.write(0x04);  // No. of Repetitions for X-Y Axis = 9
     Wire.endTransmission();
 
     Wire.beginTransmission(Addr_mag);
-    Wire.write(0x52); // Select Mag register
-    Wire.write(0x16); // No. of Repetitions for Z-Axis = 15
+    Wire.write(0x52);  // Select Mag register
+    Wire.write(0x16);  // No. of Repetitions for Z-Axis = 15
     Wire.endTransmission();
 
-    //calibration();
+    // calibration();
 
-    //delay(500);
+    // delay(500);
 }
 
-void Axis::gyro()
-{
+void Axis::gyro() {
     unsigned int data[6];
-    for (int i = 0; i < 6; i++)
-    {
+    for (int i = 0; i < 6; i++) {
         Wire.beginTransmission(Addr_gyro);
-        Wire.write((2 + i)); // Select data register
+        Wire.write((2 + i));  // Select data register
         Wire.endTransmission();
-        Wire.requestFrom(Addr_gyro, 1); // Request 1 byte of data
+        Wire.requestFrom(Addr_gyro, 1);  // Request 1 byte of data
         // Read 6 bytes of data
         // xgyro lsb, xgyro msb, ygyro lsb, ygyro msb, zgyro lsb, zgyro msb
-        if (Wire.available() == 1)
-            data[i] = Wire.read();
+        if (Wire.available() == 1) data[i] = Wire.read();
     }
     // Convert the data
     xgyro = (data[1] * 256) + data[0];
-    if (xgyro > 32767)
-        xgyro -= 65536;
+    if (xgyro > 32767) xgyro -= 65536;
     ygyro = (data[3] * 256) + data[2];
-    if (ygyro > 32767)
-        ygyro -= 65536;
+    if (ygyro > 32767) ygyro -= 65536;
     zgyro = (data[5] * 256) + data[4];
-    if (zgyro > 32767)
-        zgyro -= 65536;
+    if (zgyro > 32767) zgyro -= 65536;
 
-    xgyro = xgyro * 0.0152587890625*4; //  Full scale = +/- 500 degree/s
-    ygyro = ygyro * 0.0152587890625*4; //  Full scale = +/- 500 degree/s
-    zgyro = zgyro * 0.0152587890625*4; //  Full scale = +/- 500 degree/s
+    xgyro = xgyro * 0.0152587890625 * 4;  //  Full scale = +/- 500 degree/s
+    ygyro = ygyro * 0.0152587890625 * 4;  //  Full scale = +/- 500 degree/s
+    zgyro = zgyro * 0.0152587890625 * 4;  //  Full scale = +/- 500 degree/s
 
     xgyro += xgyro_offset;
     ygyro += ygyro_offset;
     zgyro += zgyro_offset;
 }
 
-void Axis::show(bool accl, bool gyro, bool mag)
-{
-    if (accl)
-    {
-        Serial.print("Vx = ");
-        Serial.print(vx);
-        Serial.print("  Vy = ");
-        Serial.println(vy);
+void Axis::show(bool accl, bool gyro, bool mag) {
+    if (accl) {
     }
-    if (gyro)
-    {
+    if (gyro) {
         /*Serial.print("xgyro = ");
         Serial.print(xgyro);
         Serial.print(" ygyro = ");
@@ -184,8 +159,7 @@ void Axis::show(bool accl, bool gyro, bool mag)
         Serial.println(" °");*/
         Serial.println(zgyro);
     }
-    if (mag)
-    {
+    if (mag) {
         /* Serial.print("xmag = ");
         Serial.print(xmag);
         Serial.print(",");
@@ -197,12 +171,7 @@ void Axis::show(bool accl, bool gyro, bool mag)
         Serial.print(ymag);
         Serial.println(",");*/
     }
-    if (!accl && !gyro && !mag)
-    {
-        Serial.print("gyro_deg = ");
-        Serial.print(gyro_degree);
-        Serial.print(" go_dir = ");
-        Serial.println(go_dir);
+    if (!accl && !gyro && !mag) {
         /*Serial.print(" mag_degree = ");
         Serial.print(degrees(mag_radian));
         Serial.print(" integrated_degree = ");
@@ -210,37 +179,26 @@ void Axis::show(bool accl, bool gyro, bool mag)
     }
 }
 
-void Axis::cal()
-{
+void Axis::cal() {
     gyro();
-    accl();
     unsigned long long now = micros();
     float dt = (now - pre_time) / 1000000.0;
     pre_time = now;
     float dtheta = (zgyro + pre_zgyro) / 2.0 * dt;
-    vx += xaccl * dt;
-    vy += yaccl * dt;
     pre_zgyro = zgyro;
     gyro_degree += dtheta;
     if (gyro_degree > 180)
         gyro_degree -= 360;
     else if (gyro_degree <= -180)
         gyro_degree += 360;
-    go_dir = atan2(vy, vx) * 180.0 / PI;
-    //Serial.println(gyro_degree);
 }
 
-void Axis::gyro_reset()
-{
-    gyro_degree = 0.00;
-}
+void Axis::gyro_reset() { gyro_degree = 0.00; }
 
-void Axis::send()
-{
-    int sign = 0; // 0:正 1:負
+void Axis::send() {
+    int sign = 0;  // 0:正 1:負
     float _gyro_degree = gyro_degree;
-    if (_gyro_degree < 0)
-    {
+    if (_gyro_degree < 0) {
         sign = 1;
         _gyro_degree *= -1;
     }
@@ -250,43 +208,26 @@ void Axis::send()
     Serial1.write(strech_deg);
 }
 
-void Axis::calibration()
-{
+void Axis::calibration() {
     Serial.println("Calibrating...");
     Serial.println("Do not move the sensor");
     float sum_xgyro = 0.00;
     float sum_ygyro = 0.00;
     float sum_zgyro = 0.00;
-    float sum_xaccl = 0.00; 
-    float sum_yaccl = 0.00;
-    float sum_zaccl = 0.00;
-    for (int i = 0; i < 351; i++)
-    {
-        if (i < 50)
-        {
+    for (int i = 0; i < 351; i++) {
+        if (i < 50) {
             gyro();
-            accl();
             delay(5);
-        }
-        else if (i < 350)
-        {
+        } else if (i < 350) {
             gyro();
             sum_xgyro -= xgyro;
             sum_ygyro -= ygyro;
             sum_zgyro -= zgyro;
-            sum_xaccl -= xaccl;
-            sum_yaccl -= yaccl;
-            sum_zaccl -= zaccl;
             delay(5);
-        }
-        else
-        {
+        } else {
             xgyro_offset = sum_xgyro / 300.0;
             ygyro_offset = sum_ygyro / 300.0;
             zgyro_offset = sum_zgyro / 300.0;
-            xaccl_offset = sum_xaccl / 300.0;
-            yaccl_offset = sum_yaccl / 300.0;
-            zaccl_offset = sum_zaccl / 300.0;
         }
     }
 
@@ -339,38 +280,32 @@ void Axis::calibration()
     Serial.println(zgyro_offset);*/
 }
 
-void Axis::accl()
-{
+/*void Axis::accl() {
     unsigned int data[6];
-    for (int i = 0; i < 6; i++)
-    {
+    for (int i = 0; i < 6; i++) {
         Wire.beginTransmission(Addr_accl);
-        Wire.write((2 + i)); // Select data register
+        Wire.write((2 + i));  // Select data register
         Wire.endTransmission();
-        Wire.requestFrom(Addr_accl, 1); // Request 1 byte of data
+        Wire.requestFrom(Addr_accl, 1);  // Request 1 byte of data
         // Read 6 bytes of data
         // xaccl lsb, xaccl msb, yaccl lsb, yaccl msb, zaccl lsb, zaccl msb
-        if (Wire.available() == 1)
-            data[i] = Wire.read();
+        if (Wire.available() == 1) data[i] = Wire.read();
     }
     // Convert the data to 12-bits
     xaccl = ((data[1] * 256) + (data[0] & 0xF0)) / 16;
-    if (xaccl > 2047)
-        xaccl -= 4096;
+    if (xaccl > 2047) xaccl -= 4096;
     yaccl = ((data[3] * 256) + (data[2] & 0xF0)) / 16;
-    if (yaccl > 2047)
-        yaccl -= 4096;
+    if (yaccl > 2047) yaccl -= 4096;
     zaccl = ((data[5] * 256) + (data[4] & 0xF0)) / 16;
-    if (zaccl > 2047)
-        zaccl -= 4096;
-    xaccl = xaccl * 0.0098; // range = +/-2g
-    yaccl = yaccl * 0.0098; // range = +/-2g
-    zaccl = zaccl * 0.0098; // range = +/-2g
+    if (zaccl > 2047) zaccl -= 4096;
+    xaccl = xaccl * 0.0098;  // range = +/-2g
+    yaccl = yaccl * 0.0098;  // range = +/-2g
+    zaccl = zaccl * 0.0098;  // range = +/-2g
 
     xaccl += xaccl_offset;
     yaccl += yaccl_offset;
     zaccl += zaccl_offset;
-}
+}*/
 
 /*
 void Axis::mag()
