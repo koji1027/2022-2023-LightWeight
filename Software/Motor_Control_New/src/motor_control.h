@@ -44,11 +44,11 @@ void motor_control::cal(float ir_deg, int speed, float target_deg,
     target_deg = target_deg > 180 ? target_deg - 360 : target_deg;
     current_deg = fmod(current_deg, 360);
     current_deg = current_deg > 180 ? current_deg - 360 : current_deg;
-    if (ir_deg > 60 && ir_deg < 120) {
+    /*if (ir_deg > 60 && ir_deg < 120) {
         target_deg = ir_deg;
     } else if (ir_deg < -60 && ir_deg > -120) {
         target_deg = ir_deg;
-    }
+    }*/
     float power[MOTOR_NUM] = {0, 0, 0, 0};
     float vx = sin(radians(ir_deg - target_deg));
     float vy = cos(radians(ir_deg - target_deg));
@@ -79,7 +79,7 @@ void motor_control::cal(float ir_deg, int speed, float target_deg,
     }
     dt = (micros() - preTime) / 1000000;
     deg_diff[1] = target_deg - current_deg;
-    Serial.println(deg_diff[1]);
+    //Serial.println(deg_diff[1]);
     deg_diff[1] = fmod(deg_diff[1], 360);
     deg_diff[1] = deg_diff[1] > 180 ? deg_diff[1] - 360 : deg_diff[1];
     P = Kp * deg_diff[1];

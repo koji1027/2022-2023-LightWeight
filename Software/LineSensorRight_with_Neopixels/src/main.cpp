@@ -104,7 +104,8 @@ void loop() {
         }
     }
     for (int i = 0; i < SENSOR_NUM; i++) {
-        Serial.print(line_flag[i]);
+        //Serial.print(line_flag[i]);
+        Serial.print(sensor_value[i]);
         Serial.print(" ");
     }
     Serial.println();

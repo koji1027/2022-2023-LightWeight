@@ -86,7 +86,7 @@ void loop1() {
             bmx055.gyro_reset();
         }
     }
-    for (int i = 0; i < 360; i++) {
+    /*for (int i = 0; i < 360; i++) {
         display.clearDisplay();
         //display.display();
         display_ball(i, ball_dist);
@@ -94,7 +94,7 @@ void loop1() {
         display_other_info(current_mode);
         display.display();
         //delay(1000);
-    }
+    }*/
 }
 
 void display_init() {

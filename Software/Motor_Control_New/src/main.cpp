@@ -44,16 +44,19 @@ void setup() {
 }
 
 void loop() {
+    /*
     while (battery_voltage_flag) {
         Motor.stop();
         Serial.println("Please charge the battery");
-    }
+    }*/
     gyro_get();
-    Motor.cal(ir_deg, 100, 0, gyro_deg);
+    line_get();
+    //Serial.println("a");
+    Motor.cal(90, 133, 0, gyro_deg);
     delay(10);
 }
 
-void ir_get() {
+void ir_get() { 
     Serial2.write(255);
     while (!Serial2.available()) {
     }
@@ -86,13 +89,13 @@ void gyro_get() {
 
 void line_get() {
     int recv_data[4] = {0};
-    Serial4.write(255);
+    Serial4.write(254);
     while (!Serial4.available()) {
     }
     for (int i = 0; i < 2; i++) {
         recv_data[i] = Serial4.read();
     }
-    Serial5.write(255);
+    Serial5.write(254);
     while (!Serial5.available()) {
     }
     for (int i = 2; i < 4; i++) {
@@ -142,4 +145,12 @@ void line_get() {
         }
         line_deg = atan2(line_x_sum, line_y_sum) * 180.0 / PI;
     }
+    Serial4.write(252);
+    for(int i=0; i<16; i++){
+        while(!Serial4.available()){}
+        Serial.print(Serial4.read());
+        Serial.print("\t");
+    }
+    Serial.print("\n");
+    //Serial.println(line_deg);
 }
