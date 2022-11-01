@@ -1,3 +1,4 @@
+//Serial5
 #include <Adafruit_NeoPixel.h>
 #include <Arduino.h>
 
@@ -161,7 +162,12 @@ void loop1() {
     } else if (int(recv_data) == 252) {
         Serial1.write(byte(255));
         for (int i = 0; i < SENSOR_NUM; i++) {
-            Serial1.write(sensor_value[i]);
+            Serial1.write(sensor_value[i]/4);
+        }
+    } else if (int(recv_data) == 251) {
+        Serial1.write(byte(255));
+        for (int i = 0; i < SENSOR_NUM; i++) {
+            Serial1.write(line_flag[i]);
         }
     }
 }

@@ -1,3 +1,4 @@
+//Serial4
 #include <Arduino.h>
 
 #define COM A0
@@ -100,12 +101,14 @@ void loop() {
         }
     }
 
-    for (int i = 0; i < SENSOR_NUM; i++) {
+    /*for (int i = 0; i < SENSOR_NUM; i++) {
         Serial.print(line_flag[i]);
         Serial.print(" ");
     }
     Serial.println();
-    delay(100);
+    delay(100);*/
+
+    Serial.println(sensor_value[5]);
 
     for (int i = 0; i < SENSOR_NUM; i++) {
         if (line_flag[i] == 1) {
@@ -163,6 +166,12 @@ void loop1() {
         Serial1.write(255);
         for (int i = 0; i < SENSOR_NUM; i++) {
             Serial1.write(sensor_value[i]);
+        }
+    }
+    else if (int(recv_data) == 251) {
+        Serial1.write(byte(255));
+        for (int i = 0; i < SENSOR_NUM; i++) {
+            Serial1.write(line_flag[i]);
         }
     }
 }
