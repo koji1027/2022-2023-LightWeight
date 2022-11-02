@@ -25,7 +25,7 @@ class Axis {
     float zgyro = 0.00;
     float xgyro_offset = 0.00;
     float ygyro_offset = 0.00;
-    float zgyro_offset = 0.00;
+    float zgyro_offset = 2.81;
     unsigned long long pre_time = 0;
     float pre_zgyro = 0.00;
     float gyro_degree = 0.00;
@@ -111,7 +111,7 @@ void Axis::init() {
     Wire.write(0x16);  // No. of Repetitions for Z-Axis = 15
     Wire.endTransmission();
 
-    // calibration();
+    //calibration();
 
     // delay(500);
 }
@@ -176,6 +176,8 @@ void Axis::show(bool accl, bool gyro, bool mag) {
         Serial.print(degrees(mag_radian));
         Serial.print(" integrated_degree = ");
         Serial.println(integrated_degree);*/
+
+        Serial.println(gyro_degree);
     }
 }
 

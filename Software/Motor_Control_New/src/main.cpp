@@ -6,6 +6,17 @@ void gyro_get();
 void line_get();
 
 const float LINE_ANGLE[32] = {
+    1.0 * PI / 16.0,
+    2.0 * PI / 16.0,
+    3.0 * PI / 16.0,
+    4.0 * PI / 16.0,
+    5.0 * PI / 16.0,
+    6.0 * PI / 16.0,
+    7.0 * PI / 16.0,
+    8.0 * PI / 16.0,
+    9.0 * PI / 16.0,
+    10.0 * PI / 16.0,
+    11.0 * PI / 16.0,
     12.0 * PI / 16.0,
     13.0 * PI / 16.0,
     14.0 * PI / 16.0,
@@ -27,17 +38,6 @@ const float LINE_ANGLE[32] = {
     -2.0 * PI / 16.0,
     -1.0 * PI / 16.0,
     0.0 * PI / 16.0,
-    1.0 * PI / 16.0,
-    2.0 * PI / 16.0,
-    3.0 * PI / 16.0,
-    4.0 * PI / 16.0,
-    5.0 * PI / 16.0,
-    6.0 * PI / 16.0,
-    7.0 * PI / 16.0,
-    8.0 * PI / 16.0,
-    9.0 * PI / 16.0,
-    10.0 * PI / 16.0,
-    11.0 * PI / 16.0,
 };
 
 bool battery_voltage_flag = false;
@@ -61,7 +61,7 @@ void setup()
     Serial4.begin(115200);
     Serial5.begin(115200);
     Motor.begin();
-    delay(1000);
+    delay(3500);
     for (int i = 0; i < 32; i++)
     {
         line_x[i] = sin(LINE_ANGLE[i]);
@@ -89,8 +89,15 @@ void loop()
         }
     }
     Serial.println("");*/
-
-    // Motor.cal(90, 133, 0, gyro_deg);
+    if (line_whole_flag) {
+        Motor.cal(line_deg+180, 100, 0, gyro_deg);
+        //delay(500);
+        //Serial.println("Line On");
+    }
+    else {
+        Motor.cal(0, 100, 0, gyro_deg);
+        //Serial.println("No Line");
+    }
     /*while(line_whole_flag == 1){
         Motor.cal(-line_deg, 120, 0, 0);
     }*/
@@ -134,6 +141,7 @@ void gyro_get()
             gyro_deg *= -1.0;
         }
     }
+    Serial.println(gyro_deg);
 }
 
 void line_get()
@@ -143,24 +151,26 @@ void line_get()
         line_flag[i] = 0;
     }
     int recv_data[4] = {0};
-    Serial4.write(254);
-    while (!Serial4.available())
-    {
-    }
-    if (Serial4.read() == 255) {
-    for (int i = 0; i < 2; i++)
-        {
-            recv_data[i] = Serial4.read();
-        }
-    }
     Serial5.write(254);
     while (!Serial5.available())
     {
     }
     if (Serial5.read() == 255) {
+    for (int i = 0; i < 2; i++)
+        {
+            while (!Serial5.available()) {}
+            recv_data[i] = Serial5.read();
+        }
+    }
+    Serial4.write(254);
+    while (!Serial4.available())
+    {
+    }
+    if (Serial4.read() == 255) {
     for (int i = 2; i < 4; i++)
         {
-            recv_data[i] = Serial5.read();
+            while (!Serial4.available()) {}
+            recv_data[i] = Serial4.read();
         }
     }
 
@@ -216,11 +226,11 @@ void line_get()
         }
     }
     
-    for (int i = 0; i < 16; i++){
+    /*for (int i = 0; i < 16; i++){
         Serial.print(line_flag[i]);
         Serial.print("\t");
     }
-    Serial.print("\n");
+    Serial.print("\n");*/
 
     if (line_whole_flag)
     {
@@ -231,7 +241,9 @@ void line_get()
             line_x_sum += line_x[i] * line_flag[i];
             line_y_sum += line_y[i] * line_flag[i];
         }
-        line_deg = atan2(line_x_sum, line_y_sum) * 180.0 / PI;
+        float line_rad = atan2(line_x_sum, line_y_sum);
+        line_rad = fmod(line_rad, PI);
+        line_deg = -degrees(line_rad);
         //Serial.println(line_deg);
     }
     //else{Serial.println("Yeah");}

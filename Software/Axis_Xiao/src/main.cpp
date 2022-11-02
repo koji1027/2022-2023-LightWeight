@@ -68,7 +68,11 @@ void setup1() {
     display_init();
 }
 
-void loop() { bmx055.cal(); }
+void loop() {
+    bmx055.cal();
+    bmx055.show(0,0,0);
+    }
+
 
 void loop1() {
     if (Serial1.available() > 0) {

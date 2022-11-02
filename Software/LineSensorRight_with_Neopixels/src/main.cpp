@@ -104,12 +104,14 @@ void loop() {
             line_flag[i] = 0;
         }
     }
+    /*
     for (int i = 0; i < SENSOR_NUM; i++) {
         //Serial.print(line_flag[i]);
-        Serial.print(sensor_value[i]);
+        Serial.print(line_flag[i]);
         Serial.print(" ");
     }
     Serial.println();
+    */
     delay(100);
 
     for (int i = 0; i < SENSOR_NUM; i++) {
@@ -124,7 +126,6 @@ void setup1() {
     pinMode(NEOPIXEL_DIN, OUTPUT);
     pinMode(LED_PIN, OUTPUT);
     digitalWrite(LED_PIN, HIGH);
-    Serial1.begin(9600);
     pixels.begin();
     pixels_init();
 }
@@ -143,16 +144,26 @@ void loop1() {
         pixels_init();
     } else if (int(recv_data) == 254) {
         int send_data[2] = {0, 0};
-        for (int i = 0; i < 2; i++) {
-            send_data[i] += line_flag[i] * 1;
-            send_data[i] += line_flag[i + 1] * 2;
-            send_data[i] += line_flag[i + 2] * 4;
-            send_data[i] += line_flag[i + 3] * 8;
-            send_data[i] += line_flag[i + 4] * 16;
-            send_data[i] += line_flag[i + 5] * 32;
-            send_data[i] += line_flag[i + 6] * 64;
-            send_data[i] += line_flag[i + 7] * 128;
-        }
+        send_data[0] += line_flag[0] * 1;
+        send_data[0] += line_flag[1] * 2;
+        send_data[0] += line_flag[2] * 4;
+        send_data[0] += line_flag[3] * 8;
+        send_data[0] += line_flag[4] * 16;
+        send_data[0] += line_flag[5] * 32;
+        send_data[0] += line_flag[6] * 64;
+        send_data[0] += line_flag[7] * 128;
+        send_data[1] += line_flag[8] * 1;
+        send_data[1] += line_flag[9] * 2;
+        send_data[1] += line_flag[10] * 4;
+        send_data[1] += line_flag[11] * 8;
+        send_data[1] += line_flag[12] * 16;
+        send_data[1] += line_flag[13] * 32;
+        send_data[1] += line_flag[14] * 64;
+        send_data[1] += line_flag[15] * 128;
+        
+        Serial.print(send_data[0]);
+        Serial.print("\t");
+        Serial.println(send_data[1]);
         Serial1.write(255);
         for (int i = 0; i < 2; i++) {
             Serial1.write(send_data[i]);
