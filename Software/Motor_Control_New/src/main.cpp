@@ -90,7 +90,11 @@ void loop()
     }
     Serial.println("");*/
     if (line_whole_flag) {
-        Motor.cal(line_deg+180, 100, 0, gyro_deg);
+        while(1){
+            Motor.cal(0,0,0,0);
+            Serial.println(line_deg);
+        }
+        //Motor.cal(line_deg+180, 100, 0, gyro_deg);
         //delay(500);
         //Serial.println("Line On");
     }
