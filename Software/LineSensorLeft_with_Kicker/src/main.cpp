@@ -106,7 +106,7 @@ void loop() {
         Serial.print(" ");
     }
     Serial.println();
-    delay(100);
+    //delay(100);
 
     for (int i = 0; i < SENSOR_NUM; i++) {
         if (line_flag[i] == 1) {

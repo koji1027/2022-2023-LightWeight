@@ -57,6 +57,7 @@ void setup() {
 
 void loop() {
     // put your main code here, to run repeatedly:
+    unsigned long start = micros();
     int _sensor_value[SENSOR_NUM];
     int _line_flag[SENSOR_NUM];
     for (int i = 0; i < SENSOR_NUM; i++) {
@@ -112,7 +113,7 @@ void loop() {
     }
     Serial.println();
     */
-    delay(100);
+    //delay(100);
 
     for (int i = 0; i < SENSOR_NUM; i++) {
         if (line_flag[i] == 1) {
