@@ -74,6 +74,7 @@ void motor_control::cal(float ir_deg, int speed, float target_deg,
     power[1] = constrain(power[1], -200, 200);
     power[2] = constrain(power[2], -200, 200);
     power[3] = constrain(power[3], -200, 200);
+
     if (current_deg < 3 && current_deg > -3) {
         I = 0;
     }
