@@ -1,0 +1,47 @@
+// AUTOMATICALLY GENERATED FILE. PLEASE DO NOT MODIFY IT MANUALLY
+//
+// PIO Unified Debugger
+//
+// Documentation: https://docs.platformio.org/page/plus/debugging.html
+// Configuration: https://docs.platformio.org/page/projectconf/section_env_debug.html
+
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "platformio-debug",
+            "request": "launch",
+            "name": "PIO Debug",
+            "executable": "D:/Documents/GitHub/2022-2023-LightWeight/Software/IRsensor/.pio/build/seeed_xiao_rp2040/firmware.elf",
+            "projectEnvName": "seeed_xiao_rp2040",
+            "toolchainBinDir": "C:/Users/nkoji/.platformio/packages/toolchain-rp2040-earlephilhower/bin",
+            "internalConsoleOptions": "openOnSessionStart",
+            "svdPath": "C:/Users/nkoji/.platformio/platforms/raspberrypi/misc/svd/rp2040.svd",
+            "preLaunchTask": {
+                "type": "PlatformIO",
+                "task": "Pre-Debug"
+            }
+        },
+        {
+            "type": "platformio-debug",
+            "request": "launch",
+            "name": "PIO Debug (skip Pre-Debug)",
+            "executable": "D:/Documents/GitHub/2022-2023-LightWeight/Software/IRsensor/.pio/build/seeed_xiao_rp2040/firmware.elf",
+            "projectEnvName": "seeed_xiao_rp2040",
+            "toolchainBinDir": "C:/Users/nkoji/.platformio/packages/toolchain-rp2040-earlephilhower/bin",
+            "internalConsoleOptions": "openOnSessionStart",
+            "svdPath": "C:/Users/nkoji/.platformio/platforms/raspberrypi/misc/svd/rp2040.svd"
+        },
+        {
+            "type": "platformio-debug",
+            "request": "launch",
+            "name": "PIO Debug (without uploading)",
+            "executable": "D:/Documents/GitHub/2022-2023-LightWeight/Software/IRsensor/.pio/build/seeed_xiao_rp2040/firmware.elf",
+            "projectEnvName": "seeed_xiao_rp2040",
+            "toolchainBinDir": "C:/Users/nkoji/.platformio/packages/toolchain-rp2040-earlephilhower/bin",
+            "internalConsoleOptions": "openOnSessionStart",
+            "svdPath": "C:/Users/nkoji/.platformio/platforms/raspberrypi/misc/svd/rp2040.svd",
+            "loadMode": "manual"
+        }
+    ]
+}
