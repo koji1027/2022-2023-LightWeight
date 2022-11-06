@@ -70,94 +70,82 @@ void setup1() {
 
 void loop() {
     bmx055.cal();
-    bmx055.show(0,0,0);
-    }
-
+    bmx055.show(0, 0, 0);
+}
 
 void loop1() {
     if (Serial1.available() > 0) {
         int recv_data = Serial1.read();
         if (recv_data == 255) {
-            bmx055.send();
             float battery_voltage = analogRead(A0);
             battery_voltage = battery_voltage * 3.3 / 1023.0;
             battery_voltage *= 4.0;
             bool battery_voltage_flag =
                 (battery_voltage < 10.0 && battery_voltage > 6.0);
-            Serial1.write(battery_voltage_flag);
-        }
-        if (recv_data == 254) {
+            bmx055.send(battery_voltage_flag);
+        } else if (recv_data == 254) {
             bmx055.gyro_reset();
         }
     }
-    /*for (int i = 0; i < 360; i++) {
+}
+
+    void display_init() {
+        display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
         display.clearDisplay();
-        //display.display();
-        display_ball(i, ball_dist);
-        display_line(line_flag);
-        display_other_info(current_mode);
         display.display();
-        //delay(1000);
-    }*/
-}
-
-void display_init() {
-    display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
-    display.clearDisplay();
-    display.display();
-    /*display.setTextSize(1);
-    display.setTextColor(WHITE);
-    display.drawCircle(32, 32, 12, WHITE);
-    display.writeLine(17, 32, 47, 32, WHITE);
-    display.writeLine(32, 17, 32, 47, WHITE);
-    display.display();*/
-}
-
-void display_ball(float ball_deg, int ball_dist) {
-    ball_deg = fmod(ball_deg, 360.0);
-    float ball_rad = ball_deg / 180.0 * PI;
-    display.clearDisplay();
-    display.setTextSize(1);
-    display.setTextColor(WHITE);
-    display.drawCircle(32, 32, 12, WHITE);
-    display.writeLine(17, 32, 47, 32, WHITE);
-    display.writeLine(32, 17, 32, 47, WHITE);
-    float ball_x = round(sin(ball_rad) * 27 + 32);
-    float ball_y = round(32 - cos(ball_rad) * 27);
-    display.fillCircle(ball_x, ball_y, 3, WHITE);
-    display.setTextSize(1);
-    display.setTextColor(WHITE);
-    display.setCursor(64, 0);
-    display.println("Ball:");
-    display.setCursor(80, 8);
-    float theta = round(ball_rad / PI * 100) / 100.0;
-    if (theta > 1) {
-        theta -= 2;
+        /*display.setTextSize(1);
+        display.setTextColor(WHITE);
+        display.drawCircle(32, 32, 12, WHITE);
+        display.writeLine(17, 32, 47, 32, WHITE);
+        display.writeLine(32, 17, 32, 47, WHITE);
+        display.display();*/
     }
-    display.print(theta);
-    display.println("PI");
-    display.setCursor(64, 16);
-    display.print("Dist:");
-    display.print(ball_dist);
-    display.println("cm");
-}
 
-void display_line(bool line_flag) {
-    display.setTextSize(1);
-    display.setTextColor(WHITE);
-    display.setCursor(64, 28);
-    if (line_flag) {
-        display.println("On Line");
-    } else {
-        display.println("No Line");
+    void display_ball(float ball_deg, int ball_dist) {
+        ball_deg = fmod(ball_deg, 360.0);
+        float ball_rad = ball_deg / 180.0 * PI;
+        display.clearDisplay();
+        display.setTextSize(1);
+        display.setTextColor(WHITE);
+        display.drawCircle(32, 32, 12, WHITE);
+        display.writeLine(17, 32, 47, 32, WHITE);
+        display.writeLine(32, 17, 32, 47, WHITE);
+        float ball_x = round(sin(ball_rad) * 27 + 32);
+        float ball_y = round(32 - cos(ball_rad) * 27);
+        display.fillCircle(ball_x, ball_y, 3, WHITE);
+        display.setTextSize(1);
+        display.setTextColor(WHITE);
+        display.setCursor(64, 0);
+        display.println("Ball:");
+        display.setCursor(80, 8);
+        float theta = round(ball_rad / PI * 100) / 100.0;
+        if (theta > 1) {
+            theta -= 2;
+        }
+        display.print(theta);
+        display.println("PI");
+        display.setCursor(64, 16);
+        display.print("Dist:");
+        display.print(ball_dist);
+        display.println("cm");
     }
-}
 
-void display_other_info(int current_mode) {
-    display.setCursor(64, 40);
-    display.print("Mode:");
-    display.println(mode[current_mode]);
-    display.setTextSize(1);
-    display.setCursor(64, 52);
-    display.print("MadeByKoji");
-}
+    void display_line(bool line_flag) {
+        display.setTextSize(1);
+        display.setTextColor(WHITE);
+        display.setCursor(64, 28);
+        if (line_flag) {
+            display.println("On Line");
+        } else {
+            display.println("No Line");
+        }
+    }
+
+    void display_other_info(int current_mode) {
+        display.setCursor(64, 40);
+        display.print("Mode:");
+        display.println(mode[current_mode]);
+        display.setTextSize(1);
+        display.setCursor(64, 52);
+        display.print("MadeByKoji");
+    }

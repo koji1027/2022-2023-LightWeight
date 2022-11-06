@@ -7,6 +7,7 @@
 #define DELTA_TIME 0.01
 #define MOTOR_POWER 255
 #define SQRT3 1.7320508075688772935274463415059
+#define MOTOR_POWER_BUFFSIZE 10
 
 class motor_control {
    public:
@@ -23,6 +24,7 @@ class motor_control {
     float dt, preTime;
     float P, I = 0, D;
     float deg_diff[2] = {0, 0};
+    float motor_power_buff[MOTOR_NUM][MOTOR_POWER_BUFFSIZE] = {{0}};
 };
 
 void motor_control::begin() {
@@ -44,11 +46,13 @@ void motor_control::cal(float ir_deg, int speed, float target_deg,
     target_deg = target_deg > 180 ? target_deg - 360 : target_deg;
     current_deg = fmod(current_deg, 360);
     current_deg = current_deg > 180 ? current_deg - 360 : current_deg;
-    /*if (ir_deg > 60 && ir_deg < 120) {
-        target_deg = ir_deg;
+    if (ir_deg > 60 && ir_deg < 120) {
+        speed *= 1.7;
+        speed = constrain(speed, 0, 200);
     } else if (ir_deg < -60 && ir_deg > -120) {
-        target_deg = ir_deg;
-    }*/
+        speed *= 1.7;
+        speed = constrain(speed, 0, 200);
+    }
     float power[MOTOR_NUM] = {0, 0, 0, 0};
     float vx = sin(radians(ir_deg - target_deg));
     float vy = cos(radians(ir_deg - target_deg));
@@ -80,7 +84,7 @@ void motor_control::cal(float ir_deg, int speed, float target_deg,
     }
     dt = (micros() - preTime) / 1000000;
     deg_diff[1] = target_deg - current_deg;
-    //Serial.println(deg_diff[1]);
+    // Serial.println(deg_diff[1]);
     deg_diff[1] = fmod(deg_diff[1], 360);
     deg_diff[1] = deg_diff[1] > 180 ? deg_diff[1] - 360 : deg_diff[1];
     P = Kp * deg_diff[1];
@@ -95,6 +99,19 @@ void motor_control::cal(float ir_deg, int speed, float target_deg,
     }
     for (int i = 0; i < MOTOR_NUM; i++) {
         power[i] = constrain(power[i], -200, 200);
+    }
+    for (int i = 0; i < MOTOR_NUM; i++) {
+        for (int j = 0; j < MOTOR_POWER_BUFFSIZE - 1; j++) {
+            motor_power_buff[i][j] = motor_power_buff[i][j + 1];
+        }
+        motor_power_buff[i][MOTOR_POWER_BUFFSIZE - 1] = power[i];
+    }
+    for (int i = 0; i < MOTOR_NUM; i++) {
+        power[i] = 0;
+        for (int j = 0; j < MOTOR_POWER_BUFFSIZE; j++) {
+            power[i] += motor_power_buff[i][j];
+        }
+        power[i] = power[i] / (float)MOTOR_POWER_BUFFSIZE;
     }
     move(power);
 }

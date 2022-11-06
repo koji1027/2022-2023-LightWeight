@@ -12,7 +12,7 @@ class Axis {
     void gyro_reset();
     void gyro();
     void cal();
-    void send();
+    void send(int voltage);
     void show(bool accl, bool gyro, bool mag);
     // void cal_angle_mag();
     // void mag();
@@ -111,7 +111,7 @@ void Axis::init() {
     Wire.write(0x16);  // No. of Repetitions for Z-Axis = 15
     Wire.endTransmission();
 
-    //calibration();
+    // calibration();
 
     // delay(500);
 }
@@ -197,7 +197,7 @@ void Axis::cal() {
 
 void Axis::gyro_reset() { gyro_degree = 0.00; }
 
-void Axis::send() {
+void Axis::send(int voltage) {
     int sign = 0;  // 0:正 1:負
     float _gyro_degree = gyro_degree;
     if (_gyro_degree < 0) {
@@ -208,6 +208,7 @@ void Axis::send() {
     Serial1.write(255);
     Serial1.write(sign);
     Serial1.write(strech_deg);
+    Serial1.write(voltage);
 }
 
 void Axis::calibration() {

@@ -11,10 +11,8 @@
 #define s2 4
 #define s3 5
 #define SIG_pin A1
-MovingAverage ave(100);
-
-int MaxPinVal = 0;
-int MaxPinIndex = 0;
+#define kLPF 0.2
+// MovingAverage ave(100);
 
 class IR {
    public:
@@ -25,6 +23,7 @@ class IR {
     void angle_read();
     void send();
     float angle_PI;
+    float now_radius;
 
    private:
     int muxChannel[16][4] = {
@@ -73,6 +72,7 @@ class IR {
     // float R = boal_radius + unit_radius;
     // int MAX_R = 1600;
     int IR_Cur[IR_NUM];
+    int IR_Cur_LPF[IR_NUM];
     float IR_IN[IR_NUM] = {
         0,           -PI / 8,     -PI * 2 / 8, -PI * 3 / 8,
         -PI * 4 / 8, -PI * 5 / 8, -PI * 6 / 8, -PI * 7 / 8,
@@ -84,9 +84,6 @@ class IR {
     float unit_sin[IR_NUM];
     float unit_cos[IR_NUM];
     // float unit_cor[IR_NUM];
-    float now_radius;
-    int maxPinVal = 0;
-    int maxPin = 0;
 };
 
 void IR::begin() {
@@ -108,37 +105,29 @@ void IR::IR_get() {
         if (IR_Cur[i] > 1000) {
             IR_Cur[i] = 0;
         }
+        IR_Cur_LPF[i] = kLPF * IR_Cur[i] + (1 - kLPF) * IR_Cur_LPF[i];
     }
-
-    // IR_Cur[15] = IR_CUR_MAX - analogRead(A0);
 
     int maxVal = 0;
     int maxIndex = 0;
     for (int i = 0; i < IR_NUM; i++) {
-        if (IR_Cur[i] > maxVal) {
-            maxVal = IR_Cur[i];
+        if (IR_Cur_LPF[i] > maxVal) {
+            maxVal = IR_Cur_LPF[i];
             maxIndex = i;
         }
     }
-    maxPinVal = maxVal;
-    MaxPinIndex = maxIndex;
     vector_XY = {0, 0};
-    /*int a = maxIndex + 16 - 3;
-    a = a % 16;
-    for (int i = 0; i < 7; i++)
-    {
-        int b = a + i;
-        b = b % 16;
-        vector_XY.x += IR_Cur[b] * unit_cos[b];
-        vector_XY.y += IR_Cur[b] * unit_sin[b];
-    }*/
     for (int i = 0; i < 16; i++) {
-        vector_XY.x += IR_Cur[i] * unit_cos[i];
-        vector_XY.y += IR_Cur[i] * unit_sin[i];
+        vector_XY.x += IR_Cur_LPF[i] * unit_cos[i];
+        vector_XY.y += IR_Cur_LPF[i] * unit_sin[i];
     }
-    vector_RT.radius = sqrt(pow(vector_XY.x, 2.0) + pow(vector_XY.y, 2.0));
-    now_radius = ave.updateData(vector_RT.radius);  // 半径
-
+    // vector_RT.radius = sqrt(pow(vector_XY.x, 2.0) + pow(vector_XY.y, 2.0));
+    //  now_radius = ave.updateData(vector_RT.radius);  // 半径
+    vector_RT.radius = -0.4679 * IR_Cur_LPF[maxIndex] + 387.35;
+    if (vector_RT.radius < 1) {
+        vector_RT.radius = 1;
+    }
+    now_radius = kLPF * vector_RT.radius + (1 - kLPF) * now_radius;
     vector_RT.angle = atan2(vector_XY.y, vector_XY.x);
     angle_PI = vector_RT.angle / PI;  // 角度
 }
@@ -146,33 +135,40 @@ void IR::IR_get() {
 void IR::IRpin_read() {
     for (int i = 0; i < IR_NUM; i++) {
         Serial.print(i);
-        Serial.print(": ");
-        Serial.println(IR_Cur[i]);
+        Serial.print("\t");
     }
-    Serial.println("ー－－－－");
+    Serial.println();
+    for (int i = 0; i < IR_NUM; i++) {
+        Serial.print(IR_Cur[i]);
+        Serial.print("\t");
+    }
+    Serial.println();
 }
 
 void IR::radius_read() {
-    Serial.print("radius:");
+    Serial.print("radius: ");
     Serial.println(now_radius);
 }
 
 void IR::angle_read() {
-    Serial.print("angle:");
+    Serial.print("angle: ");
     Serial.print(angle_PI);
     Serial.println("π");
 }
 
 void IR::send() {
-    float ir_deg = angle_PI * 180;
     int sign = 0;
-    if (ir_deg < 0) {
+    if (angle_PI < 0) {
         sign = 1;
-        ir_deg *= -1;
+        angle_PI *= -1;
     }
-    int strech_deg = round(ir_deg / 180.0 * 255.0);
+    int strech_deg = round(angle_PI * 255.0);
+    int ir_dist1 = now_radius / 10;
+    uint8_t ir_dist2 = (fmod(now_radius, 10)) * 10;
     Serial1.write(255);
     Serial1.write(sign);
     Serial1.write(strech_deg);
+    Serial1.write(ir_dist1);
+    Serial1.write(ir_dist2);
 }
 #endif
