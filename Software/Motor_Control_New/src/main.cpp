@@ -58,7 +58,9 @@ void loop() {
     // line_get();
     ir_get();
     Serial.println(ir_deg);
-    if (line_whole_flag) {
+    
+    /*
+        if (line_whole_flag) {
         Motor.cal(line_deg + 180, LINE_SPEED, 0, gyro_deg);
         Serial.println("Line On");
     } else {
@@ -81,8 +83,9 @@ void loop() {
             Motor.stop();
         }
     }
+    */
 
-    /*
+    
     if (line_whole_flag) {
         Motor.cal(line_deg + 180, LINE_SPEED, 0, gyro_deg);
         Serial.println("Line On");
@@ -91,8 +94,8 @@ void loop() {
             Motor.cal(0, 0, 0, gyro_deg);
         } else {
             if (ir_deg >= 0 && ir_deg < 15) {
-                Motor.cal(ir_deg, WRAPAROUND_SPEED, 0, gyro_deg);
-                Serial.println(ir_deg);
+                Motor.cal(ir_deg * 1.5, WRAPAROUND_SPEED, 0, gyro_deg);
+                Serial.println(ir_deg + 15);
             } else if (ir_deg >= 15 && ir_deg < 45) {
                 Motor.cal(120, WRAPAROUND_SPEED, 0, gyro_deg);
                 Serial.println("120");
@@ -118,12 +121,12 @@ void loop() {
                 Motor.cal(-120, WRAPAROUND_SPEED, 0, gyro_deg);
                 Serial.println("-120");
             } else if (ir_deg >= -15 && ir_deg < 0) {
-                Motor.cal(ir_deg, WRAPAROUND_SPEED, 0, gyro_deg);
+                Motor.cal(ir_deg * 1.5, WRAPAROUND_SPEED, 0, gyro_deg);
                 Serial.println("120");
             }
         }
     }
-    */
+    
 
     delay(10);
 }
@@ -141,7 +144,7 @@ void ir_get() {
         int ir_dist1 = Serial2.read();
         int ir_dist2 = Serial2.read();
         ir_deg = (float)_strech_ir_deg / 255.0 * 180.0;
-        if (sign == 1) {
+        if (sign == 0) {
             ir_deg *= -1.0;
         }
         ir_deg += gyro_deg;

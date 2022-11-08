@@ -27,6 +27,7 @@ void loop() {
     ir.IR_get();
     // ir.IRpin_read();
     // ir.radius_read();
+    Serial.println(ir.angle_PI*180);
 
     if (Serial1.available()) {
         int recv_data = Serial1.read();
