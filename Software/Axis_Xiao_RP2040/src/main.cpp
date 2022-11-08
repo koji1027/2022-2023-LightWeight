@@ -58,16 +58,23 @@ void setup() {
     Serial.begin(SERIAL_BAUD);
     Serial1.begin(SERIAL_BAUD);
     Wire.begin();
+    bmx055.init();
+    bmx055.show(false, false, false);
+}
+
+void setup1() {
+    Serial1.begin(SERIAL_BAUD);
     pinMode(A0, INPUT);
     analogReadResolution(10);
-    // display_init();
-    bmx055.init();
+    display_init();
 }
 
 void loop() {
     bmx055.cal();
-    bmx055.show(false, false, false);
+    bmx055.show(0, 0, 0);
+}
 
+void loop1() {
     if (Serial1.available() > 0) {
         int recv_data = Serial1.read();
         if (recv_data == 255) {
