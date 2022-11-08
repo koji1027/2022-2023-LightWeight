@@ -25,7 +25,7 @@ class Axis {
     float zgyro = 0.00;
     float xgyro_offset = 0.00;
     float ygyro_offset = 0.00;
-    float zgyro_offset = -2.81;
+    float zgyro_offset = 2.81;
     unsigned long long pre_time = 0;
     float pre_zgyro = 0.00;
     float gyro_degree = 0.00;
