@@ -58,8 +58,7 @@ void loop() {
     // line_get();
     ir_get();
     Serial.println(ir_deg);
-    
-    
+
     /*
         if (line_whole_flag) {
         Motor.cal(line_deg + 180, LINE_SPEED, 0, gyro_deg);
