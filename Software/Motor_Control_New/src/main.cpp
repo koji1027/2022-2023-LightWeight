@@ -49,11 +49,6 @@ void setup() {
 }
 
 void loop() {
-    while (1) {
-        gyro_get();
-        Motor.cal(90, 200, 0, gyro_deg);
-        delay(10);
-    }
     /*
     while (battery_voltage_flag) {
         Motor.stop();
