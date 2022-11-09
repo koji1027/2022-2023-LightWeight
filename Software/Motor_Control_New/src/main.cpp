@@ -49,6 +49,11 @@ void setup() {
 }
 
 void loop() {
+    while (1) {
+        gyro_get();
+        Motor.cal(90, 200, 0, gyro_deg);
+        delay(10);
+    }
     /*
     while (battery_voltage_flag) {
         Motor.stop();
@@ -58,8 +63,7 @@ void loop() {
     // line_get();
     ir_get();
     Serial.println(ir_deg);
-    
-    
+
     /*
         if (line_whole_flag) {
         Motor.cal(line_deg + 180, LINE_SPEED, 0, gyro_deg);
