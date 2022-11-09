@@ -57,7 +57,20 @@ void loop() {
     gyro_get();
     // line_get();
     ir_get();
+    ir_deg = ir_deg * -1;
     Serial.println(ir_deg);
+    /*while(1){
+        digitalWrite(3, HIGH);
+        digitalWrite(10, HIGH);
+        digitalWrite(12, HIGH);
+        digitalWrite(13, HIGH);
+        analogWrite(2, 166);
+        analogWrite(9, 346);
+        analogWrite(11, 346);
+        analogWrite(18, 166);
+        delay(100);
+    }*/
+     while(1){Motor.cal(0,100,0,0);}
 
     /*
         if (line_whole_flag) {
@@ -86,6 +99,7 @@ void loop() {
     */
 
     
+    
     if (line_whole_flag) {
         Motor.cal(line_deg + 180, LINE_SPEED, 0, gyro_deg);
         Serial.println("Line On");
@@ -96,7 +110,10 @@ void loop() {
             if (ir_deg >= 0 && ir_deg < 20) {
                 Motor.cal(ir_deg * 1.5, WRAPAROUND_SPEED, 0, gyro_deg);
                 Serial.println(ir_deg + 15);
-            } else if (ir_deg >= 20 && ir_deg < 45) {
+            } else if (ir_deg >= 20 && ir_deg < 30) {
+                Motor.cal(ir_deg * 3, WRAPAROUND_SPEED, 0, gyro_deg);
+                Serial.println("120");
+            } else if (ir_deg >= 30 && ir_deg < 45) {
                 Motor.cal(105, WRAPAROUND_SPEED, 0, gyro_deg);
                 Serial.println("120");
             } else if (ir_deg >= 45 && ir_deg < 90) {
@@ -120,11 +137,11 @@ void loop() {
             }*/ else if (ir_deg >= -90 && ir_deg < -45) {
                 Motor.cal(-120, WRAPAROUND_SPEED, 0, gyro_deg);
                 Serial.println("-150");
-            } else if (ir_deg >= -90 && ir_deg < -45) {
-                Motor.cal(-120, WRAPAROUND_SPEED, 0, gyro_deg);
-                Serial.println("-150");
-            } else if (ir_deg >= -45 && ir_deg < -20) {
+            } else if (ir_deg >= -45 && ir_deg < -30) {
                 Motor.cal(-105, WRAPAROUND_SPEED, 0, gyro_deg);
+                Serial.println("-150");
+            } else if (ir_deg >= -30 && ir_deg < -20) {
+                Motor.cal(ir_deg * 3, WRAPAROUND_SPEED, 0, gyro_deg);
                 Serial.println("-120");
             } else if (ir_deg >= -20 && ir_deg < 0) {
                 Motor.cal(ir_deg * 1.5, WRAPAROUND_SPEED, 0, gyro_deg);

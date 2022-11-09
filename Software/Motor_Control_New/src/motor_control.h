@@ -8,6 +8,7 @@
 #define MOTOR_POWER 255
 #define SQRT3 1.7320508075688772935274463415059
 #define MOTOR_POWER_BUFFSIZE 10
+#define BACK_PER_FRONT 1.1
 
 class motor_control {
    public:
@@ -70,14 +71,21 @@ void motor_control::cal(float ir_deg, int speed, float target_deg,
             power[i] = power[i] / max_power * speed;
         }
     }
+    
     power[0] -= 2;
     power[1] -= 2;
     power[2] -= 2;
     power[3] -= 1;
+    
     power[0] = constrain(power[0], -200, 200);
     power[1] = constrain(power[1], -200, 200);
     power[2] = constrain(power[2], -200, 200);
     power[3] = constrain(power[3], -200, 200);
+
+    /*
+    power[1] = power[1] * BACK_PER_FRONT;
+    power[2] = power[2] * BACK_PER_FRONT;
+    */
 
     if (current_deg < 3 && current_deg > -3) {
         I = 0;
