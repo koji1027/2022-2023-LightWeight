@@ -86,7 +86,7 @@ void loop() {
     }
     */
 
-    /*
+    
     if (line_whole_flag) {
         Motor.cal(line_deg + 180, LINE_SPEED, 0, gyro_deg);
         Serial.println("Line On");
@@ -103,10 +103,10 @@ void loop() {
             } else if (ir_deg >= 45 && ir_deg < 90) {
                 Motor.cal(120, WRAPAROUND_SPEED, 0, gyro_deg);
                 Serial.println("150");
-            }/* else if (ir_deg >= 45 && ir_deg < 90) {
+            } else if (ir_deg >= 45 && ir_deg < 90) {
                 Motor.cal(120, WRAPAROUND_SPEED, 0, gyro_deg);
                 Serial.println("150");
-            } else if (ir_deg >= 90 && ir_deg < 150) {
+            }/* else if (ir_deg >= 90 && ir_deg < 150) {
                 Motor.cal(180, WRAPAROUND_SPEED, 0, gyro_deg);
                 Serial.println("180");
             } else if (ir_deg >= 150 && ir_deg < 180) {
@@ -118,6 +118,9 @@ void loop() {
             } else if (ir_deg >= -150 && ir_deg < -90) {
                 Motor.cal(180, WRAPAROUND_SPEED, 0, gyro_deg);
                 Serial.println("180");
+            }*/ else if (ir_deg >= -90 && ir_deg < -45) {
+                Motor.cal(-120, WRAPAROUND_SPEED, 0, gyro_deg);
+                Serial.println("-150");
             } else if (ir_deg >= -90 && ir_deg < -45) {
                 Motor.cal(-120, WRAPAROUND_SPEED, 0, gyro_deg);
                 Serial.println("-150");
@@ -132,7 +135,7 @@ void loop() {
             }
         }
     }
-    */
+    
     delay(10);
 }
 
