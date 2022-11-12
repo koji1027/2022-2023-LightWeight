@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 #define MOTOR_NUM 4
-#define Kp 2.4
+#define Kp 2.2
 #define Ki 0.1
 #define Kd 0.15
 #define DELTA_TIME 0.01
@@ -18,7 +18,7 @@ class motor_control {
     // void posture_spin(float gyro_degree);
 
    private:
-    const int MOTOR_PIN[MOTOR_NUM][2] = {{3, 2}, {10, 9}, {12, 11}, {13, 18}};
+    const int MOTOR_PIN[MOTOR_NUM][2] = {{10, 9}, {3, 2}, {13, 18}, {12, 11}};
     const float MOTOR_POS[MOTOR_NUM][2] = {
         {-1, SQRT3}, {1, SQRT3}, {1, -SQRT3}, {-1, -SQRT3}};
     float dt, preTime;
@@ -40,25 +40,30 @@ void motor_control::begin() {
 
 void motor_control::cal(float ir_deg, int speed, float target_deg,
                         float current_deg) {
+    speed = constrain(speed, 0, 200);
     ir_deg = fmod(ir_deg, 360);
     ir_deg = ir_deg > 180 ? ir_deg - 360 : ir_deg;
     target_deg = fmod(target_deg, 360);
     target_deg = target_deg > 180 ? target_deg - 360 : target_deg;
     current_deg = fmod(current_deg, 360);
     current_deg = current_deg > 180 ? current_deg - 360 : current_deg;
-    if (ir_deg > 60 && ir_deg < 120) {
+    /*if (ir_deg > 60 && ir_deg < 120) {
         speed *= 1.7;
         speed = constrain(speed, 0, 200);
     } else if (ir_deg < -60 && ir_deg > -120) {
         speed *= 1.7;
         speed = constrain(speed, 0, 200);
-    }
+    }*/
     float power[MOTOR_NUM] = {0, 0, 0, 0};
     float vx = sin(radians(ir_deg - target_deg));
     float vy = cos(radians(ir_deg - target_deg));
     for (int i = 0; i < MOTOR_NUM; i++) {
         power[i] = vx * MOTOR_POS[i][0] + vy * MOTOR_POS[i][1];
     }
+    power[0] *= 1.0;
+    power[1] *= 0.6;
+    power[2] *= 0.6;
+    power[3] *= 1.0;
     float max_power = 0;
     for (int i = 0; i < MOTOR_NUM; i++) {
         if (abs(power[i]) > max_power) {
@@ -70,14 +75,6 @@ void motor_control::cal(float ir_deg, int speed, float target_deg,
             power[i] = power[i] / max_power * speed;
         }
     }
-    power[0] -= 2;
-    power[1] -= 2;
-    power[2] -= 2;
-    power[3] -= 1;
-    power[0] = constrain(power[0], -200, 200);
-    power[1] = constrain(power[1], -200, 200);
-    power[2] = constrain(power[2], -200, 200);
-    power[3] = constrain(power[3], -200, 200);
 
     if (current_deg < 3 && current_deg > -3) {
         I = 0;
@@ -93,12 +90,22 @@ void motor_control::cal(float ir_deg, int speed, float target_deg,
     deg_diff[0] = deg_diff[1];
     float vel_theta = P + I + D;
     preTime = micros();
-    vel_theta = constrain(vel_theta, -200, 200);
     for (int i = 0; i < MOTOR_NUM; i++) {
         power[i] -= vel_theta;
     }
-    for (int i = 0; i < MOTOR_NUM; i++) {
-        power[i] = constrain(power[i], -200, 200);
+    if (speed != 0) {
+        if (abs(power[0]) > 200 || abs(power[1]) > 200 || abs(power[2]) > 200 ||
+            abs(power[3]) > 200) {
+            float max_power = 0;
+            for (int i = 0; i < MOTOR_NUM; i++) {
+                if (abs(power[i]) > max_power) {
+                    max_power = abs(power[i]);
+                }
+            }
+            for (int i = 0; i < MOTOR_NUM; i++) {
+                power[i] = power[i] / max_power * 200;
+            }
+        }
     }
     for (int i = 0; i < MOTOR_NUM; i++) {
         for (int j = 0; j < MOTOR_POWER_BUFFSIZE - 1; j++) {

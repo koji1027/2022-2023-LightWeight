@@ -57,35 +57,6 @@ void loop() {
     gyro_get();
     // line_get();
     ir_get();
-    Serial.println(ir_deg);
-
-    /*
-        if (line_whole_flag) {
-        Motor.cal(line_deg + 180, LINE_SPEED, 0, gyro_deg);
-        Serial.println("Line On");
-    } else {
-        float Dcos = ir_dist * cos(ir_deg * PI / 180.0);
-        if (Dcos >= 30) {
-            float x = ir_dist * sin(ir_deg * PI / 180.0);
-            float y = ir_dist * cos(ir_deg * PI / 180.0) - 30;
-            float deg = 90 - atan2(y, x) * 180.0 / PI;
-            deg = fmod(deg, 360);
-            deg = deg > 180 ? deg - 360 : deg;
-            Motor.cal(deg, TRACK_SPEED, 0, gyro_deg);
-        } else if (Dcos < 30 && abs(ir_deg) > 20) {
-            float x = ir_dist * sin(ir_deg * PI / 180.0);
-            float y = ir_dist * cos(ir_deg * PI / 180.0) - 30;
-            float deg = 90 - atan2(y, x) * 180.0 / PI;
-            deg = fmod(deg, 360);
-            deg = deg > 180 ? deg - 360 : deg;
-            Motor.cal(deg, TRACK_SPEED, 0, gyro_deg);
-        } else {
-            Motor.stop();
-        }
-    }
-    */
-
-    /*
     if (line_whole_flag) {
         Motor.cal(line_deg + 180, LINE_SPEED, 0, gyro_deg);
         Serial.println("Line On");
@@ -95,44 +66,81 @@ void loop() {
         } else {
             if (ir_deg >= 0 && ir_deg < 20) {
                 Motor.cal(ir_deg * 1.5, WRAPAROUND_SPEED, 0, gyro_deg);
-                Serial.println(ir_deg + 15);
             } else if (ir_deg >= 20 && ir_deg < 45) {
                 Motor.cal(105, WRAPAROUND_SPEED, 0, gyro_deg);
-                Serial.println("120");
             } else if (ir_deg >= 45 && ir_deg < 90) {
                 Motor.cal(120, WRAPAROUND_SPEED, 0, gyro_deg);
-                Serial.println("150");
-            }/* else if (ir_deg >= 45 && ir_deg < 90) {
-                Motor.cal(120, WRAPAROUND_SPEED, 0, gyro_deg);
-                Serial.println("150");
             } else if (ir_deg >= 90 && ir_deg < 150) {
                 Motor.cal(180, WRAPAROUND_SPEED, 0, gyro_deg);
                 Serial.println("180");
             } else if (ir_deg >= 150 && ir_deg < 180) {
                 Motor.cal(-150, WRAPAROUND_SPEED, 0, gyro_deg);
-                Serial.println("-150");
             } else if (ir_deg >= -180 && ir_deg < -150) {
                 Motor.cal(150, WRAPAROUND_SPEED, 0, gyro_deg);
-                Serial.println("150");
             } else if (ir_deg >= -150 && ir_deg < -90) {
                 Motor.cal(180, WRAPAROUND_SPEED, 0, gyro_deg);
-                Serial.println("180");
             } else if (ir_deg >= -90 && ir_deg < -45) {
                 Motor.cal(-120, WRAPAROUND_SPEED, 0, gyro_deg);
-                Serial.println("-150");
             } else if (ir_deg >= -45 && ir_deg < -20) {
                 Motor.cal(-105, WRAPAROUND_SPEED, 0, gyro_deg);
-                Serial.println("-120");
             } else if (ir_deg >= -20 && ir_deg < 0) {
                 Motor.cal(ir_deg * 1.5, WRAPAROUND_SPEED, 0, gyro_deg);
-                Serial.println("120");
-            } else{
-                Motor.cal(0,0,0,0);
+            } else {
+                Motor.cal(0, 0, 0, 0);
             }
         }
+        delay(5);
+        /*
+       if (line_whole_flag) {
+           Motor.cal(line_deg + 180, LINE_SPEED, 0, gyro_deg);
+           Serial.println("Line On");
+       } else {
+           float Dcos = ir_dist * cos(ir_deg * PI / 180.0);
+           if (Dcos >= 30) {
+               float x = ir_dist * sin(ir_deg * PI / 180.0);
+               float y = ir_dist * cos(ir_deg * PI / 180.0) - 30;
+               float deg = 90 - atan2(y, x) * 180.0 / PI;
+               deg = fmod(deg, 360);
+               deg = deg > 180 ? deg - 360 : deg;
+               Motor.cal(deg, TRACK_SPEED, 0, gyro_deg);
+           } else if (Dcos < 30 && abs(ir_deg) > 20) {
+               float x = ir_dist * sin(ir_deg * PI / 180.0);
+               float y = ir_dist * cos(ir_deg * PI / 180.0) - 30;
+               float deg = 90 - atan2(y, x) * 180.0 / PI;
+               deg = fmod(deg, 360);
+               deg = deg > 180 ? deg - 360 : deg;
+               Motor.cal(deg, TRACK_SPEED, 0, gyro_deg);
+           } else {
+               Motor.stop();
+           }
+       }
+       */
+        /*
+         if (line_whole_flag) {
+             Motor.cal(line_deg + 180, LINE_SPEED, 0, gyro_deg);
+             Serial.println("Line On");
+         } else {
+             float Dcos = ir_dist * cos(ir_deg * PI / 180.0);
+             if (Dcos >= 30) {
+                 float x = ir_dist * sin(ir_deg * PI / 180.0);
+                 float y = ir_dist * cos(ir_deg * PI / 180.0) - 30;
+                 float deg = 90 - atan2(y, x) * 180.0 / PI;
+                 deg = fmod(deg, 360);
+                 deg = deg > 180 ? deg - 360 : deg;
+                 Motor.cal(deg, TRACK_SPEED, 0, gyro_deg);
+             } else if (Dcos < 30 && abs(ir_deg) > 20) {
+                 float x = ir_dist * sin(ir_deg * PI / 180.0);
+                 float y = ir_dist * cos(ir_deg * PI / 180.0) - 30;
+                 float deg = 90 - atan2(y, x) * 180.0 / PI;
+                 deg = fmod(deg, 360);
+                 deg = deg > 180 ? deg - 360 : deg;
+                 Motor.cal(deg, TRACK_SPEED, 0, gyro_deg);
+             } else {
+                 Motor.stop();
+             }
+         }
+         */
     }
-    */
-    delay(10);
 }
 
 void ir_get() {
