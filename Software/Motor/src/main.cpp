@@ -5,9 +5,19 @@
 #define LINE_SPEED 100
 #define WRAPAROUND_SPEED 100
 
+motor Motor;
+
 void ir_get();
 void gyro_get();
 void line_get();
+
+float gyro_rad = 0.0;
+float ir_rad = 0.0;
+float ir_dist = 0.0;
+bool line_whole_flag = false;
+float line_rad = 0.0;
+float line_x[32] = {0.0};
+float line_y[32] = {0.0};
 
 const float LINE_ANGLE[32] = {
     1.0 * PI / 16.0,   2.0 * PI / 16.0,   3.0 * PI / 16.0,   4.0 * PI / 16.0,
@@ -20,44 +30,38 @@ const float LINE_ANGLE[32] = {
     -3.0 * PI / 16.0,  -2.0 * PI / 16.0,  -1.0 * PI / 16.0,  0.0 * PI / 16.0,
 };
 
-bool battery_voltage_flag = false;
-int line_flag[32];
-bool line_whole_flag;
-float line_deg = 0;
-float ir_deg = 0;
-float ir_dist = 0;
-float gyro_deg = 0;
-float line_x[32];
-float line_y[32];
-
-motor_control Motor;
-
 void setup() {
     // put your setup code here, to run once:
-    // Serial.begin(115200);
     Serial.begin(115200);
     Serial2.begin(115200);
     Serial3.begin(115200);
     Serial4.begin(115200);
     Serial5.begin(115200);
-    Motor.begin();
-    delay(1500);
+    Motor.init();
     for (int i = 0; i < 32; i++) {
         line_x[i] = sin(LINE_ANGLE[i]);
         line_y[i] = cos(LINE_ANGLE[i]);
     }
+    delay(2000);
 }
 
 void loop() {
-    /*
-    while (battery_voltage_flag) {
-        Motor.stop();
-        Serial.println("Please charge the battery");
-    }*/
+    // put your main code here, to run repeatedly:
     gyro_get();
-    // line_get();
     ir_get();
-    Motor.cal(0, 100, 0, gyro_deg);
+    line_get();
+    if (line_whole_flag) {
+        Serial.println(line_rad);
+        if ((line_rad > -PI / 3.0 && line_rad < PI / 3.0) ||
+            line_rad > 2.0 * PI / 3.0 || line_rad < -2.0 * PI / 3.0) {
+            Motor.cal(line_rad + PI, LINE_SPEED, 0, gyro_rad);
+        } else {
+            Motor.cal(line_rad + PI, LINE_SPEED, 0, gyro_rad);
+            delay(100);
+        }
+    } else {
+        Motor.cal(ir_rad, TRACK_SPEED, 0, gyro_rad);
+    }
     /*if (line_whole_flag) {
         Motor.cal(line_deg + 180, LINE_SPEED, 0, gyro_deg);
         Serial.println("Line On");
@@ -89,79 +93,8 @@ void loop() {
             } else {
                 Motor.cal(0, 0, 0, 0);
             }
-        }
-        delay(5);*/
-    /*
-   if (line_whole_flag) {
-       Motor.cal(line_deg + 180, LINE_SPEED, 0, gyro_deg);
-       Serial.println("Line On");
-   } else {
-       float Dcos = ir_dist * cos(ir_deg * PI / 180.0);
-       if (Dcos >= 30) {
-           float x = ir_dist * sin(ir_deg * PI / 180.0);
-           float y = ir_dist * cos(ir_deg * PI / 180.0) - 30;
-           float deg = 90 - atan2(y, x) * 180.0 / PI;
-           deg = fmod(deg, 360);
-           deg = deg > 180 ? deg - 360 : deg;
-           Motor.cal(deg, TRACK_SPEED, 0, gyro_deg);
-       } else if (Dcos < 30 && abs(ir_deg) > 20) {
-           float x = ir_dist * sin(ir_deg * PI / 180.0);
-           float y = ir_dist * cos(ir_deg * PI / 180.0) - 30;
-           float deg = 90 - atan2(y, x) * 180.0 / PI;
-           deg = fmod(deg, 360);
-           deg = deg > 180 ? deg - 360 : deg;
-           Motor.cal(deg, TRACK_SPEED, 0, gyro_deg);
-       } else {
-           Motor.stop();
-       }
-   }
-   */
-    /*
-     if (line_whole_flag) {
-         Motor.cal(line_deg + 180, LINE_SPEED, 0, gyro_deg);
-         Serial.println("Line On");
-     } else {
-         float Dcos = ir_dist * cos(ir_deg * PI / 180.0);
-         if (Dcos >= 30) {
-             float x = ir_dist * sin(ir_deg * PI / 180.0);
-             float y = ir_dist * cos(ir_deg * PI / 180.0) - 30;
-             float deg = 90 - atan2(y, x) * 180.0 / PI;
-             deg = fmod(deg, 360);
-             deg = deg > 180 ? deg - 360 : deg;
-             Motor.cal(deg, TRACK_SPEED, 0, gyro_deg);
-         } else if (Dcos < 30 && abs(ir_deg) > 20) {
-             float x = ir_dist * sin(ir_deg * PI / 180.0);
-             float y = ir_dist * cos(ir_deg * PI / 180.0) - 30;
-             float deg = 90 - atan2(y, x) * 180.0 / PI;
-             deg = fmod(deg, 360);
-             deg = deg > 180 ? deg - 360 : deg;
-             Motor.cal(deg, TRACK_SPEED, 0, gyro_deg);
-         } else {
-             Motor.stop();
-         }
-     }
-     */
-}
-
-void ir_get() {
-    Serial2.write(255);
-    while (!Serial2.available()) {
-    }
-    int recv_data = Serial2.read();
-    if (recv_data == 255) {
-        while (!Serial2.available()) {
-        }
-        int sign = Serial2.read();
-        int _strech_ir_deg = Serial2.read();
-        int ir_dist1 = Serial2.read();
-        int ir_dist2 = Serial2.read();
-        ir_deg = (float)_strech_ir_deg / 255.0 * 180.0;
-        if (sign == 0) {
-            ir_deg *= -1.0;
-        }
-        ir_deg += gyro_deg;
-        ir_dist = (float)(ir_dist1 * 10 + (float)ir_dist2 / 10.0);
-    }
+        }*/
+    delay(10);
 }
 
 void gyro_get() {
@@ -173,16 +106,38 @@ void gyro_get() {
         while (!Serial3.available()) {
         }
         int sign = Serial3.read();
-        int strech_deg = Serial3.read();
+        int strech_rad = Serial3.read();
         int battery_voltage_flag = Serial3.read();
-        gyro_deg = (float)strech_deg / 255.0 * 180.0;
+        gyro_rad = (float)strech_rad / 255.0 * PI;
         if (sign == 0) {
-            gyro_deg *= -1.0;
+            gyro_rad *= -1.0;
         }
     }
 }
 
+void ir_get() {
+    Serial2.write(255);
+    while (!Serial2.available()) {
+    }
+    int recv_data = Serial2.read();
+    if (recv_data == 255) {
+        while (!Serial2.available()) {
+        }
+        int sign = Serial2.read();
+        int _strech_ir_rad = Serial2.read();
+        int ir_dist1 = Serial2.read();
+        int ir_dist2 = Serial2.read();
+        ir_rad = (float)_strech_ir_rad / 255.0 * PI;
+        if (sign == 0) {
+            ir_rad *= -1.0;
+        }
+        ir_rad += gyro_rad;
+        ir_dist = (float)(ir_dist1 * 10 + (float)ir_dist2 / 10.0);
+    }
+}
+
 void line_get() {
+    bool line_flag[32] = {false};
     line_whole_flag = false;
     for (int i = 0; i < 32; i++) {
         line_flag[i] = 0;
@@ -285,9 +240,7 @@ void line_get() {
             line_x_sum += line_x[i] * line_flag[i];
             line_y_sum += line_y[i] * line_flag[i];
         }
-        float line_rad = atan2(line_x_sum, line_y_sum);
-        line_rad = fmod(line_rad, PI);
-        line_deg = -degrees(line_rad);
+        line_rad = atan2(line_x_sum, line_y_sum);
         // Serial.println(line_deg);
     }
     // else{Serial.println("Yeah");}
