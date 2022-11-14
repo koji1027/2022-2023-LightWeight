@@ -1,9 +1,9 @@
 #include <Arduino.h>
 #include <motor_control.h>
 
-#define TRACK_SPEED 100
-#define LINE_SPEED 100
-#define WRAPAROUND_SPEED 100
+#define TRACK_SPEED 0
+#define LINE_SPEED 0
+#define WRAPAROUND_SPEED 0
 
 motor Motor;
 
@@ -47,54 +47,49 @@ void setup() {
 
 void loop() {
     // put your main code here, to run repeatedly:
-    gyro_get();
-    ir_get();
-    line_get();
-    if (line_whole_flag) {
-        Serial.println(line_rad);
-        if ((line_rad > -PI / 3.0 && line_rad < PI / 3.0) ||
-            line_rad > 2.0 * PI / 3.0 || line_rad < -2.0 * PI / 3.0) {
-            Motor.cal(line_rad + PI, LINE_SPEED, 0, gyro_rad);
-        } else {
-            Motor.cal(line_rad + PI, LINE_SPEED, 0, gyro_rad);
-            delay(100);
-        }
-    } else {
-        Motor.cal(ir_rad, TRACK_SPEED, 0, gyro_rad);
-    }
-    /*if (line_whole_flag) {
-        Motor.cal(line_deg + 180, LINE_SPEED, 0, gyro_deg);
-        Serial.println("Line On");
-    } else {
-        if (gyro_deg > 90 || gyro_deg < -90) {
-            Motor.cal(0, 0, 0, gyro_deg);
-        } else {
-            if (ir_deg >= 0 && ir_deg < 20) {
-                Motor.cal(ir_deg * 1.5, WRAPAROUND_SPEED, 0, gyro_deg);
-            } else if (ir_deg >= 20 && ir_deg < 45) {
-                Motor.cal(105, WRAPAROUND_SPEED, 0, gyro_deg);
-            } else if (ir_deg >= 45 && ir_deg < 90) {
-                Motor.cal(120, WRAPAROUND_SPEED, 0, gyro_deg);
-            } else if (ir_deg >= 90 && ir_deg < 150) {
-                Motor.cal(180, WRAPAROUND_SPEED, 0, gyro_deg);
-                Serial.println("180");
-            } else if (ir_deg >= 150 && ir_deg < 180) {
-                Motor.cal(-150, WRAPAROUND_SPEED, 0, gyro_deg);
-            } else if (ir_deg >= -180 && ir_deg < -150) {
-                Motor.cal(150, WRAPAROUND_SPEED, 0, gyro_deg);
-            } else if (ir_deg >= -150 && ir_deg < -90) {
-                Motor.cal(180, WRAPAROUND_SPEED, 0, gyro_deg);
-            } else if (ir_deg >= -90 && ir_deg < -45) {
-                Motor.cal(-120, WRAPAROUND_SPEED, 0, gyro_deg);
-            } else if (ir_deg >= -45 && ir_deg < -20) {
-                Motor.cal(-105, WRAPAROUND_SPEED, 0, gyro_deg);
-            } else if (ir_deg >= -20 && ir_deg < 0) {
-                Motor.cal(ir_deg * 1.5, WRAPAROUND_SPEED, 0, gyro_deg);
+    while (1) {
+        gyro_get();
+        ir_get();
+        line_get();
+        if (line_whole_flag) {
+            if ((line_rad > -PI / 3.0 && line_rad < PI / 3.0) ||
+                line_rad > 2.0 * PI / 3.0 || line_rad < -2.0 * PI / 3.0) {
+                Motor.cal(line_rad + PI, LINE_SPEED, 0, 0);
             } else {
-                Motor.cal(0, 0, 0, 0);
+                Motor.cal(line_rad + PI, LINE_SPEED, 0, 0);
+                delay(90);
             }
-        }*/
-    delay(10);
+        } else {
+            if (gyro_rad > PI / 2.0 || gyro_rad < -PI / 2.0) {
+                Motor.cal(0, 0, 0, gyro_rad);
+            } else {
+                if (ir_rad >= 0 && ir_rad < radians(20)) {
+                    Motor.cal(ir_rad * 1.5, WRAPAROUND_SPEED, 0, gyro_rad);
+                } else if (ir_rad >= radians(20) && ir_rad < radians(45)) {
+                    Motor.cal(radians(105), WRAPAROUND_SPEED, 0, gyro_rad);
+                } else if (ir_rad >= radians(45) && ir_rad < radians(90)) {
+                    Motor.cal(radians(120), WRAPAROUND_SPEED, 0, gyro_rad);
+                } else if (ir_rad >= radians(90) && ir_rad < radians(150)) {
+                    Motor.cal(radians(180), WRAPAROUND_SPEED, 0, gyro_rad);
+                } else if (ir_rad >= radians(150) && ir_rad < radians(180)) {
+                    Motor.cal(-radians(150), WRAPAROUND_SPEED, 0, gyro_rad);
+                } else if (ir_rad >= -radians(180) && ir_rad < -radians(150)) {
+                    Motor.cal(radians(150), WRAPAROUND_SPEED, 0, gyro_rad);
+                } else if (ir_rad >= -radians(150) && ir_rad < -radians(90)) {
+                    Motor.cal(radians(180), WRAPAROUND_SPEED, 0, gyro_rad);
+                } else if (ir_rad >= -radians(90) && ir_rad < -radians(45)) {
+                    Motor.cal(-radians(120), WRAPAROUND_SPEED, 0, gyro_rad);
+                } else if (ir_rad >= -radians(45) && ir_rad < -radians(20)) {
+                    Motor.cal(-radians(105), WRAPAROUND_SPEED, 0, gyro_rad);
+                } else if (ir_rad >= -radians(20) && ir_rad < 0) {
+                    Motor.cal(ir_rad * 1.5, WRAPAROUND_SPEED, 0, gyro_rad);
+                } else {
+                    Motor.cal(0, 0, 0, 0);
+                }
+            }
+            delay(10);
+        }
+    }
 }
 
 void gyro_get() {

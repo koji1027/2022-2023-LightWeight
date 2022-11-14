@@ -6,6 +6,7 @@
 #define Ki 150
 #define Kd 0.00005
 #define MAX_PWM 200
+#define LPF 0.2
 
 class motor {
    private:
@@ -15,6 +16,7 @@ class motor {
     float I = 0;
     float pre_diff = 0;
     unsigned long long pre_time = 0;
+    float pre_power[MOTOR_NUM] = {0, 0, 0, 0};
 
    public:
     void init();
@@ -77,6 +79,10 @@ void motor::cal(float dir, int duty, float target_dir, float current_dir) {
     for (int i = 0; i < MOTOR_NUM; i++) {
         power[i] -= pid;
         power[i] = constrain(power[i], -MAX_PWM, MAX_PWM);
+    }
+    for (int i = 0; i < MOTOR_NUM; i++) {
+        power[i] = pre_power[i] * LPF + power[i] * (1.0 - LPF);
+        pre_power[i] = power[i];
     }
     move(power);
 }
