@@ -1,9 +1,9 @@
 #include <Arduino.h>
 
 #define MOTOR_NUM 4
-#define Kp 2.2
+#define Kp 1.8
 #define Ki 0.1
-#define Kd 0.15
+#define Kd 0.02
 #define DELTA_TIME 0.01
 #define MOTOR_POWER 255
 #define SQRT3 1.7320508075688772935274463415059
