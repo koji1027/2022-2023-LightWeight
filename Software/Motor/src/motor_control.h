@@ -37,7 +37,7 @@ void motor::init() {
 }
 
 void motor::cal(float dir, int duty, float target_dir, float current_dir) {
-    dir = fmod(dir, PI * 2.0) - PI;
+    dir = fmod(dir - target_dir, PI * 2.0) - PI;
     duty = constrain(duty, 0, MAX_PWM);
     target_dir = fmod(target_dir, PI * 2.0) - PI;
     current_dir = fmod(current_dir, PI * 2.0) - PI;

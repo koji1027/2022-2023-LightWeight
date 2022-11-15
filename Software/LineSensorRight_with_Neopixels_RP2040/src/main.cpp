@@ -1,4 +1,4 @@
-//Serial5
+// Serial5
 #include <Adafruit_NeoPixel.h>
 #include <Arduino.h>
 
@@ -113,7 +113,7 @@ void loop() {
     }
     Serial.println();
     */
-    //delay(100);
+    // delay(100);
 
     for (int i = 0; i < SENSOR_NUM; i++) {
         if (line_flag[i] == 1) {
@@ -128,6 +128,26 @@ void setup1() {
     pinMode(LED_PIN, OUTPUT);
     digitalWrite(LED_PIN, HIGH);
     pixels.begin();
+    for (int i = 0; i < NEOPIXEL_NUM; i++) {
+        for (int j = 0; j < i + 1; j++) {
+            pixels.setPixelColor(j, pixels.Color(255, 255, 255));
+        }
+        pixels.setBrightness(150);
+        pixels.show();
+        delay(30);
+    }
+    delay(500);
+    for (int i = 0; i < NEOPIXEL_NUM; i++) {
+        pixels.setPixelColor(i, pixels.Color(0, 0, 255));
+    }
+    pixels.setBrightness(150);
+    pixels.show();
+    delay(500);
+    for (int i = 0; i < NEOPIXEL_NUM; i++) {
+        pixels.setPixelColor(i, pixels.Color(0, 255, 0));
+    }
+    pixels.setBrightness(150);
+    pixels.show();
     pixels_init();
 }
 
@@ -161,7 +181,7 @@ void loop1() {
         send_data[1] += line_flag[13] * 32;
         send_data[1] += line_flag[14] * 64;
         send_data[1] += line_flag[15] * 128;
-        
+
         Serial.print(send_data[0]);
         Serial.print("\t");
         Serial.println(send_data[1]);
@@ -174,7 +194,7 @@ void loop1() {
     } else if (int(recv_data) == 252) {
         Serial1.write(byte(255));
         for (int i = 0; i < SENSOR_NUM; i++) {
-            Serial1.write(sensor_value[i]/4);
+            Serial1.write(sensor_value[i] / 4);
         }
     } else if (int(recv_data) == 251) {
         Serial1.write(byte(255));
@@ -186,9 +206,7 @@ void loop1() {
 
 void pixels_init() {
     for (int i = 0; i < NEOPIXEL_NUM; i++) {
-        pixels.setPixelColor(
-            i, pixels.Color(neopixel_coloer[0], neopixel_coloer[1],
-                            neopixel_coloer[2]));
+        pixels.setPixelColor(i, pixels.Color(255, 0, 0));
     }
     pixels.setBrightness(150);
     pixels.show();
