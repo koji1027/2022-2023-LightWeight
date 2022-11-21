@@ -128,7 +128,6 @@ void loop() {
             line_y += sensor_y[i] * line_flag[i];
         }
     }
-    pixels_init();
     if (Serial1.available()) {
         byte recv_data = Serial1.read();
         if (int(recv_data) == 255) {
@@ -180,15 +179,43 @@ void loop() {
     }
 }
 
-void setup1() {}
-
-void loop1() {}
-
 void pixels_init() {
+    pixels.setBrightness(255);
     for (int i = 0; i < NEOPIXEL_NUM; i++) {
-        pixels.setPixelColor(
-            i, pixels.Color(neopixel_coloer[0], neopixel_coloer[1],
-                            neopixel_coloer[2]));
+        for (int j = 0; j < i + 1; j++) {
+            pixels.setPixelColor(j, pixels.Color(255, 255, 255));
+        }
+        pixels.show();
+        delay(100);
+    }
+    delay(100);
+    for (int k = 254; k > 0; k++) {
+        for (int i = 0; i < NEOPIXEL_NUM; i++) {
+            for (int j = 0; j < i + 1; j++) {
+                pixels.setPixelColor(j, pixels.Color(255, k, 255));
+            }
+            for (int j = i; j < NEOPIXEL_NUM; j++) {
+                pixels.setPixelColor(j, pixels.Color(255, k + 1, 255));
+            }
+            pixels.show();
+            delay(10);
+        }
+        delay(10);
+    }
+    delay(1000);
+    for (int i = 0; i < NEOPIXEL_NUM; i++) {
+        for (int j = 0; j < i + 1; j++) {
+            pixels.setPixelColor(j, pixels.Color(255, 0, 0));
+        }
+        for (int j = i; j < NEOPIXEL_NUM; j++) {
+            pixels.setPixelColor(j, pixels.Color(255, 255, 0));
+        }
+        pixels.show();
+        delay(200);
+    }
+    delay(1000);
+    for (int i = 0; i < NEOPIXEL_NUM; i++) {
+        pixels.setPixelColor(i, pixels.Color(255, 0, 0));
     }
     pixels.setBrightness(150);
     pixels.show();
