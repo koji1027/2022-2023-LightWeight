@@ -40,7 +40,7 @@ void setup()
 void loop()
 {
   // put your main code here, to run repeatedly:
-  uint8_t power = 255;
+  uint8_t power = 132;
   double theta = 0;
   /*while (true)
   {
@@ -62,9 +62,7 @@ void loop()
     analogWrite(11, 120);
     analogWrite(13, 120);
   }*/
-  while(1){
-    motor_control(theta, power);
-    theta++;
-    theta = theta
-  }
+
+  motor_control(theta, power);
+
 }
