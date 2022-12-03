@@ -1,0 +1,60 @@
+//
+// !!! WARNING !!! AUTO-GENERATED FILE!
+// PLEASE DO NOT MODIFY IT AND USE "platformio.ini":
+// https://docs.platformio.org/page/projectconf/section_env_build.html#build-flags
+//
+{
+    "configurations": [
+        {
+            "name": "PlatformIO",
+            "includePath": [
+                "D:/Documents/GitHub/2022-2023-LightWeight/Software/OLED Display/include",
+                "D:/Documents/GitHub/2022-2023-LightWeight/Software/OLED Display/src",
+                "C:/Users/nkoji/.platformio/packages/framework-arduino-avr/libraries/SPI/src",
+                "C:/Users/nkoji/.platformio/packages/framework-arduino-avr/libraries/Wire/src",
+                "C:/Users/nkoji/.platformio/packages/framework-arduino-avr/cores/arduino",
+                "C:/Users/nkoji/.platformio/packages/framework-arduino-avr/variants/micro",
+                "C:/Users/nkoji/.platformio/packages/framework-arduino-avr/libraries/EEPROM/src",
+                "C:/Users/nkoji/.platformio/packages/framework-arduino-avr/libraries/HID/src",
+                "C:/Users/nkoji/.platformio/packages/framework-arduino-avr/libraries/SoftwareSerial/src",
+                ""
+            ],
+            "browse": {
+                "limitSymbolsToIncludedHeaders": true,
+                "path": [
+                    "D:/Documents/GitHub/2022-2023-LightWeight/Software/OLED Display/include",
+                    "D:/Documents/GitHub/2022-2023-LightWeight/Software/OLED Display/src",
+                    "C:/Users/nkoji/.platformio/packages/framework-arduino-avr/libraries/SPI/src",
+                    "C:/Users/nkoji/.platformio/packages/framework-arduino-avr/libraries/Wire/src",
+                    "C:/Users/nkoji/.platformio/packages/framework-arduino-avr/cores/arduino",
+                    "C:/Users/nkoji/.platformio/packages/framework-arduino-avr/variants/micro",
+                    "C:/Users/nkoji/.platformio/packages/framework-arduino-avr/libraries/EEPROM/src",
+                    "C:/Users/nkoji/.platformio/packages/framework-arduino-avr/libraries/HID/src",
+                    "C:/Users/nkoji/.platformio/packages/framework-arduino-avr/libraries/SoftwareSerial/src",
+                    ""
+                ]
+            },
+            "defines": [
+                "PLATFORMIO=60104",
+                "ARDUINO_AVR_MICRO",
+                "F_CPU=16000000L",
+                "ARDUINO_ARCH_AVR",
+                "ARDUINO=10808",
+                "USB_VID=0x2341",
+                "USB_PID=0x8037",
+                "USB_PRODUCT=\"Arduino Micro\"",
+                "USB_MANUFACTURER=\"Arduino\"",
+                "__AVR_ATmega32U4__",
+                ""
+            ],
+            "cStandard": "c11",
+            "cppStandard": "c++11",
+            "compilerPath": "C:/Users/nkoji/.platformio/packages/toolchain-atmelavr/bin/avr-gcc.exe",
+            "compilerArgs": [
+                "-mmcu=atmega32u4",
+                ""
+            ]
+        }
+    ],
+    "version": 4
+}
