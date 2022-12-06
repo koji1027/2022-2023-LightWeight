@@ -1,4 +1,5 @@
-#include <Arduino.h>
+//参考　https://qiita.com/Ninagawa_Izumi/items/2646c7d3d98943919f80
+
 // MPU6050 offset-finder, based on Jeff Rowberg's MPU6050_RAW
 // 2016-10-19 by Robert R. Fenichel (bob@fenichel.net)
 
@@ -85,7 +86,7 @@ and so on.
 // Arduino Wire library is required if I2Cdev I2CDEV_ARDUINO_WIRE implementation
 // is used in I2Cdev.h
 #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
-    #include <Wire.h>
+    #include "Wire.h"
 #endif
 
 // class default I2C address is 0x68
@@ -186,8 +187,6 @@ void Initialize()
   {
     // join I2C bus (I2Cdev library doesn't do this automatically)
     #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
-        Wire.setSCL(4);
-        Wire.setSDA(5);
         Wire.begin();
     #elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
         Fastwire::setup(400, true);
