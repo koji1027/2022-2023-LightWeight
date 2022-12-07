@@ -31,6 +31,7 @@ THE SOFTWARE.
 
 #ifndef _HELPER_3DMATH_H_
 #define _HELPER_3DMATH_H_
+#include <math.h>
 
 class Quaternion {
     public:
@@ -91,9 +92,9 @@ class Quaternion {
 
 class VectorInt16 {
     public:
-        int16_t x;
-        int16_t y;
-        int16_t z;
+        int x;
+        int y;
+        int z;
 
         VectorInt16() {
             x = 0;
@@ -101,7 +102,7 @@ class VectorInt16 {
             z = 0;
         }
         
-        VectorInt16(int16_t nx, int16_t ny, int16_t nz) {
+        VectorInt16(int nx, int ny, int nz) {
             x = nx;
             y = ny;
             z = nz;

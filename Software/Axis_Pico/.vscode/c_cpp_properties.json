@@ -8,8 +8,9 @@
         {
             "name": "PlatformIO",
             "includePath": [
-                "c:/Users/skmoc/OneDrive/ドキュメント/GitHub/2022-2023-LightWeight/Software/Axis_Pico_New_/include",
-                "c:/Users/skmoc/OneDrive/ドキュメント/GitHub/2022-2023-LightWeight/Software/Axis_Pico_New_/src",
+                "c:/Users/skmoc/OneDrive/ドキュメント/GitHub/2022-2023-LightWeight/Software/Axis_Pico/include",
+                "c:/Users/skmoc/OneDrive/ドキュメント/GitHub/2022-2023-LightWeight/Software/Axis_Pico/src",
+                "C:/Users/skmoc/.platformio/packages/framework-arduinopico/libraries/Wire/src",
                 "C:/Users/skmoc/.platformio/packages/framework-arduinopico/cores/rp2040",
                 "C:/Users/skmoc/.platformio/packages/framework-arduinopico/cores/rp2040/api/deprecated",
                 "C:/Users/skmoc/.platformio/packages/framework-arduinopico/cores/rp2040/api/deprecated-avr-comp",
@@ -39,7 +40,6 @@
                 "C:/Users/skmoc/.platformio/packages/framework-arduinopico/libraries/Updater/src",
                 "C:/Users/skmoc/.platformio/packages/framework-arduinopico/libraries/WebServer/src",
                 "C:/Users/skmoc/.platformio/packages/framework-arduinopico/libraries/WiFi/src",
-                "C:/Users/skmoc/.platformio/packages/framework-arduinopico/libraries/Wire/src",
                 "C:/Users/skmoc/.platformio/packages/framework-arduinopico/libraries/http-parser/src",
                 "C:/Users/skmoc/.platformio/packages/framework-arduinopico/libraries/lwIP_CYW43/src",
                 "C:/Users/skmoc/.platformio/packages/framework-arduinopico/libraries/lwIP_Ethernet/src",
@@ -49,8 +49,9 @@
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
                 "path": [
-                    "c:/Users/skmoc/OneDrive/ドキュメント/GitHub/2022-2023-LightWeight/Software/Axis_Pico_New_/include",
-                    "c:/Users/skmoc/OneDrive/ドキュメント/GitHub/2022-2023-LightWeight/Software/Axis_Pico_New_/src",
+                    "c:/Users/skmoc/OneDrive/ドキュメント/GitHub/2022-2023-LightWeight/Software/Axis_Pico/include",
+                    "c:/Users/skmoc/OneDrive/ドキュメント/GitHub/2022-2023-LightWeight/Software/Axis_Pico/src",
+                    "C:/Users/skmoc/.platformio/packages/framework-arduinopico/libraries/Wire/src",
                     "C:/Users/skmoc/.platformio/packages/framework-arduinopico/cores/rp2040",
                     "C:/Users/skmoc/.platformio/packages/framework-arduinopico/cores/rp2040/api/deprecated",
                     "C:/Users/skmoc/.platformio/packages/framework-arduinopico/cores/rp2040/api/deprecated-avr-comp",
@@ -80,7 +81,6 @@
                     "C:/Users/skmoc/.platformio/packages/framework-arduinopico/libraries/Updater/src",
                     "C:/Users/skmoc/.platformio/packages/framework-arduinopico/libraries/WebServer/src",
                     "C:/Users/skmoc/.platformio/packages/framework-arduinopico/libraries/WiFi/src",
-                    "C:/Users/skmoc/.platformio/packages/framework-arduinopico/libraries/Wire/src",
                     "C:/Users/skmoc/.platformio/packages/framework-arduinopico/libraries/http-parser/src",
                     "C:/Users/skmoc/.platformio/packages/framework-arduinopico/libraries/lwIP_CYW43/src",
                     "C:/Users/skmoc/.platformio/packages/framework-arduinopico/libraries/lwIP_Ethernet/src",
