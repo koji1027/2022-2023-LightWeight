@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <Wire.h>
 
 #include "led.h"
 #include "line.h"
@@ -15,6 +16,8 @@ void setup() {
     // pinMode(15, OUTPUT);
     // led.begin();
     // line.begin();
+    pinMode(25, OUTPUT);
+    digitalWrite(25, HIGH);
 }
 
 void loop() {

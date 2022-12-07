@@ -58,13 +58,13 @@ void Motor::cal(float go_rad, float gyro_rad, int speed, float machine_rad) {
 }
 
 void Motor::move(float *power) {
-    int pwm[MOTOR_NUM] = {0.0, 0.0, 0.0, 0.0};
+    int output[MOTOR_NUM] = {0};
     for (int i = 0; i < MOTOR_NUM; i++) {
-        pwm[i] = (int)(power[i] + 1023.0 / 2.0);
-        pwm[i] = constrain(pwm[i], 0, MAX_PWM);
+        output[i] = (int)(power[i] + 1023.0 / 2.0);
+        output[i] = constrain(output[i], 0, MAX_PWM);
     }
     for (int i = 0; i < MOTOR_NUM; i++) {
         digitalWrite(MOTOR_PIN[i][0], HIGH);
-        analogWrite(MOTOR_PIN[i][1], pwm[i]);
+        pwm(MOTOR_PIN[i][1], PWM_FREQ, output[i]);
     }
 }
