@@ -1,11 +1,13 @@
+#define MPU6050_INCLUDE_DMP_MOTIONAPPS20
 #include "mpu_axis.h"
 #include "MPU6050_6Axis_MotionApps20.h"
-
-MPU6050 mpu;
 
 ////////////////
 //IMU_Zero.cpp//
 ////////////////
+void MPU_Axis::set_MPU(MPU6050 *_mpu){
+    p_mpu = _mpu;
+}
 
 void MPU_Axis::zero_reader()
 {
@@ -43,7 +45,7 @@ void MPU_Axis::GetSmoothed()
 
     for (i = 1; i <= N; i++)
     { // get sums
-        mpu.getMotion6(&RawValue[iAx], &RawValue[iAy], &RawValue[iAz],
+        p_mpu->getMotion6(&RawValue[iAx], &RawValue[iAy], &RawValue[iAz],
                              &RawValue[iGx], &RawValue[iGy], &RawValue[iGz]);
         if ((i % 500) == 0)
             Serial.print(PERIOD);
@@ -74,11 +76,11 @@ void MPU_Axis::Initialize()
 
     // initialize device
     Serial.println("Initializing I2C devices...");
-    mpu.initialize();
+    p_mpu->initialize();
 
     // verify connection
     Serial.println("Testing device connections...");
-    Serial.println(mpu.testConnection() ? "MPU6050 connection successful" : "MPU6050 connection failed");
+    Serial.println(p_mpu->testConnection() ? "MPU6050 connection successful" : "MPU6050 connection failed");
     Serial.println("PID tuning Each Dot = 100 readings");
     /*A tidbit on how PID (PI actually) tuning works.
       When we change the offset in the MPU6050 we can get instant results. This allows us to use Proportional and
@@ -91,41 +93,41 @@ void MPU_Axis::Initialize()
       readings, the integral value is used for the actual offsets and the last proportional reading is ignored due to
       the fact it reacts to any noise.
     */
-    mpu.CalibrateAccel(6);
-    mpu.CalibrateGyro(6);
+    p_mpu->CalibrateAccel(6);
+    p_mpu->CalibrateGyro(6);
     Serial.println("\nat 600 Readings");
-    mpu.PrintActiveOffsets();
+    p_mpu->PrintActiveOffsets();
     Serial.println();
-    mpu.CalibrateAccel(1);
-    mpu.CalibrateGyro(1);
+    p_mpu->CalibrateAccel(1);
+    p_mpu->CalibrateGyro(1);
     Serial.println("700 Total Readings");
-    mpu.PrintActiveOffsets();
+    p_mpu->PrintActiveOffsets();
     Serial.println();
-    mpu.CalibrateAccel(1);
-    mpu.CalibrateGyro(1);
+    p_mpu->CalibrateAccel(1);
+    p_mpu->CalibrateGyro(1);
     Serial.println("800 Total Readings");
-    mpu.PrintActiveOffsets();
+    p_mpu->PrintActiveOffsets();
     Serial.println();
-    mpu.CalibrateAccel(1);
-    mpu.CalibrateGyro(1);
+    p_mpu->CalibrateAccel(1);
+    p_mpu->CalibrateGyro(1);
     Serial.println("900 Total Readings");
-    mpu.PrintActiveOffsets();
+    p_mpu->PrintActiveOffsets();
     Serial.println();
-    mpu.CalibrateAccel(1);
-    mpu.CalibrateGyro(1);
+    p_mpu->CalibrateAccel(1);
+    p_mpu->CalibrateGyro(1);
     Serial.println("1000 Total Readings");
-    mpu.PrintActiveOffsets();
+    p_mpu->PrintActiveOffsets();
     Serial.println("\n\n Any of the above offsets will work nice \n\n Lets proof the PID tuning using another method:");
 } // Initialize
 
 void MPU_Axis::SetOffsets(int TheOffsets[6])
 {
-    mpu.setXAccelOffset(TheOffsets[iAx]);
-    mpu.setYAccelOffset(TheOffsets[iAy]);
-    mpu.setZAccelOffset(TheOffsets[iAz]);
-    mpu.setXGyroOffset(TheOffsets[iGx]);
-    mpu.setYGyroOffset(TheOffsets[iGy]);
-    mpu.setZGyroOffset(TheOffsets[iGz]);
+    p_mpu->setXAccelOffset(TheOffsets[iAx]);
+    p_mpu->setYAccelOffset(TheOffsets[iAy]);
+    p_mpu->setZAccelOffset(TheOffsets[iAz]);
+    p_mpu->setXGyroOffset(TheOffsets[iGx]);
+    p_mpu->setYGyroOffset(TheOffsets[iGy]);
+    p_mpu->setZGyroOffset(TheOffsets[iGz]);
 } // SetOffsets
 
 void MPU_Axis::ShowProgress()
@@ -302,12 +304,12 @@ void MPU_Axis::DMP_init(){
 
     // initialize device
     Serial.println(F("Initializing I2C devices..."));
-    mpu.initialize();
+    p_mpu->initialize();
     pinMode(INTERRUPT_PIN, INPUT);
 
     // verify connection
     Serial.println(F("Testing device connections..."));
-    Serial.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
+    Serial.println(p_mpu->testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
 
     // wait for ready
     Serial.println(F("\nSend any character to begin DMP programming and demo: "));
@@ -317,37 +319,37 @@ void MPU_Axis::DMP_init(){
 
     // load and configure the DMP
     Serial.println(F("Initializing DMP..."));
-    devStatus = mpu.dmpInitialize();
+    devStatus = p_mpu->dmpInitialize();
 
     // supply your own gyro offsets here, scaled for min sensitivity
-    mpu.setXGyroOffset(220);
-    mpu.setYGyroOffset(76);
-    mpu.setZGyroOffset(-85);
-    mpu.setZAccelOffset(1788); // 1688 factory default for my test chip
+    p_mpu->setXGyroOffset(220);
+    p_mpu->setYGyroOffset(76);
+    p_mpu->setZGyroOffset(-85);
+    p_mpu->setZAccelOffset(1788); // 1688 factory default for my test chip
 
     // make sure it worked (returns 0 if so)
     if (devStatus == 0) {
         // Calibration Time: generate offsets and calibrate our MPU6050
-        mpu.CalibrateAccel(6);
-        mpu.CalibrateGyro(6);
-        mpu.PrintActiveOffsets();
+        p_mpu->CalibrateAccel(6);
+        p_mpu->CalibrateGyro(6);
+        p_mpu->PrintActiveOffsets();
         // turn on the DMP, now that it's ready
         Serial.println(F("Enabling DMP..."));
-        mpu.setDMPEnabled(true);
+        p_mpu->setDMPEnabled(true);
 
         // enable Arduino interrupt detection
         Serial.print(F("Enabling interrupt detection (Arduino external interrupt "));
         Serial.print(digitalPinToInterrupt(INTERRUPT_PIN));
         Serial.println(F(")..."));
         attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN), dmpDataReady, RISING);
-        mpuIntStatus = mpu.getIntStatus();
+        mpuIntStatus = p_mpu->getIntStatus();
 
         // set our DMP Ready flag so the main loop() function knows it's okay to use it
         Serial.println(F("DMP ready! Waiting for first interrupt..."));
         dmpReady = true;
 
         // get expected DMP packet size for later comparison
-        packetSize = mpu.dmpGetFIFOPacketSize();
+        packetSize = p_mpu->dmpGetFIFOPacketSize();
     } else {
         // ERROR!
         // 1 = initial memory load failed
@@ -366,10 +368,10 @@ void MPU_Axis::DMP_read(){
     // if programming failed, don't try to do anything
     if (!dmpReady) return;
     // read a packet from FIFO
-    if (mpu.dmpGetCurrentFIFOPacket(fifoBuffer)) { // Get the Latest packet 
+    if (p_mpu->dmpGetCurrentFIFOPacket(fifoBuffer)) { // Get the Latest packet 
         #ifdef OUTPUT_READABLE_QUATERNION
             // display quaternion values in easy matrix form: w x y z
-            mpu.dmpGetQuaternion(&q, fifoBuffer);
+            p_mpu->dmpGetQuaternion(&q, fifoBuffer);
             Serial.print("quat\t");
             Serial.print(q.w);
             Serial.print("\t");
@@ -382,8 +384,8 @@ void MPU_Axis::DMP_read(){
 
         #ifdef OUTPUT_READABLE_EULER
             // display Euler angles in degrees
-            mpu.dmpGetQuaternion(&q, fifoBuffer);
-            mpu.dmpGetEuler(euler, &q);
+            p_mpu->dmpGetQuaternion(&q, fifoBuffer);
+            p_mpu->dmpGetEuler(euler, &q);
             Serial.print("euler\t");
             Serial.print(euler[0] * 180/M_PI);
             Serial.print("\t");
@@ -394,9 +396,9 @@ void MPU_Axis::DMP_read(){
 
         #ifdef OUTPUT_READABLE_YAWPITCHROLL
             // display Euler angles in degrees
-            mpu.dmpGetQuaternion(&q, fifoBuffer);
-            mpu.dmpGetGravity(&gravity, &q);
-            mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+            p_mpu->dmpGetQuaternion(&q, fifoBuffer);
+            p_mpu->dmpGetGravity(&gravity, &q);
+            p_mpu->dmpGetYawPitchRoll(ypr, &q, &gravity);
             Serial.print("ypr\t");
             Serial.print(ypr[0] * 180/PI);
             Serial.print("\t");
@@ -407,10 +409,10 @@ void MPU_Axis::DMP_read(){
 
         #ifdef OUTPUT_READABLE_REALACCEL
             // display real acceleration, adjusted to remove gravity
-            mpu.dmpGetQuaternion(&q, fifoBuffer);
-            mpu.dmpGetAccel(&aa, fifoBuffer);
-            mpu.dmpGetGravity(&gravity, &q);
-            mpu.dmpGetLinearAccel(&aaReal, &aa, &gravity);
+            p_mpu->dmpGetQuaternion(&q, fifoBuffer);
+            p_mpu->dmpGetAccel(&aa, fifoBuffer);
+            p_mpu->dmpGetGravity(&gravity, &q);
+            p_mpu->dmpGetLinearAccel(&aaReal, &aa, &gravity);
             Serial.print("areal\t");
             Serial.print(aaReal.x);
             Serial.print("\t");
@@ -422,11 +424,11 @@ void MPU_Axis::DMP_read(){
         #ifdef OUTPUT_READABLE_WORLDACCEL
             // display initial world-frame acceleration, adjusted to remove gravity
             // and rotated based on known orientation from quaternion
-            mpu.dmpGetQuaternion(&q, fifoBuffer);
-            mpu.dmpGetAccel(&aa, fifoBuffer);
-            mpu.dmpGetGravity(&gravity, &q);
-            mpu.dmpGetLinearAccel(&aaReal, &aa, &gravity);
-            mpu.dmpGetLinearAccelInWorld(&aaWorld, &aaReal, &q);
+            p_mpu->dmpGetQuaternion(&q, fifoBuffer);
+            p_mpu->dmpGetAccel(&aa, fifoBuffer);
+            p_mpu->dmpGetGravity(&gravity, &q);
+            p_mpu->dmpGetLinearAccel(&aaReal, &aa, &gravity);
+            p_mpu->dmpGetLinearAccelInWorld(&aaWorld, &aaReal, &q);
             Serial.print("aworld\t");
             Serial.print(aaWorld.x);
             Serial.print("\t");

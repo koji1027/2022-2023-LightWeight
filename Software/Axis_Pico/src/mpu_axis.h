@@ -1,3 +1,5 @@
+#define MPU6050_INCLUDE_DMP_MOTIONAPPS20
+
 #include <Arduino.h>
 #include <Wire.h>
 #include "I2Cdev.h"
@@ -14,6 +16,7 @@ class MPU_Axis
 {
 public:
     // IMU_Zero.cpp//
+    void set_MPU(MPU6050 *_mpu);
     void zero_reader(); //作った
     void ForceHeader();
     void GetSmoothed();
@@ -30,6 +33,8 @@ public:
     void dmpDataReady();
 
 private:
+
+    MPU6050 *p_mpu;
     ////////////////
     //IMU_Zero.cpp//
     ////////////////
