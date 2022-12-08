@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 #define MOTOR_NUM 4
-#define MAX_PWM 800
+#define MAX_PWM 200
 #define PWM_FREQ 80000
 #define Kp 0.0
 #define Ki 0.0

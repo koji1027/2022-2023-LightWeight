@@ -15,7 +15,7 @@ class Line {
     float SENSOR_THETA[SENSOR_NUM] = {0.0};
     float SENSOR_X[SENSOR_NUM] = {0.0};
     float SENSOR_Y[SENSOR_NUM] = {0.0};
-    int sensor_value[SENSOR_NUM] = {0};  // TODO:18番目のセンサーが死んでいる
+    int sensor_value[SENSOR_NUM] = {0};
     bool sensor_state[SENSOR_NUM] = {false};
     float line_vector[2] = {0.0};
     float line_theta = 0.0;
@@ -44,10 +44,10 @@ void Line::read() {
             digitalWrite(SELECT_PIN[1][j], (byte)i & (1 << j));
         }
         delayMicroseconds(10);
-        sensor_value[i + 16] = analogRead(COM_PIN[0]);
-        sensor_value[i] = analogRead(COM_PIN[1]);
+        sensor_value[i] = analogRead(COM_PIN[0]);
+        sensor_value[i + 16] = analogRead(COM_PIN[1]);
     }
-    sensor_value[18] = 0;  // TODO:18番目のセンサーが死んでいる
+    sensor_value[18] = 0;
     for (int i = 0; i < SENSOR_NUM; i++) {
         if (sensor_value[i] > THRESHOLD) {
             sensor_state[i] = true;
@@ -70,7 +70,12 @@ void Line::read() {
 
 void Line::print() {
     // デバッグ用
-    for (int i = 16; i < 24; i++) {
+    for (int i = 0; i < 8; i++) {
+        Serial.print(sensor_value[i]);
+        Serial.print("\t");
+    }
+    Serial.println();
+    for (int i = 8; i < 16; i++) {
         Serial.print(sensor_value[i]);
         Serial.print("\t");
     }
