@@ -1,3 +1,6 @@
+#ifndef GYRO_H
+#define GYRO_H
+
 #include <Arduino.h>
 #include <Wire.h>
 
@@ -89,3 +92,5 @@ void Gyro::calcAngle() {
     pre_time = now_time;
     pre_gz = gz;
 }
+
+#endif

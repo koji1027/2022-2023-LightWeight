@@ -1,3 +1,5 @@
+#ifndef LINE_H
+#define LINE_H
 #include <Arduino.h>
 
 #define SENSOR_NUM 32
@@ -81,3 +83,5 @@ void Line::print() {
     }
     Serial.println();
 }
+
+#endif

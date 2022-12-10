@@ -1,3 +1,6 @@
+#ifndef LED_H
+#define LED_H
+
 #include <Adafruit_NeoPixel.h>
 #include <Arduino.h>
 
@@ -13,3 +16,5 @@ void set_led() {
     led.setBrightness(255);
     led.show();
 }
+
+#endif
