@@ -5,9 +5,8 @@
 #include "led.h"
 #include "line.h"
 
-// Line line;
 SerialPIO motor(22, 16, 32);
-//SerialPIO Serial1(0, 1, 32);
+Line line;
 Gyro gyro;
 
 float ir_angle = 0.0;
@@ -17,19 +16,16 @@ void setup() {
     Serial.begin(115200);
     gyro.begin();
     gyro.calibration();
-    //  pinMode(15, OUTPUT);
-    //  led.begin();
-    //  line.begin();
+    led.begin();
+    line.begin();
 }
 
 void loop() {
     gyro.read();
     gyro.calcAngle();
-    // delay(10);
-    //  set_led();
-    //  line.read();
-    //  line.print();
-    //  motor.write(100);
+    set_led();
+    line.read();
+    line.print();
 }
 
 void setup1() {
@@ -47,12 +43,12 @@ void loop1() {
             int a = data[0] + (data[1] << 8);
             ir_angle = (a / 100.0) - PI;
         }
-        Serial.println(ir_angle);
+        // Serial.println(ir_angle);
     }
 
     int a = (gyro.angle + PI) * 100;
     int b = (ir_angle + PI) * 100;
-    byte data[4];//[0][1]:gyro, [2][3]:ir
+    byte data[4];  //[0][1]:gyro, [2][3]:ir
     data[0] = byte(a);
     data[1] = byte(a >> 8);
     data[2] = byte(b);

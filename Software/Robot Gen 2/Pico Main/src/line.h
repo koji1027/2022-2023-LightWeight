@@ -14,7 +14,30 @@ class Line {
    private:
     const int COM_PIN[2] = {A0, A1};
     const int SELECT_PIN[2][4] = {{D2, D3, D6, D7}, {D10, D11, D12, D13}};
-    float SENSOR_THETA[SENSOR_NUM] = {0.0};
+    float SENSOR_THETA[SENSOR_NUM] = {PI,
+                                      0.0,
+                                      -7 * PI / 8.0,
+                                      PI / 8.0,
+                                      -6 * PI / 8.0,
+                                      2 * PI / 8.0,
+                                      -5 * PI / 8.0,
+                                      3 * PI / 8.0,
+                                      -4 * PI / 8.0,
+                                      4 * PI / 8.0,
+                                      -3 * PI / 8.0,
+                                      5 * PI / 8.0,
+                                      -2 * PI / 8.0,
+                                      6 * PI / 8.0,
+                                      -PI / 8.0,
+                                      7 * PI / 8.0,
+                                      0.0,
+                                      0.0,
+                                      0.0,
+                                      0.0,
+                                      0.0,
+                                      0.0,
+                                      0.0,
+                                      0.0};
     float SENSOR_X[SENSOR_NUM] = {0.0};
     float SENSOR_Y[SENSOR_NUM] = {0.0};
     int sensor_value[SENSOR_NUM] = {0};
@@ -29,9 +52,6 @@ void Line::begin() {
         for (int j = 0; j < 4; j++) {
             pinMode(SELECT_PIN[i][j], OUTPUT);
         }
-    }
-    for (int i = 0; i < SENSOR_NUM; i++) {
-        SENSOR_THETA[i] = (float)i * PI / 16.0;
     }
     for (int i = 0; i < SENSOR_NUM; i++) {
         SENSOR_X[i] = sin(SENSOR_THETA[i]);
@@ -59,7 +79,7 @@ void Line::read() {
     }
     float line_vector_x = 0.0;
     float line_vector_y = 0.0;
-    for (int i = 0; i < SENSOR_NUM; i++) {
+    for (int i = 0; i < 16; i++) {
         if (sensor_state[i]) {
             line_vector_x += SENSOR_X[i];
             line_vector_y += SENSOR_Y[i];
@@ -72,15 +92,8 @@ void Line::read() {
 
 void Line::print() {
     // デバッグ用
-    for (int i = 0; i < 8; i++) {
-        Serial.print(sensor_value[i]);
-        Serial.print("\t");
-    }
-    Serial.println();
-    for (int i = 8; i < 16; i++) {
-        Serial.print(sensor_value[i]);
-        Serial.print("\t");
-    }
+    Serial.print("line_theta: ");
+    Serial.print(line_theta);
     Serial.println();
 }
 

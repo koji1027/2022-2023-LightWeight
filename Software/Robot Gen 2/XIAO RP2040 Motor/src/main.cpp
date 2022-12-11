@@ -11,9 +11,18 @@ void setup() {
     delay(5000);
 }
 
-void loop() { motor.cal(); }
+void loop() {
+    for (int i = -180; i < 180; i++) {
+        motor.go_angle = (i / 180.0) * PI;
+        motor.cal();
+        delay(10);
+    }
+}
 
-void setup1() { Serial1.begin(115200); }
+void setup1() {
+    Serial1.begin(115200);
+    delay(5000);
+}
 
 void loop1() {
     if (Serial1.available() > 4) {
@@ -24,10 +33,11 @@ void loop1() {
             data[1] = Serial1.read();
             int a = data[0] + (data[1] << 8);
             motor.gyro_angle = (a / 100.0) - PI;
+            //  Serial.println(motor.gyro_angle);
             data[2] = Serial1.read();
             data[3] = Serial1.read();
             int b = data[2] + (data[3] << 8);
-            motor.go_angle = (b / 100.0) - PI;
+            // motor.go_angle = (b / 100.0) - PI;
         }
     }
 }
