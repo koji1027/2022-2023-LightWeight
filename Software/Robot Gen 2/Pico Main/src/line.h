@@ -3,7 +3,7 @@
 #include <Arduino.h>
 
 #define SENSOR_NUM 32
-#define THRESHOLD 300
+#define THRESHOLD 400
 
 class Line {
    public:
@@ -80,7 +80,7 @@ void Line::read() {
     }
     entire_sensor_state = false;
     for (int i = 0; i < SENSOR_NUM; i++) {
-        if (sensor_state[i] == true){
+        if (sensor_state[i] == true) {
             entire_sensor_state = true;
         }
     }
@@ -99,7 +99,6 @@ void Line::read() {
 
 void Line::print() {
     // デバッグ用
-    Serial.print("line_theta: ");
     Serial.print(line_theta);
     Serial.println();
 }

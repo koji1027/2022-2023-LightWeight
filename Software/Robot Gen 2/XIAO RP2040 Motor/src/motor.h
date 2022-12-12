@@ -15,7 +15,7 @@ class Motor {
     float machine_angle = 0.0;
     int default_speed = 100;
     int speed;
-    int c; // 1:line, 0:ir
+    int c = 0;  // 1:line, 0:ir
     void begin();
     void cal();
     void move(float power[4]);

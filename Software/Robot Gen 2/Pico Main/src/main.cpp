@@ -7,42 +7,28 @@
 
 SerialPIO motor(22, 16, 32);
 Line line;
-// Gyro gyro;
+Gyro gyro;
 
 float ir_angle = 0.0;
 
 void setup() {
     // put your setup code here, to run once:
     Serial.begin(115200);
-    // gyro.begin();
-    // gyro.calibration();
+    gyro.begin();
+    gyro.calibration();
     led.begin();
-<<<<<<< Updated upstream
     line.begin();
-    set_led();
 }
 
 void loop() {
     gyro.read();
     gyro.calcAngle();
-    //gyro.angle += 0.003;
-    Serial.println(gyro.angle);
+    set_led();
     line.read();
-    //line.print();
-=======
-    // line.begin();
+    Serial.println(line.line_theta);
+    // line.print();
 }
 
-void loop() {
-    // gyro.read();
-    // gyro.calcAngle();
-    set_led();
-    delay(10);
-    // line.read();
-    // line.print();
->>>>>>> Stashed changes
-}
-/*
 void setup1() {
     motor.begin(115200);
     Serial1.begin(9600);
@@ -62,13 +48,12 @@ void loop1() {
     }
 
     int a = (gyro.angle + PI) * 100;
-    int b = 0;
-    int c = 0; // 1:line, 0:ir
-    if (line.entire_sensor_state == true){
+    int b = (ir_angle + PI) * 100;
+    int c = 0;  // 1:line, 0:ir
+    if (line.entire_sensor_state == true) {
         int b = (line.line_theta + PI) * 100;
         c = 1;
-    }
-    else{
+    } else {
         int b = (ir_angle + PI) * 100;
         c = 0;
     }
@@ -80,5 +65,4 @@ void loop1() {
     data[4] = byte(c);
     motor.write(255);
     motor.write(data, 5);
-    delay(10);
-}*/
+}
