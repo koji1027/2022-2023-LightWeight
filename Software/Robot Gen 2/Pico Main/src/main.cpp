@@ -7,16 +7,17 @@
 
 SerialPIO motor(22, 16, 32);
 Line line;
-Gyro gyro;
+// Gyro gyro;
 
 float ir_angle = 0.0;
 
 void setup() {
     // put your setup code here, to run once:
     Serial.begin(115200);
-    gyro.begin();
-    gyro.calibration();
+    // gyro.begin();
+    // gyro.calibration();
     led.begin();
+<<<<<<< Updated upstream
     line.begin();
     set_led();
 }
@@ -28,8 +29,20 @@ void loop() {
     Serial.println(gyro.angle);
     line.read();
     //line.print();
+=======
+    // line.begin();
 }
 
+void loop() {
+    // gyro.read();
+    // gyro.calcAngle();
+    set_led();
+    delay(10);
+    // line.read();
+    // line.print();
+>>>>>>> Stashed changes
+}
+/*
 void setup1() {
     motor.begin(115200);
     Serial1.begin(9600);
@@ -68,4 +81,4 @@ void loop1() {
     motor.write(255);
     motor.write(data, 5);
     delay(10);
-}
+}*/

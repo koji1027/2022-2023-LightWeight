@@ -4,7 +4,7 @@
 #include <Adafruit_NeoPixel.h>
 #include <Arduino.h>
 
-#define LED_PIN 15
+#define LED_PIN D15
 #define LED_NUM 32
 
 Adafruit_NeoPixel led(LED_NUM, LED_PIN, NEO_GRB + NEO_KHZ800);
