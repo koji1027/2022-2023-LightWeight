@@ -12,11 +12,14 @@ void setup() {
 }
 
 void loop() {
-    for (int i = -180; i < 180; i++) {
-        motor.go_angle = (i / 180.0) * PI;
-        motor.cal();
-        delay(10);
+    if (motor.c == 0){
+        motor.speed = 0;
     }
+    else{
+        motor.speed = motor.default_speed;
+    }
+    motor.cal();
+    Serial.print(motor.speed);
 }
 
 void setup1() {
@@ -25,19 +28,25 @@ void setup1() {
 }
 
 void loop1() {
-    if (Serial1.available() > 4) {
+    if (Serial1.available() > 5) {
         int recv_data = Serial1.read();
         if (recv_data == 255) {
-            int data[4];  //[0][1]:gyro, [2][3]:ir
+            int data[5];  //[0][1]:gyro, [2][3]:go
             data[0] = Serial1.read();
             data[1] = Serial1.read();
             int a = data[0] + (data[1] << 8);
             motor.gyro_angle = (a / 100.0) - PI;
-            //  Serial.println(motor.gyro_angle);
+            Serial.println(motor.gyro_angle);
             data[2] = Serial1.read();
             data[3] = Serial1.read();
             int b = data[2] + (data[3] << 8);
-            // motor.go_angle = (b / 100.0) - PI;
+            motor.c = data[4]; // 1:line, 0:ir
+            if (motor.c == 1){
+                motor.go_angle = b / 100.0;
+            }
+            else{
+                motor.go_angle = (b / 100.0) - PI;
+            }
         }
     }
 }

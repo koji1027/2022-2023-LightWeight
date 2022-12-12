@@ -18,14 +18,16 @@ void setup() {
     gyro.calibration();
     led.begin();
     line.begin();
+    set_led();
 }
 
 void loop() {
     gyro.read();
     gyro.calcAngle();
-    set_led();
+    //gyro.angle += 0.003;
+    Serial.println(gyro.angle);
     line.read();
-    line.print();
+    //line.print();
 }
 
 void setup1() {
@@ -47,13 +49,23 @@ void loop1() {
     }
 
     int a = (gyro.angle + PI) * 100;
-    int b = (ir_angle + PI) * 100;
-    byte data[4];  //[0][1]:gyro, [2][3]:ir
+    int b = 0;
+    int c = 0; // 1:line, 0:ir
+    if (line.entire_sensor_state == true){
+        int b = (line.line_theta + PI) * 100;
+        c = 1;
+    }
+    else{
+        int b = (ir_angle + PI) * 100;
+        c = 0;
+    }
+    byte data[5];  //[0][1]:gyro, [2][3]:go
     data[0] = byte(a);
     data[1] = byte(a >> 8);
     data[2] = byte(b);
     data[3] = byte(b >> 8);
+    data[4] = byte(c);
     motor.write(255);
-    motor.write(data, 4);
+    motor.write(data, 5);
     delay(10);
 }

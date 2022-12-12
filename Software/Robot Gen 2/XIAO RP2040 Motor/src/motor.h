@@ -13,7 +13,9 @@ class Motor {
     float gyro_angle = 0.0;
     float go_angle = -PI / 2.0;
     float machine_angle = 0.0;
-    int speed = 50;
+    int default_speed = 100;
+    int speed;
+    int c; // 1:line, 0:ir
     void begin();
     void cal();
     void move(float power[4]);

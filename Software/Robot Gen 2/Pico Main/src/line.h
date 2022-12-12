@@ -10,6 +10,9 @@ class Line {
     void begin();
     void read();
     void print();  // デバッグ用
+    bool entire_sensor_state = false;
+    float line_vector[2] = {0.0};
+    float line_theta = 0.0;
 
    private:
     const int COM_PIN[2] = {A0, A1};
@@ -42,8 +45,6 @@ class Line {
     float SENSOR_Y[SENSOR_NUM] = {0.0};
     int sensor_value[SENSOR_NUM] = {0};
     bool sensor_state[SENSOR_NUM] = {false};
-    float line_vector[2] = {0.0};
-    float line_theta = 0.0;
 };
 
 void Line::begin() {
@@ -75,6 +76,12 @@ void Line::read() {
             sensor_state[i] = true;
         } else {
             sensor_state[i] = false;
+        }
+    }
+    entire_sensor_state = false;
+    for (int i = 0; i < SENSOR_NUM; i++) {
+        if (sensor_state[i] == true){
+            entire_sensor_state = true;
         }
     }
     float line_vector_x = 0.0;
