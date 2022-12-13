@@ -10,6 +10,8 @@ Line line;
 Gyro gyro;
 
 float ir_angle = 0.0;
+float circulate_angle = 0.0;
+void circulate();
 
 void setup() {
     // put your setup code here, to run once:
@@ -46,23 +48,45 @@ void loop1() {
         }
         // Serial.println(ir_angle);
     }
+    circulate();
+    Serial.print(ir_angle);
+    Serial.print("\t");
+    Serial.println(circulate_angle);
 
-    int a = (gyro.angle + PI) * 100;
-    int b = (ir_angle + PI) * 100;
+    int send_gyro = (gyro.angle + PI) * 100;
+    int send_move = (ir_angle + PI) * 100;
     int c = 0;  // 1:line, 0:ir
     if (line.entire_sensor_state == true) {
-        b = (line.line_theta + PI) * 100;
+        send_move = (line.line_theta + PI) * 100;
         c = 1;
     } else {
-        b = (ir_angle + PI) * 100;
+        send_move = (circulate_angle + PI) * 100;
         c = 0;
     }
-    byte data[5];  //[0][1]:gyro, [2][3]:go
-    data[0] = byte(a);
-    data[1] = byte(a >> 8);
-    data[2] = byte(b);
-    data[3] = byte(b >> 8);
+    byte data[5];  //[0][1]:gyro, [2][3]:move
+    data[0] = byte(send_gyro);
+    data[1] = byte(send_gyro >> 8);
+    data[2] = byte(send_move);
+    data[3] = byte(send_move >> 8);
     data[4] = byte(c);
     motor.write(255);
     motor.write(data, 5);
+}
+
+void circulate(){
+    if (ir_angle > 0.4){
+        circulate_angle = ir_angle + (PI / 3);
+        if (circulate_angle > PI){
+            circulate_angle = circulate_angle - PI*2;
+        }
+    }
+    else if (ir_angle < -0.4){
+        circulate_angle = ir_angle - (PI / 3);
+        if (circulate_angle < -PI){
+            circulate_angle = circulate_angle + PI*2;
+        }
+    }
+    else {
+        circulate_angle = 0;
+    }
 }

@@ -19,6 +19,7 @@ class IR {
     void begin();
     void IR_get();
     void IRpin_read();
+    void IRonepin_read(int pinnum);
     void radius_read();
     void angle_read();
     void send();
@@ -107,6 +108,7 @@ void IR::IR_get() {
         }
         IR_Cur_LPF[i] = kLPF * IR_Cur[i] + (1 - kLPF) * IR_Cur_LPF[i];
     }
+    IR_Cur_LPF[2] = (IR_Cur_LPF[1] + IR_Cur_LPF[3])/2;
 
     int maxVal = 0;
     int maxIndex = 0;
@@ -133,16 +135,22 @@ void IR::IR_get() {
 }
 
 void IR::IRpin_read() {
+    /*
     for (int i = 0; i < IR_NUM; i++) {
         Serial.print(i);
         Serial.print("\t");
     }
     Serial.println();
+    */
     for (int i = 0; i < IR_NUM; i++) {
         Serial.print(IR_Cur[i]);
         Serial.print("\t");
     }
     Serial.println();
+}
+
+void IR::IRonepin_read(int pinnum) {
+    Serial.println(IR_Cur[pinnum]);
 }
 
 void IR::radius_read() {

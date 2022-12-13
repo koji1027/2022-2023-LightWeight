@@ -11,11 +11,11 @@
 class Motor {
    public:
     float gyro_angle = 0.0;
-    float go_angle = -PI / 2.0;
+    float move_angle = -PI / 2.0;
     float machine_angle = 0.0;
     int default_speed = 100;
     int speed;
-    int c = 0;  // 1:line, 0:ir
+    int c = 0;  // 1:line, 0:move
     void begin();
     void cal();
     void move(float power[4]);
@@ -46,8 +46,9 @@ void Motor::begin() {
 void Motor::cal() {
     float power[4] = {0.0, -1.0, -1.0, -1.0};
     if (speed != 0) {
-        float vx = speed * sin(go_angle);
-        float vy = speed * cos(go_angle);
+
+        float vx = speed * sin(move_angle);
+        float vy = speed * cos(move_angle);
         for (int i = 0; i < 4; i++) {
             power[i] = vx * MOTOR_POS[i][0] + vy * MOTOR_POS[i][1];
         }
