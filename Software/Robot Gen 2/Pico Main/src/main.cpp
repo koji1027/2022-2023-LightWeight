@@ -26,7 +26,7 @@ void loop() {
     set_led();
     line.read();
     Serial.println(line.line_theta);
-    // line.print();
+    //line.print();
 }
 
 void setup1() {

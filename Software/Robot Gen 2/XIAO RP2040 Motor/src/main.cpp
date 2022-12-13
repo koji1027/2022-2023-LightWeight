@@ -44,6 +44,9 @@ void loop1() {
             motor.c = data[4];  // 1:line, 0:ir
             if (motor.c == 1) {
                 motor.go_angle = b / 100.0;
+                if (motor.go_angle > PI) {
+                    motor.go_angle -= 2 * PI;
+                }
             } else {
                 motor.go_angle = (b / 100.0) - PI;
             }
