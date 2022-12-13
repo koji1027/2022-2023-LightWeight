@@ -9,9 +9,10 @@ SerialPIO motor(22, 16, 32);
 Line line;
 Gyro gyro;
 
+void circulate();
+
 float ir_angle = 0.0;
 float circulate_angle = 0.0;
-void circulate();
 
 void setup() {
     // put your setup code here, to run once:
@@ -73,20 +74,18 @@ void loop1() {
     motor.write(data, 5);
 }
 
-void circulate(){
-    if (ir_angle > 0.4){
+void circulate() {
+    if (ir_angle > 0.4) {
         circulate_angle = ir_angle + (PI / 3);
-        if (circulate_angle > PI){
-            circulate_angle = circulate_angle - PI*2;
+        if (circulate_angle > PI) {
+            circulate_angle = circulate_angle - PI * 2;
         }
-    }
-    else if (ir_angle < -0.4){
+    } else if (ir_angle < -0.4) {
         circulate_angle = ir_angle - (PI / 3);
-        if (circulate_angle < -PI){
-            circulate_angle = circulate_angle + PI*2;
+        if (circulate_angle < -PI) {
+            circulate_angle = circulate_angle + PI * 2;
         }
-    }
-    else {
+    } else {
         circulate_angle = 0;
     }
 }

@@ -5,15 +5,15 @@
 #include <Arduino.h>
 
 #define LED_PIN D15
-#define LED_NUM 32
+#define LED_NUM 16
 
 Adafruit_NeoPixel led(LED_NUM, LED_PIN, NEO_GRB + NEO_KHZ800);
 
-void set_led() {
+void set_led(int color[3], int brightness) {
     for (int i = 0; i < LED_NUM; i++) {
-        led.setPixelColor(i, led.Color(255, 255, 255));
+        led.setPixelColor(i, led.Color(color[0], color[1], color[2]));
     }
-    led.setBrightness(255);
+    led.setBrightness(brightness);
     led.show();
 }
 
