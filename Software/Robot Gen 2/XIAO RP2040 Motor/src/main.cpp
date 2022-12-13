@@ -13,12 +13,11 @@ void setup() {
 
 void loop() {
     if (motor.c == 0) {
-        motor.speed = 0;
+        motor.speed = motor.default_speed;
         motor.cal();
     } else {
         motor.speed = motor.default_speed;
         motor.cal();
-        delay(10);
     }
 }
 
