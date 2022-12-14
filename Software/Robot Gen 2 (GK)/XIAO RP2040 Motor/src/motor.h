@@ -90,7 +90,7 @@ void Motor::cal() {
 
 void Motor::move(float power[4]) {
     for (int i = 0; i < 4; i++) {
-        power[i] *= -1;
+        //power[i] *= -1;
         power[i] += 256;
         digitalWrite(MOTOR_PIN[i][0], HIGH);
         analogWrite(MOTOR_PIN[i][1], (int)power[i]);

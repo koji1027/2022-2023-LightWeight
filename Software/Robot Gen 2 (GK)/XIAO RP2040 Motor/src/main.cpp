@@ -16,7 +16,7 @@ void loop() {
         motor.speed = 0;
         motor.cal();
     } else {
-        motor.speed = motor.default_speed;
+        motor.speed = 0;
         motor.cal();
     }
 }

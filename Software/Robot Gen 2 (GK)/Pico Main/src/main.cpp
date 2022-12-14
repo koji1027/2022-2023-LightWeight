@@ -1,7 +1,8 @@
 #include <Arduino.h>
 #include <Wire.h>
 
-#include "gyro.h"
+#include "MPU6050/gyro.h"
+// #include "gyro.h"
 #include "led.h"
 #include "line.h"
 
@@ -16,10 +17,11 @@ int brightness = 255;
 void setup() {
     // put your setup code here, to run once:
     Serial.begin(115200);
-    gyro.begin();
-    gyro.calibration();
+    // gyro.begin();
+    // gyro.calibration();
     led.begin();
     line.begin();
+    gyro.begin();
     /*pinMode(D18, INPUT_PULLUP);  // 機能する
     pinMode(D19, INPUT_PULLUP);  // 機能しない
     pinMode(D20, INPUT_PULLUP);  // 機能する
@@ -28,12 +30,13 @@ void setup() {
 }
 
 void loop() {
-    gyro.read();
-    gyro.calcAngle();
+    // gyro.read();
+    // gyro.calcAngle();
+    gyro.getEuler();
+    Serial.println(gyro.angle);
     line.read();
     set_led(color, brightness);
     // Serial.println(line.line_theta);
-    Serial.println(gyro.angle);
     // line.print();
 }
 
