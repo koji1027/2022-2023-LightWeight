@@ -22,7 +22,7 @@ class Motor {
     void stop();
 
    private:
-    const int MOTOR_PIN[4][2] = {{D3, D2}, {D1, D0}, {D8, D9}, {D4, D5}};
+    const int MOTOR_PIN[4][2] = {{D1, D0}, {D3, D2}, {D8, D9}, {D4, D5}};
     const float MOTOR_POS[4][2] = {
         {-1.0, 1.0}, {1.0, 1.0}, {1.0, -1.0}, {-1.0, -1.0}};
     unsigned long long pre_time = 0;
@@ -90,10 +90,19 @@ void Motor::cal() {
 
 void Motor::move(float power[4]) {
     for (int i = 0; i < 4; i++) {
+        power[i] *= -1;
         power[i] += 256;
         digitalWrite(MOTOR_PIN[i][0], HIGH);
         analogWrite(MOTOR_PIN[i][1], (int)power[i]);
     }
+    /*digitalWrite(MOTOR_PIN[0][0], HIGH);
+    analogWrite(MOTOR_PIN[0][1], 0);
+    digitalWrite(MOTOR_PIN[1][0], HIGH);
+    analogWrite(MOTOR_PIN[1][1], 0);
+    digitalWrite(MOTOR_PIN[2][0], HIGH);
+    analogWrite(MOTOR_PIN[2][1], 0);
+    digitalWrite(MOTOR_PIN[3][0], HIGH);
+    analogWrite(MOTOR_PIN[3][1], 0);*/
 }
 
 void Motor::stop() {

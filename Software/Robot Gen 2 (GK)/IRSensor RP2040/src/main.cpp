@@ -25,9 +25,8 @@ void setup() {
 
 void loop() {
     ir.IR_get();
-
-    // ir.angle_read();
     ir.IRpin_read();
+    // ir.angle_read();
     delay(100);
     // ir.radius_read();
 

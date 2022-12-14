@@ -13,7 +13,7 @@ void setup() {
 
 void loop() {
     if (motor.c == 0) {
-        motor.speed = motor.default_speed;
+        motor.speed = 0;
         motor.cal();
     } else {
         motor.speed = motor.default_speed;
@@ -23,7 +23,7 @@ void loop() {
 
 void setup1() {
     Serial1.begin(115200);
-    delay(5000);
+    delay(7000);
 }
 
 void loop1() {

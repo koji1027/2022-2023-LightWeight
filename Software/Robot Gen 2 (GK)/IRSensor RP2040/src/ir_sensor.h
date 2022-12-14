@@ -6,10 +6,10 @@
 
 #define IR_NUM 16
 #define IR_CUR_MAX 1023
-#define s0 2
-#define s1 3
-#define s2 4
-#define s3 5
+#define s0 D2
+#define s1 D3
+#define s2 D4
+#define s3 D5
 #define SIG_pin A1
 #define kLPF 0.2
 // MovingAverage ave(100);
@@ -92,6 +92,11 @@ void IR::begin() {
         unit_cos[i] = cos(unit_angle[i]);
         unit_sin[i] = sin(unit_angle[i]);
     }
+    pinMode(s0, OUTPUT);
+    pinMode(s1, OUTPUT);
+    pinMode(s2, OUTPUT);
+    pinMode(s3, OUTPUT);
+    pinMode(SIG_pin, INPUT);
 }
 
 void IR::IR_get() {
@@ -133,11 +138,11 @@ void IR::IR_get() {
 }
 
 void IR::IRpin_read() {
-    for (int i = 0; i < IR_NUM; i++) {
+    /*for (int i = 0; i < IR_NUM; i++) {
         Serial.print(i);
         Serial.print("\t");
     }
-    Serial.println();
+    Serial.println();*/
     for (int i = 0; i < IR_NUM; i++) {
         Serial.print(IR_Cur[i]);
         Serial.print("\t");
