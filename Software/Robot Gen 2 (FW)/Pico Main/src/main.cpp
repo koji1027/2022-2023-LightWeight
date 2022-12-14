@@ -10,9 +10,16 @@ Line line;
 Gyro gyro;
 
 void circulate();
+void linetrace();
 
 float ir_angle = 0.0;
 float circulate_angle = 0.0;
+float linetrace_angle = 0.0;
+int send_gyro = 0.0;
+int send_move = 0.0;
+int line_flag = 0; // 左:1 右:2
+int color[3] = {255, 255, 255};
+int brightness = 254;
 
 void setup() {
     // put your setup code here, to run once:
@@ -26,7 +33,7 @@ void setup() {
 void loop() {
     gyro.read();
     gyro.calcAngle();
-    set_led();
+    set_led(color,brightness);
     line.read();
     // Serial.println(line.line_theta);
     // line.print();
@@ -54,14 +61,16 @@ void loop1() {
     Serial.print("\t");
     Serial.println(circulate_angle);
 
-    int send_gyro = (gyro.angle + PI) * 100;
-    int send_move = (ir_angle + PI) * 100;
+    send_gyro = (gyro.angle + PI) * 100;
+    send_move = (ir_angle + PI) * 100;
     int c = 0;  // 1:line, 0:ir
     if (line.entire_sensor_state == true) {
-        send_move = (line.line_theta + PI) * 100;
+        // send_move = (line.line_theta + PI) * 100;
+        linetrace();
         c = 1;
     } else {
         send_move = (circulate_angle + PI) * 100;
+        line_flag = 0;
         c = 0;
     }
     byte data[5];  //[0][1]:gyro, [2][3]:move
@@ -86,6 +95,41 @@ void circulate() {
             circulate_angle = circulate_angle + PI * 2;
         }
     } else {
-        circulate_angle = 0;
+        circulate_angle = ir_angle;
     }
+}
+
+void linetrace(){
+        if ((line.line_theta > -PI/4 && line.line_theta < PI/4) ||
+        line.line_theta > PI*3/4 || line.line_theta < -PI*3/4){
+            send_move = (line.line_theta + PI) * 100;
+        }
+        else if(line.line_theta < 0){
+            if (line_flag == 2){
+                send_move = (-PI/2 + PI) * 100;
+            }
+            else if(ir_angle < 0){
+                if(ir_angle > -PI/3){
+                    send_move = (0 + PI) * 100;
+                }
+                else if(ir_angle < -PI/4){
+                    send_move = (PI + PI) * 100;
+                }
+                line_flag = 1;
+            }
+        }
+        else if(line.line_theta > 0){
+            if (line_flag == 1){
+                send_move = (PI/2 + PI) * 100;
+            }
+            else if(ir_angle > 0){
+                if(ir_angle < PI/3){
+                    send_move = (0 + PI) * 100;
+                }
+                else if(ir_angle > PI/4){
+                    send_move = (PI + PI) * 100;
+                }
+                line_flag = 2;
+            }
+        }
 }
