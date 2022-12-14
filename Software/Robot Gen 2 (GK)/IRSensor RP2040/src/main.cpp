@@ -26,7 +26,9 @@ void setup() {
 void loop() {
     ir.IR_get();
 
+    // ir.angle_read();
     ir.IRpin_read();
+    delay(100);
     // ir.radius_read();
 
     int a = (ir.angle_PI * PI + PI) * 100;
@@ -35,6 +37,5 @@ void loop() {
     data[1] = byte(a >> 8);
     Serial1.write(255);
     Serial1.write(data, 2);
-    delay(100);
-    //Serial.println("Boys Be Ambitious.");
+    // Serial.println("Boys Be Ambitious.");
 }

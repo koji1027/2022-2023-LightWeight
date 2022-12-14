@@ -24,10 +24,17 @@ class Gyro {
 
 void Gyro::begin() {
     Wire.setClock(400000);
+    Wire.setSCL(D5);
+    Wire.setSDA(D4);
     Wire.begin();
 
     Wire.beginTransmission(0x68);
-    Wire.write(0x6B);
+    Wire.write(0x75);
+    Wire.write(0x00);
+    Wire.endTransmission();
+
+    Wire.beginTransmission(0x68);
+    Wire.write(0x6B);  // MPU6050_PWR_MGMT_1レジスタの設定
     Wire.write(0x00);
     Wire.endTransmission();
     // ジャイロセンサー初期設定
@@ -67,12 +74,15 @@ void Gyro::calibration() {
 
 void Gyro::read() {
     Wire.beginTransmission(0x68);
-    Wire.write(0x47);
-    Wire.endTransmission();
-    Wire.requestFrom(0x68, 2);
+    Wire.write(0x3B);
+    Wire.endTransmission(false);
+    Wire.requestFrom(0x68, 14, true);
 
-    while (Wire.available() < 2)
+    while (Wire.available() < 14)
         ;
+    for (int i = 0; i < 12; i++) {
+        Wire.read();
+    }
     gzRaw = Wire.read() << 8 | Wire.read();
     gzRaw -= gzRawOffset;
     gzRaw = fmod(gzRaw, 65536);

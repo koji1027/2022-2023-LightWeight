@@ -20,10 +20,11 @@ void setup() {
     gyro.calibration();
     led.begin();
     line.begin();
-    pinMode(D18, INPUT_PULLUP);  // 機能する
+    /*pinMode(D18, INPUT_PULLUP);  // 機能する
     pinMode(D19, INPUT_PULLUP);  // 機能しない
     pinMode(D20, INPUT_PULLUP);  // 機能する
     pinMode(D21, INPUT_PULLUP);  // 機能しない
+    */
 }
 
 void loop() {
@@ -32,6 +33,7 @@ void loop() {
     line.read();
     set_led(color, brightness);
     // Serial.println(line.line_theta);
+    Serial.println(gyro.angle);
     // line.print();
 }
 
@@ -72,6 +74,7 @@ void loop1() {
     motor.write(255);
     motor.write(data, 5);
 
+    /*
     if (!digitalRead(D18)) {
         Serial.println("Botton 0 pressed");
         color[0] = 255;
@@ -94,4 +97,5 @@ void loop1() {
     if (!digitalRead(D21)) {
         Serial.println("Botton 3 pressed");
     }
+    */
 }

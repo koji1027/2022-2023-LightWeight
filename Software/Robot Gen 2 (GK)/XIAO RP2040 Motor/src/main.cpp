@@ -38,7 +38,7 @@ void loop1() {
             data[4] = Serial1.read();
             int a = data[0] + (data[1] << 8);
             motor.gyro_angle = (a / 100.0) - PI;
-            // Serial.println(motor.gyro_angle);
+            Serial.println(motor.gyro_angle);
             int b = data[2] + (data[3] << 8);
             motor.c = data[4];  // 1:line, 0:ir
             if (motor.c == 1) {
