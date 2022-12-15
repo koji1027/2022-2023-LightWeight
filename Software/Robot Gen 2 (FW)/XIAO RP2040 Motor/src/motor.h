@@ -11,7 +11,7 @@
 class Motor {
    public:
     float gyro_angle = 0.0;
-    float move_angle = -PI / 2.0;
+    float move_angle = 0.0;
     float machine_angle = 0.0;
     int default_speed = 100;
     int speed;
@@ -78,6 +78,7 @@ void Motor::cal() {
     I = I + Ki * diff * dt;
     pre_diff = diff;
     float PID = P + D + I;
+    PID *= -1;
     for (int i = 0; i < 4; i++) {
         power[i] += PID;
         power[i] = constrain(power[i], -200.0, 200.0);
