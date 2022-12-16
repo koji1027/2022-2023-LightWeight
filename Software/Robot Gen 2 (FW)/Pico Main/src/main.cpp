@@ -18,6 +18,7 @@ float linetrace_angle = 0.0;
 int send_gyro = 0.0;
 int send_move = 0.0;
 int line_flag = 0;  // 左:1 右:2
+int line_flag_count = 0;
 int color[3] = {255, 255, 255};
 int brightness = 254;
 
@@ -55,9 +56,9 @@ void loop1() {
         // Serial.println(ir_angle);
     }
     circulate();
-    Serial.print(ir_angle);
-    Serial.print("\t");
-    Serial.println(circulate_angle);
+
+    //Serial.println(gyro.angle);
+    Serial.println(line_flag);
 
     send_gyro = (gyro.angle + PI) * 100;
     send_move = (ir_angle + PI) * 100;
@@ -66,10 +67,15 @@ void loop1() {
         send_move = (line.line_theta + PI) * 100;
         // linetrace();
         c = 1;
+        line_flag_count = 0;
     } else {
         send_move = (circulate_angle + PI) * 100;
-        line_flag = 0;
         c = 0;
+        line_flag_count++;
+        if (line_flag_count == 100){
+            line_flag = 0;
+            line_flag_count = 0;
+        }
     }
     byte data[5];  //[0][1]:gyro, [2][3]:move
     data[0] = byte(send_gyro);
@@ -103,23 +109,23 @@ void linetrace() {
         send_move = (line.line_theta + PI) * 100;
     } else if (line.line_theta < 0) {
         if (line_flag == 2) {
-            send_move = (-PI / 2 + PI) * 100;
+            send_move = -PI / 2 * 100;
         } else if (ir_angle < 0) {
             if (ir_angle > -PI / 3) {
-                send_move = (0 + PI) * 100;
+                send_move = 0 * 100;
             } else if (ir_angle < -PI / 4) {
-                send_move = (PI + PI) * 100;
+                send_move = PI * 100;
             }
             line_flag = 1;
         }
     } else if (line.line_theta > 0) {
         if (line_flag == 1) {
-            send_move = (PI / 2 + PI) * 100;
+            send_move = PI / 2 * 100;
         } else if (ir_angle > 0) {
             if (ir_angle < PI / 3) {
-                send_move = (0 + PI) * 100;
+                send_move = 0 * 100;
             } else if (ir_angle > PI / 4) {
-                send_move = (PI + PI) * 100;
+                send_move = PI * 100;
             }
             line_flag = 2;
         }
