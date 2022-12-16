@@ -63,8 +63,8 @@ void loop1() {
     send_move = (ir_angle + PI) * 100;
     int c = 0;  // 1:line, 0:ir
     if (line.entire_sensor_state == true) {
-        // send_move = (line.line_theta + PI) * 100;
-        linetrace();
+        send_move = (line.line_theta + PI) * 100;
+        // linetrace();
         c = 1;
     } else {
         send_move = (circulate_angle + PI) * 100;

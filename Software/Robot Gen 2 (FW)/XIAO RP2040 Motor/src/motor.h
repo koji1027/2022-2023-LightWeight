@@ -46,7 +46,6 @@ void Motor::begin() {
 void Motor::cal() {
     float power[4] = {0.0, -1.0, -1.0, -1.0};
     if (speed != 0) {
-
         float vx = speed * sin(move_angle);
         float vy = speed * cos(move_angle);
         for (int i = 0; i < 4; i++) {
@@ -79,7 +78,7 @@ void Motor::cal() {
     pre_diff = diff;
     float PID = P + D + I;
     for (int i = 0; i < 4; i++) {
-        power[i] += PID;
+        power[i] -= PID;
         power[i] = constrain(power[i], -200.0, 200.0);
     }
     for (int i = 0; i < 4; i++) {

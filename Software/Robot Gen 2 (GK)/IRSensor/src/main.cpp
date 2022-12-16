@@ -10,7 +10,6 @@ void setup() {
     pinMode(s2, OUTPUT);
     pinMode(s3, OUTPUT);
     pinMode(SIG_pin, INPUT);
-    pinMode(A0, INPUT);
 
     digitalWrite(s0, LOW);
     digitalWrite(s1, LOW);
@@ -18,17 +17,18 @@ void setup() {
     digitalWrite(s3, LOW);
 
     Serial.begin(115200);
-    Serial1.begin(9600);
+    Serial1.begin(115200);
 
     ir.begin();
 }
 
 void loop() {
     ir.IR_get();
-    ir.IRpin_read();
-    // ir.angle_read();
-    delay(100);
-    // ir.radius_read();
+
+    ir.angle_read();
+    // ir.IRpin_read();
+    //   ir.radius_read();
+    //   ir.IRonepin_read(1);
 
     int a = (ir.angle_PI * PI + PI) * 100;
     byte data[2];
@@ -36,5 +36,6 @@ void loop() {
     data[1] = byte(a >> 8);
     Serial1.write(255);
     Serial1.write(data, 2);
+    delay(100);
     // Serial.println("Boys Be Ambitious.");
 }

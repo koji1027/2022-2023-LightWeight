@@ -7,6 +7,7 @@
 #include "line.h"
 
 SerialPIO motor(22, 16, 32);
+SerialPIO ir(1, 0, 32);
 Line line;
 Gyro gyro;
 
@@ -30,44 +31,41 @@ void setup() {
 }
 
 void loop() {
-    // gyro.read();
-    // gyro.calcAngle();
     gyro.getEuler();
     Serial.println(gyro.angle);
+    // Serial.println(ir_angle);
     line.read();
     set_led(color, brightness);
     // Serial.println(line.line_theta);
-    // line.print();
 }
 
 void setup1() {
     motor.begin(115200);
-    Serial1.begin(9600);
+    ir.begin(115200);
 }
 
 void loop1() {
-    if (Serial1.available() > 2) {
-        int recv_data = Serial1.read();
+    if (ir.available() > 2) {
+        int recv_data = ir.read();
         if (recv_data == 255) {
             int data[2];
-            data[0] = Serial1.read();
-            data[1] = Serial1.read();
+            data[0] = ir.read();
+            data[1] = ir.read();
             int a = data[0] + (data[1] << 8);
             ir_angle = (a / 100.0) - PI;
         }
-        // Serial.println(ir_angle);
     }
 
     int a = (gyro.angle + PI) * 100;
     int b = (ir_angle + PI) * 100;
     int c = 0;  // 1:line, 0:ir
-    if (line.entire_sensor_state == true) {
+    /*if (line.entire_sensor_state == true) {
         b = (line.line_theta + PI) * 100;
         c = 1;
     } else {
         b = (ir_angle + PI) * 100;
         c = 0;
-    }
+    }*/
     byte data[5];  //[0][1]:gyro, [2][3]:go
     data[0] = byte(a);
     data[1] = byte(a >> 8);

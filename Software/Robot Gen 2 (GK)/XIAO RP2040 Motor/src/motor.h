@@ -11,18 +11,18 @@
 class Motor {
    public:
     float gyro_angle = 0.0;
-    float go_angle = -PI / 2.0;
+    float move_angle = -PI / 2.0;
     float machine_angle = 0.0;
     int default_speed = 100;
     int speed;
-    int c = 0;  // 1:line, 0:ir
+    int c = 0;  // 1:line, 0:move
     void begin();
     void cal();
     void move(float power[4]);
     void stop();
 
    private:
-    const int MOTOR_PIN[4][2] = {{D1, D0}, {D3, D2}, {D8, D9}, {D4, D5}};
+    const int MOTOR_PIN[4][2] = {{D2, D3}, {D0, D1}, {D8, D9}, {D4, D5}};
     const float MOTOR_POS[4][2] = {
         {-1.0, 1.0}, {1.0, 1.0}, {1.0, -1.0}, {-1.0, -1.0}};
     unsigned long long pre_time = 0;
@@ -46,8 +46,8 @@ void Motor::begin() {
 void Motor::cal() {
     float power[4] = {0.0, -1.0, -1.0, -1.0};
     if (speed != 0) {
-        float vx = speed * sin(go_angle);
-        float vy = speed * cos(go_angle);
+        float vx = speed * sin(move_angle);
+        float vy = speed * cos(move_angle);
         for (int i = 0; i < 4; i++) {
             power[i] = vx * MOTOR_POS[i][0] + vy * MOTOR_POS[i][1];
         }
@@ -78,7 +78,7 @@ void Motor::cal() {
     pre_diff = diff;
     float PID = P + D + I;
     for (int i = 0; i < 4; i++) {
-        power[i] += PID;
+        power[i] -= PID;
         power[i] = constrain(power[i], -200.0, 200.0);
     }
     for (int i = 0; i < 4; i++) {
@@ -90,25 +90,16 @@ void Motor::cal() {
 
 void Motor::move(float power[4]) {
     for (int i = 0; i < 4; i++) {
-        //power[i] *= -1;
         power[i] += 256;
         digitalWrite(MOTOR_PIN[i][0], HIGH);
         analogWrite(MOTOR_PIN[i][1], (int)power[i]);
     }
-    /*digitalWrite(MOTOR_PIN[0][0], HIGH);
-    analogWrite(MOTOR_PIN[0][1], 0);
-    digitalWrite(MOTOR_PIN[1][0], HIGH);
-    analogWrite(MOTOR_PIN[1][1], 0);
-    digitalWrite(MOTOR_PIN[2][0], HIGH);
-    analogWrite(MOTOR_PIN[2][1], 0);
-    digitalWrite(MOTOR_PIN[3][0], HIGH);
-    analogWrite(MOTOR_PIN[3][1], 0);*/
 }
 
 void Motor::stop() {
     for (int i = 0; i < 4; i++) {
         digitalWrite(MOTOR_PIN[i][0], LOW);
-        analogWrite(MOTOR_PIN[i][1], 0);
+        analogWrite(MOTOR_PIN[i][1], 256);
     }
 }
 

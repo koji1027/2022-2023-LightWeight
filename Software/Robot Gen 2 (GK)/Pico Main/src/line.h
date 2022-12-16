@@ -99,11 +99,7 @@ void Line::read() {
 
 void Line::print() {
     // デバッグ用
-    for (int i = 0; i < 16; i++) {
-        Serial.print(sensor_value[i]);
-        Serial.print("\t");
-    }
-    Serial.println();
+    Serial.println(line_theta);
 }
 
 #endif

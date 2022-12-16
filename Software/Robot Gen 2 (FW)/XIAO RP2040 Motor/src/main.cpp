@@ -8,14 +8,15 @@ void setup() {
     // put your setup code here, to run once:
     Serial.begin(115200);
     motor.begin();
-    delay(5000);
+    delay(2000);
 }
 
 void loop() {
-    if (motor.c == 0) { //ライン踏んでないとき
+    // Serial.println(motor.gyro_angle);
+    if (motor.c == 0) {  // ライン踏んでないとき
         motor.speed = motor.default_speed;
         motor.cal();
-    } else { //ライン踏んだとき
+    } else {  // ライン踏んだとき
         motor.speed = motor.default_speed;
         motor.cal();
     }
@@ -23,7 +24,7 @@ void loop() {
 
 void setup1() {
     Serial1.begin(115200);
-    delay(5000);
+    delay(2000);
 }
 
 void loop1() {
@@ -38,7 +39,6 @@ void loop1() {
             data[4] = Serial1.read();
             int recv_gyro = data[0] + (data[1] << 8);
             motor.gyro_angle = (recv_gyro / 100.0) - PI;
-            // Serial.println(motor.gyro_angle);
             int recv_move = data[2] + (data[3] << 8);
             motor.c = data[4];  // 1:line, 0:move
             if (motor.c == 1) {
