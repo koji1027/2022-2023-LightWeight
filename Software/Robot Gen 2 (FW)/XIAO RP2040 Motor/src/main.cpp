@@ -15,6 +15,11 @@ void loop() {
     // Serial.println(motor.gyro_angle);
     if (motor.c == 0) {  // ライン踏んでないとき
         motor.speed = motor.default_speed;
+        if (abs(motor.move_angle) >= PI/4 && (motor.move_angle) < PI/2){
+            motor.speed = motor.default_speed * (abs(motor.move_angle) * 3 / PI - 1/2);
+        } else if (abs(motor.move_angle) < PI/4){
+            motor.speed = motor.default_speed / 4;
+        }
         motor.cal();
     } else {  // ライン踏んだとき
         motor.speed = motor.default_speed;

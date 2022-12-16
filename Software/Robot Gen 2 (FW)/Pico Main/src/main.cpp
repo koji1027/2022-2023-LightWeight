@@ -5,6 +5,8 @@
 #include "led.h"
 #include "line.h"
 
+#define LINE_FLAG_GOAL 100
+
 SerialPIO motor(22, 16, 32);
 Line line;
 Gyro gyro;
@@ -20,7 +22,7 @@ int send_move = 0.0;
 int line_flag = 0;  // 左:1 右:2
 int line_flag_count = 0;
 int color[3] = {255, 255, 255};
-int brightness = 254;
+int brightness = 255;
 
 void setup() {
     // put your setup code here, to run once:
@@ -57,8 +59,8 @@ void loop1() {
     }
     circulate();
 
-    //Serial.println(gyro.angle);
-    Serial.println(line_flag);
+    Serial.println(gyro.angle);
+    // Serial.println(line_flag);
 
     send_gyro = (gyro.angle + PI) * 100;
     send_move = (ir_angle + PI) * 100;
@@ -72,7 +74,7 @@ void loop1() {
         send_move = (circulate_angle + PI) * 100;
         c = 0;
         line_flag_count++;
-        if (line_flag_count == 100){
+        if (line_flag_count == LINE_FLAG_GOAL){
             line_flag = 0;
             line_flag_count = 0;
         }
@@ -88,12 +90,12 @@ void loop1() {
 }
 
 void circulate() {
-    if (ir_angle > 0.4) {
+    if (ir_angle > PI / 6) {
         circulate_angle = ir_angle + (PI / 3);
         if (circulate_angle > PI) {
             circulate_angle = circulate_angle - PI * 2;
         }
-    } else if (ir_angle < -0.4) {
+    } else if (ir_angle < -PI / 6) {
         circulate_angle = ir_angle - (PI / 3);
         if (circulate_angle < -PI) {
             circulate_angle = circulate_angle + PI * 2;

@@ -119,9 +119,10 @@ void IR::IR_get() {
         }
     }
     vector_XY = {0, 0};
-    for (int i = 0; i < 16; i++) {
-        vector_XY.x += IR_Cur_LPF[i] * unit_cos[i];
-        vector_XY.y += IR_Cur_LPF[i] * unit_sin[i];
+    for (int i = 0; i < 5; i++) {
+        int index = (maxIndex + i - 2) % IR_NUM;
+        vector_XY.x += IR_Cur_LPF[index] * unit_cos[index];
+        vector_XY.y += IR_Cur_LPF[index] * unit_sin[index];
     }
     // vector_RT.radius = sqrt(pow(vector_XY.x, 2.0) + pow(vector_XY.y, 2.0));
     //  now_radius = ave.updateData(vector_RT.radius);  // 半径

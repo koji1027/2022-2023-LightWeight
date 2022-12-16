@@ -53,12 +53,12 @@ void Gyro::begin() {
     mpu.initialize();
     devStatus = mpu.dmpInitialize();
 
-    mpu.setXGyroOffset(26);
-    mpu.setYGyroOffset(-2692);
-    mpu.setZGyroOffset(1410);
-    mpu.setXAccelOffset(111);
-    mpu.setYAccelOffset(15);
-    mpu.setZAccelOffset(-50);
+    mpu.setXGyroOffset(40);
+    mpu.setYGyroOffset(-2653);
+    mpu.setZGyroOffset(1394);
+    mpu.setXAccelOffset(107);
+    mpu.setYAccelOffset(19);
+    mpu.setZAccelOffset(-48);
 
     if (devStatus == 0) {
         mpu.CalibrateAccel(6);
