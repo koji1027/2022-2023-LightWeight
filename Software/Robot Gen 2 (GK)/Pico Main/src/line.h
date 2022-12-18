@@ -84,17 +84,19 @@ void Line::read() {
             entire_sensor_state = true;
         }
     }
-    float line_vector_x = 0.0;
-    float line_vector_y = 0.0;
-    for (int i = 0; i < 16; i++) {
-        if (sensor_state[i]) {
-            line_vector_x += SENSOR_X[i];
-            line_vector_y += SENSOR_Y[i];
+    if (entire_sensor_state) {
+        float line_vector_x = 0.0;
+        float line_vector_y = 0.0;
+        for (int i = 0; i < 16; i++) {
+            if (sensor_state[i]) {
+                line_vector_x += SENSOR_X[i];
+                line_vector_y += SENSOR_Y[i];
+            }
         }
+        line_vector[0] = line_vector_x;
+        line_vector[1] = line_vector_y;
+        line_theta = atan2(line_vector[0], line_vector[1]);
     }
-    line_vector[0] = line_vector_x;
-    line_vector[1] = line_vector_y;
-    line_theta = atan2(line_vector[0], line_vector[1]);
 }
 
 void Line::print() {

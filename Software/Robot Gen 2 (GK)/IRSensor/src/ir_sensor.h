@@ -108,7 +108,7 @@ void IR::IR_get() {
         }
         IR_Cur_LPF[i] = kLPF * IR_Cur[i] + (1 - kLPF) * IR_Cur_LPF[i];
     }
-    IR_Cur_LPF[2] = (IR_Cur_LPF[1] + IR_Cur_LPF[3])/2;
+    IR_Cur_LPF[2] = (IR_Cur_LPF[1] + IR_Cur_LPF[3]) / 2;
 
     int maxVal = 0;
     int maxIndex = 0;
@@ -119,9 +119,10 @@ void IR::IR_get() {
         }
     }
     vector_XY = {0, 0};
-    for (int i = 0; i < 16; i++) {
-        vector_XY.x += IR_Cur_LPF[i] * unit_cos[i];
-        vector_XY.y += IR_Cur_LPF[i] * unit_sin[i];
+    for (int i = 0; i < 5; i++) {
+        int index = (maxIndex + i - 2) % IR_NUM;
+        vector_XY.x += IR_Cur_LPF[index] * unit_cos[index];
+        vector_XY.y += IR_Cur_LPF[index] * unit_sin[index];
     }
     // vector_RT.radius = sqrt(pow(vector_XY.x, 2.0) + pow(vector_XY.y, 2.0));
     //  now_radius = ave.updateData(vector_RT.radius);  // 半径
@@ -149,9 +150,7 @@ void IR::IRpin_read() {
     Serial.println();
 }
 
-void IR::IRonepin_read(int pinnum) {
-    Serial.println(IR_Cur[pinnum]);
-}
+void IR::IRonepin_read(int pinnum) { Serial.println(IR_Cur[pinnum]); }
 
 void IR::radius_read() {
     Serial.print("radius: ");

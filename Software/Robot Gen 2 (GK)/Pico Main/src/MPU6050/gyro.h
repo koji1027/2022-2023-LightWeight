@@ -13,9 +13,15 @@ class Gyro {
    public:
     void begin();
     void getEuler();
+    void cal_vel();
     float angle = 0.0;
+    float vel_x = 0.0;
+    float vel_y = 0.0;
 
    private:
+    float pre_ax = 0.0;
+    float pre_ay = 0.0;
+    unsigned long long pre_time = 0;
     bool blinkState = false;
 
     bool dmpReady = false;
@@ -33,6 +39,9 @@ class Gyro {
     VectorFloat gravity;
     float euler[3];
     float ypr[3];
+    int16_t accelRaw[3];
+    int16_t gyroRaw[3];
+    float accel[3];
 
     uint8_t teapotPacket[14] = {'$', 0x02, 0, 0,    0,    0,    0,
                                 0,   0,    0, 0x00, 0x00, '\r', '\n'};
@@ -53,12 +62,12 @@ void Gyro::begin() {
     mpu.initialize();
     devStatus = mpu.dmpInitialize();
 
-    mpu.setXGyroOffset(240);
-    mpu.setYGyroOffset(-199);
-    mpu.setZGyroOffset(-21);
-    mpu.setXAccelOffset(-2201);
-    mpu.setYAccelOffset(347);
-    mpu.setZAccelOffset(689);
+    mpu.setXGyroOffset(244);
+    mpu.setYGyroOffset(-192);
+    mpu.setZGyroOffset(-25);
+    mpu.setXAccelOffset(-2215);
+    mpu.setYAccelOffset(361);
+    mpu.setZAccelOffset(717);
 
     if (devStatus == 0) {
         mpu.CalibrateAccel(6);
@@ -145,4 +154,26 @@ void Gyro::getEuler() {
     Serial.write(teapotPacket, 14);
     teapotPacket[11]++;
 #endif
+    mpu.getMotion6(&accelRaw[0], &accelRaw[1], &accelRaw[2], &gyroRaw[0],
+                   &gyroRaw[1], &gyroRaw[2]);
+    accel[0] = accelRaw[0] / 16384.0;
+    accel[1] = accelRaw[1] / 16384.0;
+    accel[2] = accelRaw[2] / 16384.0;
+}
+
+void Gyro::cal_vel() {
+    unsigned long long now = micros();
+    float dt = (now - pre_time) / 1000000.0;
+    pre_time = now;
+    vel_x -= (accel[0] + pre_ax) / 2 * dt;
+    vel_y += (accel[1] + pre_ay) / 2 * dt;
+    pre_ax = accel[0];
+    pre_ay = accel[1];
+    float theta = atan2(vel_y, vel_x);
+    Serial.print("vel_x: ");
+    Serial.print(vel_x);
+    Serial.print("\tvel_y: ");
+    Serial.print(vel_y);
+    Serial.print("\ttheta: ");
+    Serial.println(theta * 180 / PI);
 }

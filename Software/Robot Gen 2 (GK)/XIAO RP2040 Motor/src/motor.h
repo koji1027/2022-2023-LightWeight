@@ -6,10 +6,12 @@
 #define Kp 1.8
 #define Kd 0.00005
 #define Ki 0
+#define GK_Kp 2.0
 #define LPF 0.2
 
 class Motor {
    public:
+    int distance = 0;
     float gyro_angle = 0.0;
     float move_angle = -PI / 2.0;
     float machine_angle = 0.0;
@@ -48,6 +50,9 @@ void Motor::cal() {
     if (speed != 0) {
         float vx = speed * sin(move_angle);
         float vy = speed * cos(move_angle);
+        /*if (c == 0) {
+            vy = -speed / 3.0;
+        }*/
         for (int i = 0; i < 4; i++) {
             power[i] = vx * MOTOR_POS[i][0] + vy * MOTOR_POS[i][1];
         }
