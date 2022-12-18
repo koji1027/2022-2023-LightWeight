@@ -59,7 +59,7 @@ void loop1() {
     }
     circulate();
 
-    Serial.println(gyro.angle);
+    // Serial.println(gyro.angle);
     // Serial.println(line_flag);
 
     send_gyro = (gyro.angle + PI) * 100;
