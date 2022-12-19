@@ -8,28 +8,31 @@ void setup() {
     // put your setup code here, to run once:
     Serial.begin(115200);
     motor.begin();
-    delay(2000);
+    delay(3000);
 }
 
 void loop() {
     // Serial.println(motor.gyro_angle);
     if (motor.c == 0) {  // ライン踏んでないとき
         motor.speed = motor.default_speed;
+        /*
         if (abs(motor.move_angle) >= PI/4 && (motor.move_angle) < PI/2){
             motor.speed = motor.default_speed * (abs(motor.move_angle) * 3 / PI - 1/2);
         } else if (abs(motor.move_angle) < PI/4){
             motor.speed = motor.default_speed / 4;
         }
+        */
         motor.cal();
     } else {  // ライン踏んだとき
-        motor.speed = motor.default_speed;
+        motor.speed = 100;
         motor.cal();
     }
+    Serial.println(motor.c);
 }
 
 void setup1() {
     Serial1.begin(115200);
-    delay(2000);
+    delay(3000);
 }
 
 void loop1() {
