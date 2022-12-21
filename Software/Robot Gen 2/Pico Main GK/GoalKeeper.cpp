@@ -21,10 +21,7 @@ void setup() {
     // put your setup code here, to run once:
     Serial.begin(115200);
     gyro.begin();
-    
-    // gyro.calibration();
     line.begin();
-    // gyro.begin();
     pinMode(D18, INPUT_PULLUP);  // 機能する
     /*pinMode(D19, INPUT_PULLUP);  // 機能しない
     pinMode(D20, INPUT_PULLUP);  // 機能する
