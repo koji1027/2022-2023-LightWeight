@@ -47,6 +47,7 @@ void setup1() {
 }
 
 void loop1() {
+    Serial1.write(255);
     if (Serial1.available() > 2) {
         int recv_data = Serial1.read();
         if (recv_data == 255) {

@@ -24,7 +24,7 @@ void loop() {
         */
         motor.cal();
     } else {  // ライン踏んだとき
-        motor.speed = 100;
+        motor.speed = motor.default_speed;
         motor.cal();
     }
     Serial.println(motor.c);

@@ -20,27 +20,32 @@ bool start_flag = false;
 void setup() {
     // put your setup code here, to run once:
     Serial.begin(115200);
-    // gyro.begin();
+    gyro.begin();
+    
     // gyro.calibration();
     line.begin();
-    gyro.begin();
+    // gyro.begin();
     pinMode(D18, INPUT_PULLUP);  // 機能する
     /*pinMode(D19, INPUT_PULLUP);  // 機能しない
     pinMode(D20, INPUT_PULLUP);  // 機能する
     pinMode(D21, INPUT_PULLUP);  // 機能しない
     */
+   /*
     while (!start_flag) {
         if (!digitalRead(D18)) {
             start_flag = true;
         }
     }
+    */
     led.begin();
 }
 
 void loop() {
+    
     gyro.getEuler();
+    Serial.println(gyro.angle);
+    // 
     // gyro.cal_vel();
-    //  Serial.println(ir_angle);
     line.read();
     set_led(color, brightness);
 }
@@ -52,20 +57,17 @@ void setup1() {
 }
 
 void loop1() {
-    if (start_flag) {
-        ir.write(255);
-        while (start_flag) {
-            if (ir.available() > 3) {
+    ir.write(255);
+            if (ir.available() > 2) {
                 int recv_data = ir.read();
                 if (recv_data == 255) {
-                    int data[3];
+                    int data[2];
                     data[0] = ir.read();
                     data[1] = ir.read();
-                    data[2] = ir.read();
                     int a = data[0] + (data[1] << 8);
                     ir_angle = (a / 100.0) - PI;
-                    distance = data[2];
-                }
+                    // Serial.println(ir_angle);
+                } 
             }
 
             int a = (gyro.angle + PI) * 100;
@@ -78,15 +80,12 @@ void loop1() {
                 b = (ir_angle + PI) * 100;
                 c = 0;
             }
-            byte data[6];  //[0][1]:gyro, [2][3]:go
+            byte data[5];  //[0][1]:gyro, [2][3]:go
             data[0] = byte(a);
             data[1] = byte(a >> 8);
             data[2] = byte(b);
             data[3] = byte(b >> 8);
             data[4] = byte(c);
-            data[5] = byte(distance);
             motor.write(255);
-            motor.write(data, 6);
-        }
-    }
+            motor.write(data, 5);  
 }
