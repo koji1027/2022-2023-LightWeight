@@ -5,6 +5,7 @@
 #include "led.h"
 #include "line.h"
 
+#define LINE_Kp PI / 54.0
 #define LINE_FLAG_GOAL 100
 
 SerialPIO motor(22, 16, 32);
@@ -13,7 +14,7 @@ Line line;
 Gyro gyro;
 
 void circulate();
-void linetrace();
+int linetrace();
 
 float ir_angle = 0.0;
 float circulate_angle = 0.0;
@@ -37,8 +38,6 @@ void loop() {
     gyro.getEuler();
     set_led(color, brightness);
     line.read();
-    // Serial.println(gyro.angle);
-    // Serial.println(line.line_theta);
     // line.print();
 }
 
@@ -58,8 +57,7 @@ void loop1() {
             int a = data[0] + (data[1] << 8);
             ir_angle = (a / 100.0) - PI;
         }
-         Serial.println(ir_angle);
-    } 
+    }
     circulate();
 
     // Serial.println(gyro.angle);
@@ -67,17 +65,16 @@ void loop1() {
 
     send_gyro = (gyro.angle + PI) * 100;
     send_move = (ir_angle + PI) * 100;
-    int c = 0;  // 1:line, 0:ir
+    int c = 0;  // 2:stop, 1:line, 0:ir
     if (line.entire_sensor_state == true) {
-        send_move = (line.line_theta + PI) * 100;
-        // linetrace();
-        c = 1;
+        // send_move = (line.line_theta + PI) * 100;
+        c = linetrace();
         line_flag_count = 0;
     } else {
         send_move = (circulate_angle + PI) * 100;
         c = 0;
         line_flag_count++;
-        if (line_flag_count == LINE_FLAG_GOAL){
+        if (line_flag_count == LINE_FLAG_GOAL) {
             line_flag = 0;
             line_flag_count = 0;
         }
@@ -108,8 +105,111 @@ void circulate() {
     }
 }
 
-void linetrace() {
-    if ((line.line_theta > -PI / 4 && line.line_theta < PI / 4) ||
+int linetrace() {
+    if (line.line_theta > PI / 6.0 * 5.0 || line.line_theta < -PI / 6.0 * 5.0) {
+        if (ir_angle > PI / 6.0 && ir_angle <= PI / 2.0) {
+            send_move = (PI / 12.0 * 5.0 + PI) * 100;
+            return 0;
+        } else if (ir_angle <= -PI / 6.0 && ir_angle > -PI / 2.0) {
+            send_move = (-PI / 12.0 * 5.0 + PI) * 100;
+            return 0;
+        } else if (ir_angle > -PI / 6.0 && ir_angle <= PI / 6.0) {
+            send_move = (ir_angle + PI) * 100;
+            return 0;
+        } else {
+            send_move = (line.line_theta + PI) * 100;
+            return 1;
+        }
+
+    } else if (abs(line.line_theta) < PI / 6.0) {
+        send_move = (line.line_theta + PI) * 100;
+        return 1;
+    } else if (line.line_theta > PI / 3.0 && line.line_theta < PI / 3.0 * 2.0) {
+        if (ir_angle > PI / 9.0 * 4.0 && ir_angle <= PI / 9.0 * 5.0) {
+            send_move = 0;
+            // Serial.println("1");
+            return 2;
+        } else if (ir_angle > PI / 12.0 && ir_angle <= PI / 9.0 * 4.0) {
+            float diff = 54 - line.line_length;
+            send_move = (-LINE_Kp * diff + PI) * 100;
+            return 0;
+            // Serial.println("2");
+        } else if (ir_angle > PI / 9.0 * 5.0 && ir_angle <= PI / 12.0 * 11.0) {
+            float diff = 54 - line.line_length;
+            send_move = (-PI + LINE_Kp * diff) * 100;
+            return 0;
+            // Serial.println("3");
+        } else if (ir_angle > -PI / 12.0 && ir_angle <= PI / 12.0) {
+            send_move = (ir_angle + PI) * 100;
+            // Serial.println("4");
+            return 0;
+        } else if (ir_angle <= -PI / 12.0 * 5.0) {
+            send_move = ((ir_angle + PI / 3.0) + PI) * 100;
+            // Serial.println("5");
+            return 0;
+        } else if (ir_angle > PI / 12.0 * 5.0) {
+            send_move = (ir_angle - PI * 2.0 + PI / 3.0 + PI) * 100;
+            // Serial.println("5");
+            return 0;
+        } else if (ir_angle <= -PI / 12.0 && ir_angle > -PI / 3.0 * 2.0) {
+            send_move = (circulate_angle + PI) * 100;
+            // Serial.println("6");
+            return 0;
+        } else if (ir_angle <= -PI / 3.0 * 2.0 && ir_angle > -PI / 12.0 * 5.0) {
+            send_move = (-PI / 12.0 * 11.0 + PI) * 100;
+            // Serial.println("7");
+            return 0;
+        } else {
+            send_move = (line.line_theta + PI) * 100;
+            // Serial.println("8");
+            return 1;
+        }
+    } else if (line.line_theta < -PI / 3.0 &&
+               line.line_theta > -PI / 3.0 * 2.0) {
+        if (ir_angle < -PI / 9.0 * 4.0 && ir_angle >= -PI / 9.0 * 5.0) {
+            send_move = 0;
+            // Serial.println("1");
+            return 2;
+        } else if (ir_angle < -PI / 12.0 && ir_angle >= -PI / 9.0 * 4.0) {
+            float diff = 54 - line.line_length;
+            send_move = (LINE_Kp * diff + PI) * 100;
+            return 0;
+            // Serial.println("2");
+        } else if (ir_angle < -PI / 9.0 * 5.0 && ir_angle >= -PI / 12.0 * 5.0) {
+            float diff = 54 - line.line_length;
+            send_move = (PI - LINE_Kp * diff) * 100;
+            return 0;
+            // Serial.println("3");
+        } else if (ir_angle < PI / 12.0 && ir_angle >= -PI / 12.0) {
+            send_move = (ir_angle + PI) * 100;
+            // Serial.println("4");
+            return 0;
+        } else if (ir_angle >= PI / 12.0 * 5.0) {
+            send_move = ((ir_angle - PI / 3.0) + PI) * 100;
+            // Serial.println("5");
+            return 0;
+        } else if (ir_angle < -PI / 12.0 * 5.0) {
+            send_move = (ir_angle + PI * 2.0 - PI / 3.0 + PI) * 100;
+            // Serial.println("5");
+            return 0;
+        } else if (ir_angle >= PI / 12.0 && ir_angle < PI / 3.0 * 2.0) {
+            send_move = (circulate_angle + PI) * 100;
+            // Serial.println("6");
+            return 0;
+        } else if (ir_angle >= PI / 3.0 * 2.0 && ir_angle < PI / 12.0 * 5.0) {
+            send_move = (PI / 12.0 * 11.0 + PI) * 100;
+            // Serial.println("7");
+            return 0;
+        } else {
+            send_move = (line.line_theta + PI) * 100;
+            // Serial.println("8");
+            return 1;
+        }
+    } else {
+        send_move = (line.line_theta + PI) * 100;
+        return 1;
+    }
+    /*if ((line.line_theta > -PI / 4 && line.line_theta < PI / 4) ||
         line.line_theta > PI * 3 / 4 || line.line_theta < -PI * 3 / 4) {
         send_move = (line.line_theta + PI) * 100;
     } else if (line.line_theta < 0) {
@@ -134,5 +234,5 @@ void linetrace() {
             }
             line_flag = 2;
         }
-    }
+    }*/
 }

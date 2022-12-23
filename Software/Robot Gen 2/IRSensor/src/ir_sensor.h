@@ -6,6 +6,7 @@
 
 #define IR_NUM 16
 #define IR_CUR_MAX 1023
+#define IR_SENSOR_RADIUS 5.0
 #define s0 2
 #define s1 3
 #define s2 4
@@ -74,6 +75,7 @@ class IR {
     // int MAX_R = 1600;
     int IR_Cur[IR_NUM];
     int IR_Cur_LPF[IR_NUM];
+    float IR_Cur_Length[IR_NUM];
     float IR_IN[IR_NUM] = {
         0,           -PI / 8,     -PI * 2 / 8, -PI * 3 / 8,
         -PI * 4 / 8, -PI * 5 / 8, -PI * 6 / 8, -PI * 7 / 8,
@@ -93,6 +95,11 @@ void IR::begin() {
         unit_cos[i] = cos(unit_angle[i]);
         unit_sin[i] = sin(unit_angle[i]);
     }
+    pinMode(s0, OUTPUT);
+    pinMode(s1, OUTPUT);
+    pinMode(s2, OUTPUT);
+    pinMode(s3, OUTPUT);
+    pinMode(SIG_pin, INPUT);
 }
 
 void IR::IR_get() {
@@ -101,15 +108,16 @@ void IR::IR_get() {
         for (int j = 0; j < 4; j++) {
             digitalWrite(controlPin[j], muxChannel[i][j]);
         }
-        delayMicroseconds(10);
+        delayMicroseconds(1);
         IR_Cur[i] = IR_CUR_MAX - analogRead(SIG_pin);
         if (IR_Cur[i] > 1000) {
             IR_Cur[i] = 0;
         }
         IR_Cur_LPF[i] = kLPF * IR_Cur[i] + (1 - kLPF) * IR_Cur_LPF[i];
+        IR_Cur_Length[i] = (IR_Cur_LPF[i] - 814.39) / (-2.175);
     }
-    IR_Cur_LPF[2] = (IR_Cur_LPF[1] + IR_Cur_LPF[3])/2;
-
+    IR_Cur_LPF[2] = (IR_Cur_LPF[1] + IR_Cur_LPF[3]) / 2;
+    IR_Cur_Length[2] = (IR_Cur_LPF[2] - 814.39) / (-2.175);
     int maxVal = 0;
     int maxIndex = 0;
     for (int i = 0; i < IR_NUM; i++) {
@@ -126,12 +134,14 @@ void IR::IR_get() {
     }
     // vector_RT.radius = sqrt(pow(vector_XY.x, 2.0) + pow(vector_XY.y, 2.0));
     //  now_radius = ave.updateData(vector_RT.radius);  // 半径
-    vector_RT.radius = -0.4679 * IR_Cur_LPF[maxIndex] + 387.35;
     if (vector_RT.radius < 1) {
         vector_RT.radius = 1;
     }
     now_radius = kLPF * vector_RT.radius + (1 - kLPF) * now_radius;
     vector_RT.angle = atan2(vector_XY.y, vector_XY.x);
+    vector_RT.radius = (IR_SENSOR_RADIUS + IR_Cur_Length[maxIndex]) /
+                       cos(vector_RT.angle - unit_angle[maxIndex]);
+    now_radius = vector_RT.radius;
     angle_PI = vector_RT.angle / PI;  // 角度
 }
 
@@ -150,9 +160,7 @@ void IR::IRpin_read() {
     Serial.println();
 }
 
-void IR::IRonepin_read(int pinnum) {
-    Serial.println(IR_Cur[pinnum]);
-}
+void IR::IRonepin_read(int pinnum) { Serial.println(IR_Cur[pinnum]); }
 
 void IR::radius_read() {
     Serial.print("radius: ");

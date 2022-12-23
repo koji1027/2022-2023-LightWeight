@@ -4,6 +4,7 @@
 
 #define SENSOR_NUM 32
 #define THRESHOLD 400
+#define LINE_RADIUS 54.0
 
 class Line {
    public:
@@ -13,6 +14,7 @@ class Line {
     bool entire_sensor_state = false;
     float line_vector[2] = {0.0};
     float line_theta = 0.0;
+    float line_length = 0.0;
 
    private:
     const int COM_PIN[2] = {A0, A1};
@@ -68,7 +70,7 @@ void Line::read() {
         }
         delayMicroseconds(10);
         sensor_value[i] = analogRead(COM_PIN[0]);
-        sensor_value[i + 16] = analogRead(COM_PIN[1]);
+        sensor_value[i + 16] = 0;
     }
     sensor_value[18] = 0;
     for (int i = 0; i < SENSOR_NUM; i++) {
@@ -96,6 +98,14 @@ void Line::read() {
         line_vector[0] = line_vector_x;
         line_vector[1] = line_vector_y;
         line_theta = atan2(line_vector[0], line_vector[1]);
+        float line_sensor_theta = 0.0;
+        for (int i = 0; i < 16; i++) {
+            if (sensor_state[i]) {
+                line_sensor_theta = SENSOR_THETA[i];
+                break;
+            }
+        }
+        line_length = LINE_RADIUS * cos(line_sensor_theta - line_theta);
     }
 }
 

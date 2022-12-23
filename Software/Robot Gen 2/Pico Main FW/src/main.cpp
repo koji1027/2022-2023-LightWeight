@@ -36,9 +36,7 @@ void loop() {
     gyro.getEuler();
     set_led(color, brightness);
     line.read();
-    // Serial.println(gyro.angle);
-    // Serial.println(line.line_theta);
-    // line.print();
+    Serial.println(gyro.angle);
 }
 
 void setup1() {
@@ -57,7 +55,6 @@ void loop1() {
             int a = data[0] + (data[1] << 8);
             ir_angle = (a / 100.0) - PI;
         }
-        Serial.println(ir_angle);
     }
     circulate();
 
@@ -76,7 +73,7 @@ void loop1() {
         send_move = (circulate_angle + PI) * 100;
         c = 0;
         line_flag_count++;
-        if (line_flag_count == LINE_FLAG_GOAL){
+        if (line_flag_count == LINE_FLAG_GOAL) {
             line_flag = 0;
             line_flag_count = 0;
         }

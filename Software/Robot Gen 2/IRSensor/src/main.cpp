@@ -25,15 +25,12 @@ void setup() {
 
 void loop() {
     ir.IR_get();
-
-    ir.IRpin_read();
-    // ir.radius_read();
+    ir.radius_read();
     // ir.angle_read();
     // ir.IRonepin_read(1);
 
-    
     int recv_data = Serial1.read();
-    if (recv_data == 255){
+    if (recv_data == 255) {
         int a = (ir.angle_PI * PI + PI) * 100;
         byte data[2];
         data[0] = byte(a);
@@ -41,6 +38,6 @@ void loop() {
         Serial1.write(255);
         Serial1.write(data, 2);
     }
-    //delay(100);
-    //Serial.println("Boys Be Ambitious.");
+    // delay(100);
+    // Serial.println("Boys Be Ambitious.");
 }

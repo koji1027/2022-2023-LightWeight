@@ -77,7 +77,7 @@ void Motor::cal() {
     I = I + Ki * diff * dt;
     pre_diff = diff;
     float PID = P + D + I;
-    //PID *= -1;
+    // PID *= -1;
     for (int i = 0; i < 4; i++) {
         power[i] -= PID;
         power[i] = constrain(power[i], -200.0, 200.0);
