@@ -37,7 +37,7 @@ void loop() {
     gyro.getEuler();
     set_led(color, brightness);
     line.read();
-    Serial.println(gyro.angle);
+    // Serial.println(gyro.angle);
     // Serial.println(line.line_theta);
     // line.print();
 }
@@ -48,6 +48,7 @@ void setup1() {
 }
 
 void loop1() {
+    ir.write(255);
     if (ir.available() > 2) {
         int recv_data = ir.read();
         if (recv_data == 255) {
@@ -57,8 +58,8 @@ void loop1() {
             int a = data[0] + (data[1] << 8);
             ir_angle = (a / 100.0) - PI;
         }
-        // Serial.println(ir_angle);
-    }
+         Serial.println(ir_angle);
+    } 
     circulate();
 
     // Serial.println(gyro.angle);
