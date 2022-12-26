@@ -24,6 +24,9 @@ class Line {
     float SENSOR_Y[SENSOR_NUM] = {0.0};
     bool sensor_state[SENSOR_NUM] = {false};
     int sensor_value[SENSOR_NUM] = {0};
+    int cluster_num = 0;
+    int cluster[8][15] = {0};
+    int cluster_len[8] = {0};
 };
 
 void Line::begin() {
@@ -73,129 +76,61 @@ void Line::read() {
     sensor_value[14] = _sensor_value[12];
     sensor_value[15] = _sensor_value[14];
 
-    int cluster[8][2] = {{0, 0}};
-    int cluster_num = 0;
-    int now_c = -1;
     for (int i = 0; i < 16; i++) {
-        if (sensor_value[i] > THRESHOLD) {
-            if (i > 0) {
-                if (sensor_value[i - 1] > THRESHOLD) {
-                    cluster[now_c][0] += 1;
-                } else {
-                    now_c += 1;
-                    cluster_num += 1;
-                    cluster[now_c][0] = 1;
-                    cluster[now_c][1] = i;
-                }
-            } else {
-                if (sensor_value[15] > THRESHOLD) {
-                    cluster[now_c][0] += 1;
-                } else {
-                    now_c += 1;
-                    cluster_num += 1;
-                    cluster[now_c][0] = 1;
-                    cluster[now_c][1] = i;
-                }
-            }
+        sensor_state[i] = sensor_value[i] > THRESHOLD;
+    }
+
+    int white_sensor_num = 0;
+    int white_sensor[16];
+    for (int i = 0; i < 16; i++) {
+        if (sensor_state[i]) {
+            white_sensor[white_sensor_num] = i;
+            white_sensor_num++;
         }
     }
-    if (cluster_num == 0) {
+    if (white_sensor_num == 0) {
         entire_sensor_state = false;
+        line_vector[0] = 0.0;
+        line_vector[1] = 0.0;
+        line_theta = 0.0;
+        line_dist = 0.0;
+        return;
+    } else if (white_sensor_num == 1) {
+        entire_sensor_state = true;
+        line_vector[0] = SENSOR_X[white_sensor[0]];
+        line_vector[1] = SENSOR_Y[white_sensor[0]];
+        line_theta = SENSOR_THETA[white_sensor[0]];
+        line_dist = LINE_SENSOR_RADIUS;
         return;
     } else {
         entire_sensor_state = true;
-        float cluster_vector[cluster_num][2] = {{0.0}};  // x,y
-        float cluster_theta[cluster_num] = {0.0};
-
-        for (int i = 0; i < cluster_num; i++) {
-            if (cluster[i][0] % 2 == 0) {
-                int center_index = cluster[i][0] / 2 - 1;
-                cluster_vector[i][0] =
-                    sin(SENSOR_THETA[center_index] + PI / 16.0);
-                cluster_vector[i][1] =
-                    cos(SENSOR_THETA[center_index] + PI / 16.0);
-            } else {
-                int center_index = (cluster[i][0] - 1) / 2;
-                cluster_vector[i][0] =
-                    sin(SENSOR_THETA[center_index + cluster[i][1]]);
-                cluster_vector[i][1] =
-                    cos(SENSOR_THETA[center_index + cluster[i][1]]);
-            }
-            cluster_theta[i] =
-                atan2(cluster_vector[i][0], cluster_vector[i][1]);
+        int diff[white_sensor_num];
+        for (int i = 0; i < white_sensor_num - 1; i++) {
+            diff[i] = white_sensor[i + 1] - white_sensor[i];
         }
-        if (cluster_num == 1) {
-            line_vector[0] = cluster_vector[0][0];
-            line_vector[1] = cluster_vector[0][1];
-            line_theta = cluster_theta[0];
-            line_dist = LINE_SENSOR_RADIUS;
-        } else if (cluster_num == 2) {
-            line_vector[0] = cluster_vector[0][0] + cluster_vector[1][0];
-            line_vector[1] = cluster_vector[0][1] + cluster_vector[1][1];
-            line_theta = atan2(line_vector[0], line_vector[1]);
-            line_dist =
-                abs(LINE_SENSOR_RADIUS * cos(PI - abs(cluster_theta[0] / 2.0) -
-                                             abs(cluster_theta[1] / 2.0)));
+        diff[white_sensor_num - 1] =
+            white_sensor[0] + 16 - white_sensor[white_sensor_num - 1];
+        int max_diff = 0;
+        int max_diff_index = 0;
+        for (int i = 0; i < white_sensor_num; i++) {
+            if (diff[i] > max_diff) {
+                max_diff = diff[i];
+                max_diff_index = i;
+            }
+        }
+        if (max_diff % 2) {
+            line_theta = SENSOR_THETA[white_sensor[max_diff_index +
+                                                   (max_diff - 1) / 2]] +
+                         PI / 16.0;
         } else {
-            line_vector[0] = 0.0;
-            line_vector[1] = 0.0;
-            for (int i = 0; i < cluster_num; i++) {
-                line_vector[0] += cluster_vector[i][0];
-                line_vector[1] += cluster_vector[i][1];
-            }
-            line_theta = atan2(line_vector[0], line_vector[1]);
-            line_dist = LINE_SENSOR_RADIUS;
-        }
-        Serial.print("cluster ");
-        for (int i = 0; i < cluster_num; i++) {
-            Serial.print(i);
-            Serial.print(": ");
-            Serial.print(cluster[i][0]);
-            Serial.print("個");
-            Serial.print("  ");
-            Serial.print(cluster[i][1]);
-            Serial.print("番から");
-            Serial.print("\t");
-        }
-        Serial.println();
-    }
-    /*sensor_value[18] = 0;
-    for (int i = 0; i < SENSOR_NUM; i++) {
-        if (sensor_value[i] > THRESHOLD) {
-            sensor_state[i] = true;
-        } else {
-            sensor_state[i] = false;
+            line_theta =
+                SENSOR_THETA[white_sensor[max_diff_index + max_diff / 2]];
         }
     }
-    entire_sensor_state = false;
-    for (int i = 0; i < SENSOR_NUM; i++) {
-        if (sensor_state[i] == true) {
-            entire_sensor_state = true;
-        }
-    }
-    if (entire_sensor_state) {
-        float line_vector_x = 0.0;
-        float line_vector_y = 0.0;
-        for (int i = 0; i < 16; i++) {
-            if (sensor_state[i]) {
-                line_vector_x += SENSOR_X[i];
-                line_vector_y += SENSOR_Y[i];
-            }
-        }
-        line_vector[0] = line_vector_x;
-        line_vector[1] = line_vector_y;
-        line_theta = atan2(line_vector[0], line_vector[1]);
-        float line_sensor_theta = 0.0;
-        for (int i = 0; i < 16; i++) {
-            if (sensor_state[i]) {
-                line_sensor_theta = SENSOR_THETA[i];
-                break;
-            }
-        }
-        line_length = LINE_RADIUS * cos(line_sensor_theta - line_theta);
-    }*/
 }
-
-void Line::print() {}
-
+void Line::print() {
+    if (entire_sensor_state) {
+        Serial.println(line_theta);
+    }
+}
 #endif
