@@ -32,13 +32,14 @@ void setup() {
     gyro.begin();
     led.begin();
     line.begin();
+    delay(100);
 }
 
 void loop() {
     gyro.getEuler();
     set_led(color, brightness);
     line.read();
-    // line.print();
+    line.print();
 }
 
 void setup1() {
@@ -60,15 +61,13 @@ void loop1() {
     }
     circulate();
 
-    // Serial.println(gyro.angle);
-    // Serial.println(line_flag);
-
     send_gyro = (gyro.angle + PI) * 100;
     send_move = (ir_angle + PI) * 100;
     int c = 0;  // 2:stop, 1:line, 0:ir
     if (line.entire_sensor_state == true) {
-        // send_move = (line.line_theta + PI) * 100;
-        c = linetrace();
+        send_move = (line.line_theta + PI) * 100;
+        c = 1;
+        // c = linetrace();
         line_flag_count = 0;
     } else {
         send_move = (circulate_angle + PI) * 100;
@@ -105,7 +104,7 @@ void circulate() {
     }
 }
 
-int linetrace() {
+/*int linetrace() {
     if (line.line_theta > PI / 6.0 * 5.0 || line.line_theta < -PI / 6.0 * 5.0) {
         if (ir_angle > PI / 6.0 && ir_angle <= PI / 2.0) {
             send_move = (PI / 12.0 * 5.0 + PI) * 100;
@@ -209,7 +208,7 @@ int linetrace() {
         send_move = (line.line_theta + PI) * 100;
         return 1;
     }
-    /*if ((line.line_theta > -PI / 4 && line.line_theta < PI / 4) ||
+    if ((line.line_theta > -PI / 4 && line.line_theta < PI / 4) ||
         line.line_theta > PI * 3 / 4 || line.line_theta < -PI * 3 / 4) {
         send_move = (line.line_theta + PI) * 100;
     } else if (line.line_theta < 0) {
@@ -234,5 +233,5 @@ int linetrace() {
             }
             line_flag = 2;
         }
-    }*/
-}
+    }
+}*/

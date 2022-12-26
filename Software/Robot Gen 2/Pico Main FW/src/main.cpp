@@ -36,7 +36,7 @@ void loop() {
     gyro.getEuler();
     set_led(color, brightness);
     line.read();
-    Serial.println(gyro.angle);
+    // line.print();
 }
 
 void setup1() {
