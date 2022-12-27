@@ -27,10 +27,8 @@ void loop() {
         motor.speed = motor.default_speed;
         motor.cal();
     } else if (motor.c == 2) {
-        motor.speed = 0;
-        motor.cal();
+        motor.stop();
     }
-    Serial.println(motor.c);
 }
 
 void setup1() {
@@ -60,6 +58,9 @@ void loop1() {
             } else {
                 motor.move_angle = (recv_move / 100.0) - PI;
             }
+        } else if (recv_data == 254) {
+            motor.c = 2;
+            motor.gyro_angle = 0;
         }
     }
 }

@@ -3,7 +3,6 @@
 #include <Arduino.h>
 
 #define SENSOR_NUM 32
-#define THRESHOLD 400
 #define LINE_SENSOR_RADIUS 53.0
 
 class Line {
@@ -11,6 +10,7 @@ class Line {
     void begin();
     void read();
     void print();  // デバッグ用
+    void set_threshold();
     bool entire_sensor_state = false;
     float line_vector[2] = {0.0};
     float line_theta = 0.0;
@@ -19,6 +19,7 @@ class Line {
    private:
     const int COM_PIN[2] = {A0, A1};
     const int SELECT_PIN[2][4] = {{D2, D3, D6, D7}, {D10, D11, D12, D13}};
+    int THRESHOLD[32] = {400};
     float SENSOR_THETA[SENSOR_NUM] = {0.0};
     float SENSOR_X[SENSOR_NUM] = {0.0};
     float SENSOR_Y[SENSOR_NUM] = {0.0};
@@ -45,6 +46,9 @@ void Line::begin() {
     for (int i = 0; i < SENSOR_NUM; i++) {
         SENSOR_X[i] = sin(SENSOR_THETA[i]);
         SENSOR_Y[i] = cos(SENSOR_THETA[i]);
+    }
+    for (int i = 0; i < 16; i++) {
+        THRESHOLD[i] = 400;
     }
 }
 
@@ -76,61 +80,91 @@ void Line::read() {
     sensor_value[14] = _sensor_value[12];
     sensor_value[15] = _sensor_value[14];
 
+    int posILW[16] = {0};  // ライン上にあるセンサの番号を格納
+    int numILW = 0;        // ライン上にあるセンサの数
     for (int i = 0; i < 16; i++) {
-        sensor_state[i] = sensor_value[i] > THRESHOLD;
-    }
-
-    int white_sensor_num = 0;
-    int white_sensor[16];
-    for (int i = 0; i < 16; i++) {
-        if (sensor_state[i]) {
-            white_sensor[white_sensor_num] = i;
-            white_sensor_num++;
+        if (sensor_value[i] > THRESHOLD[i]) {
+            posILW[numILW] = i;
+            numILW++;
         }
     }
-    if (white_sensor_num == 0) {
+    if (numILW == 0) {
         entire_sensor_state = false;
-        line_vector[0] = 0.0;
-        line_vector[1] = 0.0;
-        line_theta = 0.0;
-        line_dist = 0.0;
         return;
-    } else if (white_sensor_num == 1) {
+    } else if (numILW == 1) {
+        line_theta = SENSOR_THETA[posILW[0]];
         entire_sensor_state = true;
-        line_vector[0] = SENSOR_X[white_sensor[0]];
-        line_vector[1] = SENSOR_Y[white_sensor[0]];
-        line_theta = SENSOR_THETA[white_sensor[0]];
-        line_dist = LINE_SENSOR_RADIUS;
         return;
     } else {
         entire_sensor_state = true;
-        int diff[white_sensor_num];
-        for (int i = 0; i < white_sensor_num - 1; i++) {
-            diff[i] = white_sensor[i + 1] - white_sensor[i];
+        int intvLine[numILW] = {0};  // ライン上にあるセンサの間隔
+        for (int i = 0; i < numILW; i++) {
+            intvLine[i] = posILW[i + 1] - posILW[i];
         }
-        diff[white_sensor_num - 1] =
-            white_sensor[0] + 16 - white_sensor[white_sensor_num - 1];
-        int max_diff = 0;
-        int max_diff_index = 0;
-        for (int i = 0; i < white_sensor_num; i++) {
-            if (diff[i] > max_diff) {
-                max_diff = diff[i];
-                max_diff_index = i;
+        intvLine[numILW - 1] = posILW[0] + 16 - posILW[numILW - 1];
+
+        int minIntvL = 100;   // 最小の間隔
+        int posMinIntvL = 0;  // 最小の間隔の位置
+        for (int i = 0; i < numILW; i++) {
+            if (intvLine[i] < minIntvL) {
+                minIntvL = intvLine[i];
+                posMinIntvL = i;
             }
         }
-        if (max_diff % 2) {
-            line_theta = SENSOR_THETA[white_sensor[max_diff_index +
-                                                   (max_diff - 1) / 2]] +
-                         PI / 16.0;
-        } else {
+
+        if (minIntvL % 2 == 1) {
             line_theta =
-                SENSOR_THETA[white_sensor[max_diff_index + max_diff / 2]];
+                SENSOR_THETA[posILW[posMinIntvL] + (minIntvL + 1) / 2] -
+                PI / 16.0;
+        } else {
+            line_theta = SENSOR_THETA[posILW[posMinIntvL] + minIntvL / 2];
+        }
+        line_theta = fmod(line_theta, PI * 2.0);
+        if (line_theta > PI) {
+            line_theta -= PI * 2.0;
         }
     }
 }
-void Line::print() {
-    if (entire_sensor_state) {
-        Serial.println(line_theta);
+void Line::print() {}
+
+void Line::set_threshold() {
+    delay(1000);
+    Serial.println(
+        "しきい値設定を開始します。ロボットをコート上で動かしてください。");
+    Serial.println("白線の上を通り過ぎるようにしてください。");
+    Serial.println("3");
+    delay(1000);
+    Serial.println("2");
+    delay(1000);
+    Serial.println("1");
+    delay(1000);
+    Serial.println("Start");
+    int maxValue[16] = {0};
+    int minValue[16] = {1023};
+    unsigned long long start_time = millis();
+    while (millis() - start_time < 5000) {
+        for (int i = 0; i < 16; i++) {
+            for (int j = 0; j < 4; j++) {
+                digitalWrite(SELECT_PIN[0][j], (byte)i & (1 << j));
+            }
+            int value = analogRead(COM_PIN[0]);
+            if (value > maxValue[i]) {
+                maxValue[i] = value;
+            }
+            if (value < minValue[i]) {
+                minValue[i] = value;
+            }
+        }
     }
+    for (int i = 0; i < 16; i++) {
+        THRESHOLD[i] = (float)(maxValue[i] + minValue[i]) / 2.0;
+    }
+    THRESHOLD[15] = 400;
+    Serial.println("自動しきい値設定完了！");
+    for (int i = 0; i < 16; i++) {
+        Serial.print(THRESHOLD[i]);
+        Serial.print("\t");
+    }
+    Serial.println();
 }
 #endif
