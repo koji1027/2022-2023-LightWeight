@@ -127,21 +127,25 @@ void IR::IR_get() {
         }
     }
     vector_XY = {0, 0};
+    vector_RT.radius = 0;
     for (int i = 0; i < 5; i++) {
         int index = (maxIndex + i - 2) % IR_NUM;
         vector_XY.x += IR_Cur_LPF[index] * unit_cos[index];
         vector_XY.y += IR_Cur_LPF[index] * unit_sin[index];
+        vector_RT.radius += (IR_SENSOR_RADIUS + IR_Cur_Length[index]) /
+                            cos(vector_RT.angle - unit_angle[index]);
     }
+    vector_RT.radius /= 5.0;
     // vector_RT.radius = sqrt(pow(vector_XY.x, 2.0) + pow(vector_XY.y, 2.0));
     //  now_radius = ave.updateData(vector_RT.radius);  // 半径
     if (vector_RT.radius < 1) {
         vector_RT.radius = 1;
     }
-    now_radius = kLPF * vector_RT.radius + (1 - kLPF) * now_radius;
+    //now_radius = kLPF * vector_RT.radius + (1 - kLPF) * now_radius;
     vector_RT.angle = atan2(vector_XY.y, vector_XY.x);
-    vector_RT.radius = (IR_SENSOR_RADIUS + IR_Cur_Length[maxIndex]) /
-                       cos(vector_RT.angle - unit_angle[maxIndex]);
-    now_radius = vector_RT.radius;
+    // vector_RT.radius = (IR_SENSOR_RADIUS + IR_Cur_Length[maxIndex]) /
+    // cos(vector_RT.angle - unit_angle[maxIndex]);
+    //now_radius = vector_RT.radius;
     angle_PI = vector_RT.angle / PI;  // 角度
 }
 
@@ -163,8 +167,8 @@ void IR::IRpin_read() {
 void IR::IRonepin_read(int pinnum) { Serial.println(IR_Cur[pinnum]); }
 
 void IR::radius_read() {
-    Serial.print("radius: ");
-    Serial.println(now_radius);
+    // Serial.print("radius: ");
+    Serial.println(vector_RT.radius);
 }
 
 void IR::angle_read() {

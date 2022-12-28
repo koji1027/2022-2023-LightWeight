@@ -28,7 +28,7 @@ void loop() {
     ir.radius_read();
     // ir.angle_read();
     // ir.IRonepin_read(1);
-
+    delay(50);
     int recv_data = Serial1.read();
     if (recv_data == 255) {
         int a = (ir.angle_PI * PI + PI) * 100;
