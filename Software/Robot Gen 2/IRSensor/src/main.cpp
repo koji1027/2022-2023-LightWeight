@@ -28,15 +28,22 @@ void loop() {
     ir.radius_read();
     // ir.angle_read();
     // ir.IRonepin_read(1);
-    delay(50);
     int recv_data = Serial1.read();
     if (recv_data == 255) {
         int a = (ir.angle_PI * PI + PI) * 100;
-        byte data[2];
+        int b = ir.now_radius;
+        if (b < 0) {
+            b = 0;
+        }
+        if (b > 255) {
+            b = 255;
+        }
+        byte data[3];
         data[0] = byte(a);
         data[1] = byte(a >> 8);
+        data[2] = byte(b);
         Serial1.write(255);
-        Serial1.write(data, 2);
+        Serial1.write(data, 3);
     }
     // delay(100);
     // Serial.println("Boys Be Ambitious.");

@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <moving_average.h>
+// #include <moving_average.h>
 
 #ifndef __IR_SENSOR__
 #define __IR_SENSOR__
@@ -161,6 +161,11 @@ void IR::IR_get() {
     }
     ave_radius /= MOVE_AVE_NUM;
     now_radius = ave_radius;
+    if (now_radius < 0) {
+        now_radius = 0;
+    } else if (now_radius > 255) {
+        now_radius = 255;
+    }
     angle_PI = vector_RT.angle / PI;  // 角度
 }
 

@@ -26,6 +26,7 @@ int linetrace();
 
 bool start_flag = false;
 float ir_angle = 0.0;
+int ir_radius = 0;
 float circulate_angle = 0.0;
 float linetrace_angle = 0.0;
 int send_gyro = 0.0;
@@ -78,13 +79,6 @@ void loop() {
             start_flag = false;
             Serial.println("Stop!");
         }
-        Serial.print("IR:");
-        Serial.print(ir_angle);
-        if (line.entire_sensor_state) {
-            Serial.print("\tOn Line:");
-            Serial.print(line.line_theta);
-        }
-        Serial.println();
     }
 }
 
@@ -109,22 +103,45 @@ void loop1() {
     motor.write(254);
     while (start_flag) {
         ir.write(255);
-        if (ir.available() > 2) {
+        if (ir.available() > 3) {
             int recv_data = ir.read();
             if (recv_data == 255) {
-                int data[2];
+                int data[3];
                 data[0] = ir.read();
                 data[1] = ir.read();
+                data[2] = ir.read();
                 int a = data[0] + (data[1] << 8);
                 ir_angle = (a / 100.0) - PI;
+                ir_radius = data[2];
             }
         }
-        circulate();
+        /*circulate();
 
         send_gyro = (gyro.angle + PI) * 100;
         send_move = (circulate_angle + PI) * 100;
         int c = 0;  // 2:stop, 1:line, 0:ir
-        c = linetrace();
+        c = linetrace();*/
+        int c = 0;
+        send_gyro = (gyro.angle + PI) * 100;
+        float ball[2];
+        ball[0] = ir_radius * sin(ir_angle);
+        ball[1] = ir_radius * cos(ir_angle);
+        float destination[2];
+        float theta = 0;
+        if (abs(ir_angle) < PI / 2.0 && abs(ir_angle) > PI / 9.0 &&
+            ir_radius >= 10) {
+            destination[0] = ball[0];
+            destination[1] = ball[1] - 10;
+            theta = atan2(destination[0], destination[1]);
+        } else {
+            c = 2;
+        }
+        Serial.print("ir:");
+        Serial.print(ir_angle);
+        Serial.print("\ttheta:");
+        Serial.println(theta);
+
+        send_move = (theta + PI) * 100;
         byte data[5];  //[0][1]:gyro, [2][3]:move
         data[0] = byte(send_gyro);
         data[1] = byte(send_gyro >> 8);
