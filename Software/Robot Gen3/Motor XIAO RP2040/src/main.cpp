@@ -31,7 +31,7 @@ void setup1() {
     }
 }
 void loop1() {
-    if (Serial1.available() > 8) {
+    if (Serial1.available() < 8) {
         int recv_data = Serial1.read();
         if (recv_data == 255) {
             int data[8];  //[0] Vx, [1] Vy, [2] Speed. [3] Gyro(下位8bit),
@@ -54,10 +54,6 @@ void loop1() {
             int recv_machine_angle = data[5] + (data[6] << 8);
             machine_angle = (recv_machine_angle / 100.0) - PI;
             flag = data[7];
-            Serial.print("Vx: ");
-            Serial.print(vx);
-            Serial.print("\tVy: ");
-            Serial.println(vy);
         }
     }
 }

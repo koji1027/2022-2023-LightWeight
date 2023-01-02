@@ -20,7 +20,7 @@ void Motor::cal(float vx, float vy, int speed, float machine_angle,
         if (vx != 0.0 || vy != 0.0) {
             for (int i = 0; i < 4; i++) {
                 power[i] =
-                    (vx * MOTOR_POS[i][0] + vy * MOTOR_POS[i][1]) / 2.0 * speed;
+                    (vx * MOTOR_POS[i][0] + vy * MOTOR_POS[i][1]) * speed;
             }
         }
     }
@@ -47,10 +47,13 @@ void Motor::cal(float vx, float vy, int speed, float machine_angle,
 
 void Motor::move(float power[4]) {
     for (int i = 0; i < 4; i++) {
+        Serial.print(power[i]);
+        Serial.print("\t");
         power[i] += 256;
         digitalWrite(MOTOR_PIN[i][0], HIGH);
         analogWrite(MOTOR_PIN[i][1], (int)power[i]);
     }
+    Serial.println();
 }
 
 void Motor::brake() {

@@ -118,12 +118,14 @@ void IR::IR_get() {
         }
         IR_Cur_LPF[i] = kLPF * IR_Cur[i] + (1 - kLPF) * IR_Cur_LPF[i];
         // IR_Cur_Length[i] = (IR_Cur_LPF[i] - 814.39) / (-2.175);
-        IR_Cur_Length[i] = -4E-06 * pow(IR_Cur_LPF[i], 3.0) +
-                           0.0095 * pow(IR_Cur_LPF[i], 2.0) -
-                           7.869 * IR_Cur_LPF[i] + 2272.8;
+        // IR_Cur_Length[i] = -4E-06 * pow(IR_Cur_LPF[i], 3.0) +
+        //                   0.0095 * pow(IR_Cur_LPF[i], 2.0) -
+        //                   7.869 * IR_Cur_LPF[i] + 2272.8;
+        IR_Cur_Length[i] = IR_Cur_LPF[i];
     }
     IR_Cur_LPF[2] = (IR_Cur_LPF[1] + IR_Cur_LPF[3]) / 2;
-    IR_Cur_Length[2] = (IR_Cur_LPF[2] - 814.39) / (-2.175);
+    // IR_Cur_Length[2] = (IR_Cur_LPF[2] - 814.39) / (-2.175);
+    IR_Cur_Length[2] = IR_Cur_LPF[2];
     int maxVal = 0;
     int maxIndex = 0;
     for (int i = 0; i < IR_NUM; i++) {
@@ -142,15 +144,16 @@ void IR::IR_get() {
         //                     cos(vector_RT.angle - unit_angle[index]);
     }
     // vector_RT.radius /= 5.0;
-    //  vector_RT.radius = sqrt(pow(vector_XY.x, 2.0) + pow(vector_XY.y, 2.0));
-    //   now_radius = ave.updateData(vector_RT.radius);  // 半径
+    // vector_RT.radius = sqrt(pow(vector_XY.x, 2.0) + pow(vector_XY.y, 2.0));
+    //  now_radius = ave.updateData(vector_RT.radius);  // 半径
     if (vector_RT.radius < 1) {
         vector_RT.radius = 1;
     }
     // now_radius = kLPF * vector_RT.radius + (1 - kLPF) * now_radius;
     vector_RT.angle = atan2(vector_XY.y, vector_XY.x);
-    vector_RT.radius = (IR_SENSOR_RADIUS + IR_Cur_Length[maxIndex]) /
-                       cos(vector_RT.angle - unit_angle[maxIndex]);
+    // vector_RT.radius = (IR_SENSOR_RADIUS + IR_Cur_Length[maxIndex])
+    //                     cos(vector_RT.angle - unit_angle[maxIndex]);
+    vector_RT.radius = -0.4408 * IR_Cur_Length[maxIndex] + 372.54;
     for (int i = 0; i < MOVE_AVE_NUM - 1; i++) {
         pre_radius[i] = pre_radius[i + 1];
     }
@@ -161,11 +164,11 @@ void IR::IR_get() {
     }
     ave_radius /= MOVE_AVE_NUM;
     now_radius = ave_radius;
-    if (now_radius < 0) {
+    /*if (now_radius < 0) {
         now_radius = 0;
     } else if (now_radius > 255) {
         now_radius = 255;
-    }
+    }*/
     angle_PI = vector_RT.angle / PI;  // 角度
 }
 
