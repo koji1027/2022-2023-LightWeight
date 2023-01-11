@@ -18,8 +18,8 @@ class Line {
 
    private:
     const int COM_PIN[2] = {A0, A1};
-    const int SELECT_PIN[2][4] = {{D2, D3, D6, D7}, {D10, D11, D12, D13}};
-    int THRESHOLD[32] = {400};
+    const int SELECT_PIN[2][4] = {{D2, D3, D6, D7}, {D8, D9, D10, D11}};
+    int THRESHOLD[32] = {800};
     float SENSOR_THETA[SENSOR_NUM] = {0.0};
     float SENSOR_X[SENSOR_NUM] = {0.0};
     float SENSOR_Y[SENSOR_NUM] = {0.0};
@@ -60,10 +60,10 @@ void Line::read() {
             digitalWrite(SELECT_PIN[1][j], (byte)i & (1 << j));
         }
         // delayMicroseconds(10);
-        _sensor_value[i] = analogRead(COM_PIN[0]);
-        _sensor_value[i + 16] = 0;
+        sensor_value[i] = analogRead(COM_PIN[0]);
+        sensor_value[i + 16] = analogRead(COM_PIN[1]);
     }
-    sensor_value[0] = _sensor_value[1];
+    /*sensor_value[0] = _sensor_value[1];
     sensor_value[1] = _sensor_value[3];
     sensor_value[2] = _sensor_value[5];
     sensor_value[3] = _sensor_value[7];
@@ -78,9 +78,9 @@ void Line::read() {
     sensor_value[12] = _sensor_value[8];
     sensor_value[13] = _sensor_value[10];
     sensor_value[14] = _sensor_value[12];
-    sensor_value[15] = _sensor_value[14];
+    sensor_value[15] = _sensor_value[14];*/
 
-    int posILW[16] = {0};  // ライン上にあるセンサの番号を格納
+    /*int posILW[16] = {0};  // ライン上にあるセンサの番号を格納
     int numILW = 0;        // ライン上にあるセンサの数
     for (int i = 0; i < 16; i++) {
         if (sensor_value[i] > THRESHOLD[i]) {
@@ -123,9 +123,22 @@ void Line::read() {
         if (line_theta > PI) {
             line_theta -= PI * 2.0;
         }
+    }*/
+    for (int i = 0; i < 32; i++) {
+        if (sensor_value[i] > THRESHOLD[i]) {
+            sensor_state[i] = true;
+        } else {
+            sensor_state[i] = false;
+        }
     }
 }
-void Line::print() {}
+void Line::print() {
+    for (int i = 16; i < 32; i++) {
+        Serial.print(sensor_value[i]);
+        Serial.print("\t");
+    }
+    Serial.println();
+}
 
 void Line::set_threshold() {
     delay(1000);

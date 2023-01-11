@@ -18,6 +18,10 @@ void setup() {
 
 void loop() {
     // put your main code here, to run repeatedly:
+    while (1) {
+        motor.cal(0, 1, 100, 0, 0);
+        delay(1000);
+    }
     if (flag) {
         motor.brake();
     } else {

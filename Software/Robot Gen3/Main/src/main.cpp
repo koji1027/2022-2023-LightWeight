@@ -19,7 +19,7 @@ float move_angle = 0.0;
 int ball_flag = 0;
 bool start_flag = false;
 int led_color[3] = {255, 255, 255};
-int led_brightness = 255;
+int led_brightness = 50;
 
 void setup() {
     // put your setup code here, to run once:
@@ -31,6 +31,12 @@ void setup() {
 
     gyro.begin();
     line.begin();
+    while (1) {
+        set_led(led_color, led_brightness);
+        gyro.getEuler();
+        Serial.println(gyro.angle);
+        delay(100);
+    }
     delay(1000);
 }
 
@@ -42,13 +48,13 @@ void loop() {
         }
         delay(10);
     }
-    gyro.getEuler();
+    // gyro.getEuler();
     if (!digitalRead(D21)) {
         start_flag = false;
     }
     set_led(led_color, led_brightness);
 }
-
+/*
 void setup1() {
     motor.begin(115200);
     while (!motor) {
@@ -110,4 +116,4 @@ void loop1() {
     motor.write(255);
     motor.write(data, 8);
     delay(10);
-}
+}*/
