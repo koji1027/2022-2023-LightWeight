@@ -14,6 +14,15 @@ void setup() {
     while (!Serial1) {
         delay(10);
     }
+    while (1) {
+        if (Serial1.available() > 0) {
+            int data = Serial1.read();
+            Serial.println(data);
+        }
+        else {
+            Serial.println("nasi");
+        }
+    }
 }
 
 void loop() {

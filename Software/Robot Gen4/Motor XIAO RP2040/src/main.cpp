@@ -49,6 +49,14 @@ void setup1() {
     Serial1.begin(115200);
     while (!Serial1) {
     }
+    while (1) {
+        if (Serial1.available() > 0) {
+            int data = Serial1.read();
+            Serial.println(data);
+        } else {
+            Serial.println("nasi");
+        }
+    }
 }
 void loop1() {
     if (Serial1.available() < 8) {

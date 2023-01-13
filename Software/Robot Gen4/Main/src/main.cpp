@@ -7,8 +7,8 @@
 #define DIST_BALL -20.0
 #define B pow(0.7, 1.0 / 20.0)
 
-SerialPIO motor(22, 16, 32);
-SerialPIO ir(1, 0, 32);
+SerialPIO motor(D17, D16, 32);
+SerialPIO ir(D0, D1, 32);
 Gyro gyro;
 Line line;
 
@@ -33,17 +33,23 @@ void setup() {
 void loop() {
     // put your main code here, to run repeatedly:
     gyro.getEuler();
-    //set_led(led_color, led_brightness);
+    // set_led(led_color, led_brightness);
     delay(10);
 }
 
 void setup1() {
     motor.begin(115200);
+    ir.begin(115200);
+    while (1) {
+        int data = 100;
+        ir.write(data);
+        motor.write(data);
+    }
     delay(1000);
 }
 
 void loop1() {
-    ir.write(255);
+    /*ir.write(255);
     if (ir.available() > 5) {
         int recv_data = ir.read();
         if (recv_data == 255) {
@@ -81,5 +87,5 @@ void loop1() {
 
     motor.write(255);
     motor.write(data, 8);
-    delay(10);
+    delay(10);*/
 }
