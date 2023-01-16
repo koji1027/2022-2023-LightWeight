@@ -29,6 +29,7 @@ void setup() {
     // set_led(led_color, led_brightness);
     init_led();
     delay(1000);
+    line.set_threshold();
 }
 
 void loop() {
@@ -63,9 +64,28 @@ void loop1() {
     }
     float Circ_Kp = pow(CIRC_BASE, ir_radius);
     move_angle = ir_angle + ir_angle * Circ_Kp;
-    Serial.println(ir_radius);
     float vx = sin(move_angle);
     float vy = cos(move_angle);
+    /*
+    if (line.entire_sensor_state){
+        if((line.line_theta >= 0 && line.line_theta <= PI/4)||
+           (line.line_theta > -PI/4 && line.line_theta <= 0)){
+            vy = 0;
+        }
+        if(line.line_theta > PI/4 && line.line_theta <= 3*PI/4){
+            vx = 0;
+        }
+        if((line.line_theta > 3*PI/4 && line.line_theta <= PI)||
+           (line.line_theta >= -PI && line.line_theta <= -3*PI/4)){
+            vy = 0;
+        }
+        if(line.line_theta > -3*PI/4 && line.line_theta >= -PI/4){
+            vx = 0;
+        }
+    }
+    */
+    if (line.entire_sensor_state){vx=0; vy=0;}
+    //line.onepin_print(0);
     vx = (vx + 1.0) * 100.0;
     vy = (vy + 1.0) * 100.0;
 

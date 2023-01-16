@@ -5,7 +5,7 @@ Motor motor;
 
 float gyro_angle = 0.0;
 float machine_angle = 0.0;
-int speed = 50;
+int speed = 0;
 float vx = 0.0;
 float vy = 0.0;
 int flag = 1;

@@ -9,7 +9,7 @@ class Line {
    public:
     void begin();
     void read();
-    void print();  // デバッグ用
+    void onepin_print(int i);  // デバッグ用
     void set_threshold();
     bool entire_sensor_state = false;
     float line_vector[2] = {0.0};
@@ -42,7 +42,7 @@ void Line::begin() {
         SENSOR_Y[i] = cos(SENSOR_THETA[i]);
     }
     for (int i = 0; i < SENSOR_NUM; i++) {
-        THRESHOLD[i] = 650;
+        THRESHOLD[i] = 100;
     }
 }
 
@@ -103,10 +103,12 @@ void Line::read() {
         if (line_theta > PI) {
             line_theta -= PI * 2.0;
         }
+        //line_vector[0] = sin(line_theta);
+        //line_vector[1] = cos(line_theta);
     }
 }
-void Line::print() {
-    // Serial.println(line_theta);
+void Line::onepin_print(int i) {
+        Serial.println(sensor_value[i]);
 }
 
 void Line::set_threshold() {
