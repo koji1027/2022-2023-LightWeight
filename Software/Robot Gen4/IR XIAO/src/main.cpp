@@ -1,6 +1,7 @@
 #include <Arduino.h>
 
 #include "ir_sensor.h"
+#include "sound.h"
 
 IR ir;
 
@@ -11,17 +12,9 @@ void setup() {
     Serial.begin(115200);
     Serial1.begin(115200);
     ir.begin();
+    pinMode(SPEAKER_PIN, OUTPUT);
     while (!Serial1) {
         delay(10);
-    }
-    while (1) {
-        if (Serial1.available() > 0) {
-            int data = Serial1.read();
-            Serial.println(data);
-        }
-        else {
-            Serial.println("nasi");
-        }
     }
 }
 

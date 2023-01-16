@@ -5,7 +5,7 @@
 #include "line.h"
 
 #define DIST_BALL -20.0
-#define B pow(0.7, 1.0 / 20.0)
+#define CIRC_BASE pow(0.75, 1.0 / 20.0)
 
 SerialPIO motor(D17, D16, 32);
 SerialPIO ir(D0, D1, 32);
@@ -24,32 +24,27 @@ int led_brightness = 50;
 void setup() {
     // put your setup code here, to run once:
     Serial.begin(115200);
-
     gyro.begin();
     line.begin();
+    // set_led(led_color, led_brightness);
+    init_led();
     delay(1000);
 }
 
 void loop() {
     // put your main code here, to run repeatedly:
     gyro.getEuler();
-    // set_led(led_color, led_brightness);
-    delay(10);
+    line.read();
 }
 
 void setup1() {
     motor.begin(115200);
     ir.begin(115200);
-    while (1) {
-        int data = 100;
-        ir.write(data);
-        motor.write(data);
-    }
-    delay(1000);
+    delay(3000);
 }
 
 void loop1() {
-    /*ir.write(255);
+    ir.write(255);
     if (ir.available() > 5) {
         int recv_data = ir.read();
         if (recv_data == 255) {
@@ -66,10 +61,9 @@ void loop1() {
             ball_flag = data[3];
         }
     }
-
-    float A = pow(B, ir_radius);
-    move_angle = ir_angle * A;
-    move_angle += ir_angle;
+    float Circ_Kp = pow(CIRC_BASE, ir_radius);
+    move_angle = ir_angle + ir_angle * Circ_Kp;
+    Serial.println(ir_radius);
     float vx = sin(move_angle);
     float vy = cos(move_angle);
     vx = (vx + 1.0) * 100.0;
@@ -87,5 +81,5 @@ void loop1() {
 
     motor.write(255);
     motor.write(data, 8);
-    delay(10);*/
+    delay(10);
 }

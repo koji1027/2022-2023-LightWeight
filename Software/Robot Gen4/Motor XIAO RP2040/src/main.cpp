@@ -18,30 +18,11 @@ void setup() {
 
 void loop() {
     // put your main code here, to run repeatedly:
-    while (1) {
-        /*analogWrite(D0, 128);
-        analogWrite(D3, 128);
-        analogWrite(D5, 128);
-        analogWrite(D9, 128);
-        digitalWrite(D1, LOW);
-        digitalWrite(D2, LOW);
-        digitalWrite(D4, LOW);
-        digitalWrite(D8, LOW);*/
-        digitalWrite(D0, HIGH);
-        digitalWrite(D1, HIGH);
-        digitalWrite(D2, HIGH);
-        digitalWrite(D3, HIGH);
-        digitalWrite(D4, HIGH);
-        digitalWrite(D5, HIGH);
-        digitalWrite(D8, HIGH);
-        digitalWrite(D9, HIGH);
-        Serial.println("Hello");
-        delay(1000);
-    }
     if (flag) {
         motor.brake();
     } else {
         motor.cal(vx, vy, speed, machine_angle, gyro_angle);
+        //motor.cal(0.0, 0.0, 0, 0.0, gyro_angle);
     }
 }
 
@@ -49,17 +30,9 @@ void setup1() {
     Serial1.begin(115200);
     while (!Serial1) {
     }
-    while (1) {
-        if (Serial1.available() > 0) {
-            int data = Serial1.read();
-            Serial.println(data);
-        } else {
-            Serial.println("nasi");
-        }
-    }
 }
 void loop1() {
-    if (Serial1.available() < 8) {
+    if (Serial1.available() > 8) {
         int recv_data = Serial1.read();
         if (recv_data == 255) {
             int data[8];  //[0] Vx, [1] Vy, [2] Speed. [3] Gyro(下位8bit),
