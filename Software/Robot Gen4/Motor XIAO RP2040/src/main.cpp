@@ -24,6 +24,7 @@ void loop() {
     } else {
         //motor.brake();
         motor.cal(vx, vy, speed, machine_angle, gyro_angle);
+        //motor.cal(0.0, 0.0, 0, 0.0, gyro_angle);
     }
 }
 
@@ -31,17 +32,9 @@ void setup1() {
     Serial1.begin(115200);
     while (!Serial1) {
     }
-    while (1) {
-        if (Serial1.available() > 0) {
-            int data = Serial1.read();
-            Serial.println(data);
-        } else {
-            Serial.println("nasi");
-        }
-    }
 }
 void loop1() {
-    if (Serial1.available() < 8) {
+    if (Serial1.available() > 8) {
         int recv_data = Serial1.read();
         if (recv_data == 255) {
             int data[8];  //[0] Vx, [1] Vy, [2] Speed. [3] Gyro(下位8bit),

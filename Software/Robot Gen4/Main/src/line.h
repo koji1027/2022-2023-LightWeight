@@ -17,17 +17,14 @@ class Line {
     float line_dist = 0.0;
 
    private:
-    const int COM_PIN[2] = {A0, A1};
-    const int SELECT_PIN[2][4] = {{D2, D3, D6, D7}, {D8, D9, D10, D11}};
-    int THRESHOLD[32] = {800};
+    const int COM_PIN[2] = {A1, A0};
+    const int SELECT_PIN[2][4] = {{D8, D9, D10, D11}, {D2, D3, D6, D7}};
+    int THRESHOLD[32] = {0};
     float SENSOR_THETA[SENSOR_NUM] = {0.0};
     float SENSOR_X[SENSOR_NUM] = {0.0};
     float SENSOR_Y[SENSOR_NUM] = {0.0};
     bool sensor_state[SENSOR_NUM] = {false};
     int sensor_value[SENSOR_NUM] = {0};
-    int cluster_num = 0;
-    int cluster[8][15] = {0};
-    int cluster_len[8] = {0};
 };
 
 void Line::begin() {
@@ -37,55 +34,37 @@ void Line::begin() {
             pinMode(SELECT_PIN[i][j], OUTPUT);
         }
     }
-    for (int i = 0; i < 8; i++) {
-        SENSOR_THETA[i] = PI / 8.0 * i;
-    }
-    for (int i = 8; i < 16; i++) {
-        SENSOR_THETA[i] = PI / 8.0 * i - PI * 2.0;
+    for (int i = 0; i < SENSOR_NUM; i++) {
+        SENSOR_THETA[i] = (float)i * PI / 16.0;
     }
     for (int i = 0; i < SENSOR_NUM; i++) {
         SENSOR_X[i] = sin(SENSOR_THETA[i]);
         SENSOR_Y[i] = cos(SENSOR_THETA[i]);
     }
-    for (int i = 0; i < 16; i++) {
-        THRESHOLD[i] = 400;
+    for (int i = 0; i < SENSOR_NUM; i++) {
+        THRESHOLD[i] = 650;
     }
 }
 
 void Line::read() {
-    int _sensor_value[32] = {0};
     for (int i = 0; i < 16; i++) {
         for (int j = 0; j < 4; j++) {
             digitalWrite(SELECT_PIN[0][j], (byte)i & (1 << j));
             digitalWrite(SELECT_PIN[1][j], (byte)i & (1 << j));
         }
-        // delayMicroseconds(10);
-        sensor_value[i] = analogRead(COM_PIN[0]);
-        sensor_value[i + 16] = analogRead(COM_PIN[1]);
+        sensor_value[i + 16] = analogRead(COM_PIN[0]);
+        sensor_value[i] = analogRead(COM_PIN[1]);
     }
-    /*sensor_value[0] = _sensor_value[1];
-    sensor_value[1] = _sensor_value[3];
-    sensor_value[2] = _sensor_value[5];
-    sensor_value[3] = _sensor_value[7];
-    sensor_value[4] = _sensor_value[9];
-    sensor_value[5] = _sensor_value[11];
-    sensor_value[6] = _sensor_value[13];
-    sensor_value[7] = _sensor_value[15];
-    sensor_value[8] = _sensor_value[0];
-    sensor_value[9] = _sensor_value[2];
-    sensor_value[10] = _sensor_value[4];
-    sensor_value[11] = _sensor_value[6];
-    sensor_value[12] = _sensor_value[8];
-    sensor_value[13] = _sensor_value[10];
-    sensor_value[14] = _sensor_value[12];
-    sensor_value[15] = _sensor_value[14];*/
 
-    /*int posILW[16] = {0};  // ライン上にあるセンサの番号を格納
-    int numILW = 0;        // ライン上にあるセンサの数
-    for (int i = 0; i < 16; i++) {
+    int posILW[SENSOR_NUM] = {0};  // 白線上にあるセンサの番号を格納
+    int numILW = 0;                // 白線上にあるセンサの数
+    for (int i = 0; i < SENSOR_NUM; i++) {
         if (sensor_value[i] > THRESHOLD[i]) {
+            sensor_state[i] = true;
             posILW[numILW] = i;
             numILW++;
+        } else {
+            sensor_state[i] = false;
         }
     }
     if (numILW == 0) {
@@ -97,47 +76,37 @@ void Line::read() {
         return;
     } else {
         entire_sensor_state = true;
-        int intvLine[numILW] = {0};  // ライン上にあるセンサの間隔
+        int intvLine[numILW] = {0};  // 白線上にあるセンサの間隔
         for (int i = 0; i < numILW; i++) {
             intvLine[i] = posILW[i + 1] - posILW[i];
         }
-        intvLine[numILW - 1] = posILW[0] + 16 - posILW[numILW - 1];
+        intvLine[numILW - 1] = posILW[0] + 32 - posILW[numILW - 1];
 
-        int minIntvL = 100;   // 最小の間隔
-        int posMinIntvL = 0;  // 最小の間隔の位置
+        int maxIntvL = -1;   // 最大の間隔
+        int posMaxIntvL = 0;  // 最大の間隔の位置
         for (int i = 0; i < numILW; i++) {
-            if (intvLine[i] < minIntvL) {
-                minIntvL = intvLine[i];
-                posMinIntvL = i;
+            if (intvLine[i] > maxIntvL) {
+                maxIntvL = intvLine[i];
+                posMaxIntvL = i;
             }
         }
 
-        if (minIntvL % 2 == 1) {
+        if (maxIntvL % 2 == 1) {
             line_theta =
-                SENSOR_THETA[posILW[posMinIntvL] + (minIntvL + 1) / 2] -
-                PI / 16.0;
+                SENSOR_THETA[posILW[posMaxIntvL] + (maxIntvL + 1) / 2] -
+                PI / 32.0;
         } else {
-            line_theta = SENSOR_THETA[posILW[posMinIntvL] + minIntvL / 2];
+            line_theta = SENSOR_THETA[posILW[posMaxIntvL] + maxIntvL / 2];
         }
+        line_theta += PI;
         line_theta = fmod(line_theta, PI * 2.0);
         if (line_theta > PI) {
             line_theta -= PI * 2.0;
         }
-    }*/
-    for (int i = 0; i < 32; i++) {
-        if (sensor_value[i] > THRESHOLD[i]) {
-            sensor_state[i] = true;
-        } else {
-            sensor_state[i] = false;
-        }
     }
 }
 void Line::print() {
-    for (int i = 16; i < 32; i++) {
-        Serial.print(sensor_value[i]);
-        Serial.print("\t");
-    }
-    Serial.println();
+    // Serial.println(line_theta);
 }
 
 void Line::set_threshold() {
