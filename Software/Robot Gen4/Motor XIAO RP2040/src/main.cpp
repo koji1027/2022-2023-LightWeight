@@ -5,7 +5,7 @@ Motor motor;
 
 float gyro_angle = 0.0;
 float machine_angle = 0.0;
-int speed = 0;
+int speed = 50;
 float vx = 0.0;
 float vy = 0.0;
 int flag = 1;
@@ -18,29 +18,11 @@ void setup() {
 
 void loop() {
     // put your main code here, to run repeatedly:
-    while (1) {
-        /*analogWrite(D0, 128);
-        analogWrite(D3, 128);
-        analogWrite(D5, 128);
-        analogWrite(D9, 128);
-        digitalWrite(D1, LOW);
-        digitalWrite(D2, LOW);
-        digitalWrite(D4, LOW);
-        digitalWrite(D8, LOW);*/
-        digitalWrite(D0, HIGH);
-        digitalWrite(D1, HIGH);
-        digitalWrite(D2, HIGH);
-        digitalWrite(D3, HIGH);
-        digitalWrite(D4, HIGH);
-        digitalWrite(D5, HIGH);
-        digitalWrite(D8, HIGH);
-        digitalWrite(D9, HIGH);
-        Serial.println("Hello");
-        delay(1000);
-    }
     if (flag) {
-        motor.brake();
+        //motor.brake();
+        motor.cal(vx, vy, speed, machine_angle, gyro_angle);
     } else {
+        //motor.brake();
         motor.cal(vx, vy, speed, machine_angle, gyro_angle);
     }
 }
