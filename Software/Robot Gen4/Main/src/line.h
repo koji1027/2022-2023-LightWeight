@@ -83,7 +83,7 @@ void Line::read() {
         }
         intvLine[numILW - 1] = posILW[0] + 32 - posILW[numILW - 1];
 
-        int maxIntvL = -1;   // 最大の間隔
+        int maxIntvL = -1;    // 最大の間隔
         int posMaxIntvL = 0;  // 最大の間隔の位置
         for (int i = 0; i < numILW; i++) {
             if (intvLine[i] > maxIntvL) {
