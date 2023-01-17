@@ -82,7 +82,7 @@ void Line::read() {
         }
         intvLine[numILW - 1] = posILW[0] + 32 - posILW[numILW - 1];
 
-        int maxIntvL = -1;   // 最大の間隔
+        int maxIntvL = -1;    // 最大の間隔
         int posMaxIntvL = 0;  // 最大の間隔の位置
         for (int i = 0; i < numILW; i++) {
             if (intvLine[i] > maxIntvL) {
@@ -106,7 +106,12 @@ void Line::read() {
     }
 }
 void Line::print() {
-    // Serial.println(line_theta);
+    for (int i = 0; i < 16; i++) {
+        Serial.print(sensor_value[i]);
+        Serial.print("\t");
+    }
+    Serial.println();
+    delay(100);
 }
 
 void Line::set_threshold() {

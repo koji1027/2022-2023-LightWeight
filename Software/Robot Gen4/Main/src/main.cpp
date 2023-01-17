@@ -9,7 +9,7 @@
 
 SerialPIO motor(D17, D16, 32);
 SerialPIO ir(D0, D1, 32);
-Gyro gyro;
+// Gyro gyro;
 Line line;
 
 float machine_angle = 0.0;
@@ -24,19 +24,21 @@ int led_brightness = 50;
 void setup() {
     // put your setup code here, to run once:
     Serial.begin(115200);
-    gyro.begin();
+    // gyro.begin();
     line.begin();
     // set_led(led_color, led_brightness);
     init_led();
     delay(1000);
+    init_led();
 }
 
 void loop() {
     // put your main code here, to run repeatedly:
-    gyro.getEuler();
+    // gyro.getEuler();
     line.read();
+    line.print();
 }
-
+/*
 void setup1() {
     motor.begin(115200);
     ir.begin(115200);
@@ -83,3 +85,4 @@ void loop1() {
     motor.write(data, 8);
     delay(10);
 }
+*/
