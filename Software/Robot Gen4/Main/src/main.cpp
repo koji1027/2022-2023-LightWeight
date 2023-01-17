@@ -29,13 +29,14 @@ void setup() {
     // set_led(led_color, led_brightness);
     init_led();
     delay(1000);
-    line.set_threshold();
+    //line.set_threshold();
 }
 
 void loop() {
     // put your main code here, to run repeatedly:
     gyro.getEuler();
     line.read();
+    //line.onepin_print(0);
 }
 
 void setup1() {
@@ -85,7 +86,6 @@ void loop1() {
     }
     */
     if (line.entire_sensor_state){vx=0; vy=0;}
-    //line.onepin_print(0);
     vx = (vx + 1.0) * 100.0;
     vy = (vy + 1.0) * 100.0;
 

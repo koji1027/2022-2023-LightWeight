@@ -9,6 +9,7 @@ class Line {
    public:
     void begin();
     void read();
+    void print();
     void onepin_print(int i);  // デバッグ用
     void set_threshold();
     bool entire_sensor_state = false;
