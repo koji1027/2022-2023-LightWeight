@@ -9,16 +9,8 @@ class Line {
    public:
     void begin();
     void read();
-<<<<<<< HEAD
-<<<<<<< HEAD
     void print();
     void onepin_print(int i);  // デバッグ用
-=======
-    void print();  // デバッグ用
->>>>>>> parent of 520934c (Merge branch 'main' of https://github.com/negi-tech/2022-2023-LightWeight)
-=======
-    void print();  // デバッグ用
->>>>>>> parent of 520934c (Merge branch 'main' of https://github.com/negi-tech/2022-2023-LightWeight)
     void set_threshold();
     bool entire_sensor_state = false;
     float line_vector[2] = {0.0};

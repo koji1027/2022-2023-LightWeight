@@ -9,7 +9,7 @@
 
 SerialPIO motor(D17, D16, 32);
 SerialPIO ir(D0, D1, 32);
-// Gyro gyro;
+Gyro gyro;
 Line line;
 
 float machine_angle = 0.0;
@@ -22,22 +22,19 @@ int led_color[3] = {255, 255, 255};
 int led_brightness = 50;
 
 void setup() {
-    // put your setup code here, to run once:
     Serial.begin(115200);
-    // gyro.begin();
+    gyro.begin();
     line.begin();
-    // set_led(led_color, led_brightness);
+    set_led(led_color, led_brightness);
     init_led();
     delay(1000);
-    init_led();
 }
 
 void loop() {
-    // put your main code here, to run repeatedly:
-    // gyro.getEuler();
+    gyro.getEuler();
     line.read();
 }
-/*
+
 void setup1() {
     motor.begin(115200);
     ir.begin(115200);
@@ -67,8 +64,6 @@ void loop1() {
     Serial.println(ir_radius);
     float vx = sin(move_angle);
     float vy = cos(move_angle);
-<<<<<<< HEAD
-<<<<<<< HEAD
     /*
     if (line.entire_sensor_state){
         if((line.line_theta >= 0 && line.line_theta <= PI/4)||
@@ -88,10 +83,7 @@ void loop1() {
     }
     */
     if (line.entire_sensor_state){vx=0; vy=0;}
-=======
->>>>>>> parent of 520934c (Merge branch 'main' of https://github.com/negi-tech/2022-2023-LightWeight)
-=======
->>>>>>> parent of 520934c (Merge branch 'main' of https://github.com/negi-tech/2022-2023-LightWeight)
+
     vx = (vx + 1.0) * 100.0;
     vy = (vy + 1.0) * 100.0;
 
