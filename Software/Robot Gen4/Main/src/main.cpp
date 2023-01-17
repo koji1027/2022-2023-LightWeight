@@ -102,4 +102,3 @@ void loop1() {
     motor.write(data, 8);
     delay(10);
 }
-*/
