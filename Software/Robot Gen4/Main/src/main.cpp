@@ -68,6 +68,7 @@ void loop1() {
     float vx = sin(move_angle);
     float vy = cos(move_angle);
 <<<<<<< HEAD
+<<<<<<< HEAD
     /*
     if (line.entire_sensor_state){
         if((line.line_theta >= 0 && line.line_theta <= PI/4)||
@@ -87,6 +88,8 @@ void loop1() {
     }
     */
     if (line.entire_sensor_state){vx=0; vy=0;}
+=======
+>>>>>>> parent of 520934c (Merge branch 'main' of https://github.com/negi-tech/2022-2023-LightWeight)
 =======
 >>>>>>> parent of 520934c (Merge branch 'main' of https://github.com/negi-tech/2022-2023-LightWeight)
     vx = (vx + 1.0) * 100.0;

@@ -10,8 +10,12 @@ class Line {
     void begin();
     void read();
 <<<<<<< HEAD
+<<<<<<< HEAD
     void print();
     void onepin_print(int i);  // デバッグ用
+=======
+    void print();  // デバッグ用
+>>>>>>> parent of 520934c (Merge branch 'main' of https://github.com/negi-tech/2022-2023-LightWeight)
 =======
     void print();  // デバッグ用
 >>>>>>> parent of 520934c (Merge branch 'main' of https://github.com/negi-tech/2022-2023-LightWeight)
