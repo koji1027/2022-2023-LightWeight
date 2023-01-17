@@ -19,8 +19,10 @@ void setup() {
 void loop() {
     // put your main code here, to run repeatedly:
     if (flag) {
-        motor.brake();
+        //motor.brake();
+        motor.cal(vx, vy, speed, machine_angle, gyro_angle);
     } else {
+        //motor.brake();
         motor.cal(vx, vy, speed, machine_angle, gyro_angle);
         //motor.cal(0.0, 0.0, 0, 0.0, gyro_angle);
     }

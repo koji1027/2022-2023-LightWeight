@@ -25,8 +25,9 @@ void setup() {
 
 void loop() {
     ir.IR_get();
-    ir.radius_read();
-    // ir.angle_read();
+    // ir.IRpin_read();
+    //ir.radius_read();
+    ir.angle_read();
     // ir.IRonepin_read(1);
     int recv_data = Serial1.read();
     if (recv_data == 255) {
