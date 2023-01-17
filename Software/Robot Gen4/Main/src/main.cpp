@@ -64,8 +64,10 @@ void loop1() {
     }
     float Circ_Kp = pow(CIRC_BASE, ir_radius);
     move_angle = ir_angle + ir_angle * Circ_Kp;
+    Serial.println(ir_radius);
     float vx = sin(move_angle);
     float vy = cos(move_angle);
+<<<<<<< HEAD
     /*
     if (line.entire_sensor_state){
         if((line.line_theta >= 0 && line.line_theta <= PI/4)||
@@ -85,6 +87,8 @@ void loop1() {
     }
     */
     if (line.entire_sensor_state){vx=0; vy=0;}
+=======
+>>>>>>> parent of 520934c (Merge branch 'main' of https://github.com/negi-tech/2022-2023-LightWeight)
     vx = (vx + 1.0) * 100.0;
     vy = (vy + 1.0) * 100.0;
 

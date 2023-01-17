@@ -113,12 +113,17 @@ void IR::IR_get() {
         }
         delayMicroseconds(1);
         IR_Cur[i] = IR_CUR_MAX - analogRead(SIG_pin);
+        if (IR_Cur[i] > 1000) {
+            IR_Cur[i] = 0;
+        }
         IR_Cur_LPF[i] = kLPF * IR_Cur[i] + (1 - kLPF) * IR_Cur_LPF[i];
         // IR_Cur_Length[i] = (IR_Cur_LPF[i] - 814.39) / (-2.175);
         IR_Cur_Length[i] = -4E-06 * pow(IR_Cur_LPF[i], 3.0) +
                            0.0095 * pow(IR_Cur_LPF[i], 2.0) -
                            7.869 * IR_Cur_LPF[i] + 2272.8;
     }
+    IR_Cur_LPF[2] = (IR_Cur_LPF[1] + IR_Cur_LPF[3]) / 2;
+    IR_Cur_Length[2] = (IR_Cur_LPF[2] - 814.39) / (-2.175);
     int maxVal = 0;
     int maxIndex = 0;
     for (int i = 0; i < IR_NUM; i++) {

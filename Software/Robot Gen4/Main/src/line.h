@@ -9,8 +9,12 @@ class Line {
    public:
     void begin();
     void read();
+<<<<<<< HEAD
     void print();
     void onepin_print(int i);  // デバッグ用
+=======
+    void print();  // デバッグ用
+>>>>>>> parent of 520934c (Merge branch 'main' of https://github.com/negi-tech/2022-2023-LightWeight)
     void set_threshold();
     bool entire_sensor_state = false;
     float line_vector[2] = {0.0};
@@ -43,7 +47,7 @@ void Line::begin() {
         SENSOR_Y[i] = cos(SENSOR_THETA[i]);
     }
     for (int i = 0; i < SENSOR_NUM; i++) {
-        THRESHOLD[i] = 100;
+        THRESHOLD[i] = 650;
     }
 }
 
@@ -104,12 +108,15 @@ void Line::read() {
         if (line_theta > PI) {
             line_theta -= PI * 2.0;
         }
-        //line_vector[0] = sin(line_theta);
-        //line_vector[1] = cos(line_theta);
     }
 }
-void Line::onepin_print(int i) {
-        Serial.println(sensor_value[i]);
+void Line::print() {
+    for (int i = 0; i < 16; i++) {
+        Serial.print(sensor_value[i]);
+        Serial.print("\t");
+    }
+    Serial.println();
+    delay(100);
 }
 
 void Line::set_threshold() {
