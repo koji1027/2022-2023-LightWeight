@@ -66,7 +66,6 @@ void Gyro::begin() {
     mpu.setXAccelOffset(-2231);
     mpu.setYAccelOffset(365);
     mpu.setZAccelOffset(747);
-
     if (devStatus == 0) {
         mpu.CalibrateAccel(6);
         mpu.CalibrateGyro(6);

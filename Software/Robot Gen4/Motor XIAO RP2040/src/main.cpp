@@ -22,7 +22,7 @@ void loop() {
         motor.brake();
     } else {
         motor.cal(vx, vy, speed, machine_angle, gyro_angle);
-        //motor.cal(0.0, 0.0, 0, 0.0, gyro_angle);
+        // motor.cal(0.0, 0.0, 0, 0.0, gyro_angle);
     }
 }
 
