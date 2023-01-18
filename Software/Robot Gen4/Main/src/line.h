@@ -43,7 +43,7 @@ void Line::begin() {
         SENSOR_Y[i] = cos(SENSOR_THETA[i]);
     }
     for (int i = 0; i < SENSOR_NUM; i++) {
-        THRESHOLD[i] = 650;
+        THRESHOLD[i] = 900;
     }
 }
 

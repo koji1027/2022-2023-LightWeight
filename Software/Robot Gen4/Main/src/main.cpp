@@ -17,6 +17,7 @@ float ir_angle = 0.0;
 float ir_radius = 0.0;
 float move_angle = 0.0;
 int ball_flag = 0;
+int line_flag = 0;
 bool start_flag = false;
 int led_color[3] = {255, 255, 255};
 int led_brightness = 50;
@@ -64,7 +65,7 @@ void loop1() {
     Serial.println(ir_radius);
     float vx = sin(move_angle);
     float vy = cos(move_angle);
-    /*
+    
     if (line.entire_sensor_state){
         if((line.line_theta >= 0 && line.line_theta <= PI/4)||
            (line.line_theta > -PI/4 && line.line_theta <= 0)){
@@ -81,8 +82,8 @@ void loop1() {
             vx = 0;
         }
     }
-    */
-    if (line.entire_sensor_state){vx=0; vy=0;}
+    
+    //if (line.entire_sensor_state){vx=0; vy=0;}
 
     vx = (vx + 1.0) * 100.0;
     vy = (vy + 1.0) * 100.0;
