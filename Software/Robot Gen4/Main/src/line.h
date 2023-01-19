@@ -68,6 +68,43 @@ void Line::read() {
             sensor_state[i] = false;
         }
     }
+    int cluster_num = 0;
+    int cluster[SENSOR_NUM] = {0};
+    int cluster_size[SENSOR_NUM] = {0};
+    for (int i = 0; i < SENSOR_NUM; i++) {
+        if (sensor_state[i]) {
+            if (cluster[cluster_num] + cluster_size[cluster_num] == i) {
+                cluster_size[cluster_num]++;
+            } else {
+                cluster_num++;
+                cluster[cluster_num] = i;
+                cluster_size[cluster_num] = 1;
+            }
+        }
+    }
+    if (cluster[0] == 0 &&
+        cluster[cluster_num] + cluster_size[cluster_num] == SENSOR_NUM) {
+        cluster[0] = cluster[cluster_num];
+        cluster_size[0] += cluster_size[cluster_num];
+        cluster_num--;
+    }
+    float cluster_theta[SENSOR_NUM] = {0.0};
+    for (int i = 0; i <= cluster_num; i++) {
+        if (cluster_size[i] % 2) {
+            cluster_theta[i] =
+                SENSOR_THETA[cluster[i] + cluster_size[i] / 2 - 1];
+        } else {
+            cluster_theta[i] =
+                (SENSOR_THETA[cluster[i] + cluster_size[i] / 2 - 1] +
+                 SENSOR_THETA[cluster[i] + cluster_size[i] / 2]) /
+                2.0;
+        }
+    }
+    float sum_vector[2] = {0.0, 0.0};
+    for (int i = 0; i <= cluster_num; i++) {
+        sum_vector[0] += sin(cluster_theta[i]);
+        sum_vector[1] += cos(cluster_theta[i]);
+    }
     if (numILW == 0) {
         entire_sensor_state = false;
         return;
