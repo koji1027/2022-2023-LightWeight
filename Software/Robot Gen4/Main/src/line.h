@@ -43,7 +43,7 @@ void Line::begin() {
         SENSOR_Y[i] = cos(SENSOR_THETA[i]);
     }
     for (int i = 0; i < SENSOR_NUM; i++) {
-        THRESHOLD[i] = 900;
+        THRESHOLD[i] = 500;
     }
 }
 
@@ -145,7 +145,7 @@ void Line::read() {
 }
 void Line::print() {
     for (int i = 0; i < 16; i++) {
-        Serial.print(sensor_value[i]);
+        Serial.print(sensor_state[i]);
         Serial.print("\t");
     }
     Serial.println();

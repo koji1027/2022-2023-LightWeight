@@ -14,6 +14,9 @@ void setup() {
     // put your setup code here, to run once:
     Serial.begin(115200);
     motor.begin();
+    while (1) {
+        motor.cal(0.0, 1.0, 200, 0.0, 0.0);
+    }
 }
 
 void loop() {

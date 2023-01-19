@@ -40,6 +40,7 @@ void setup() {
 void loop() {
     gyro.getEuler();
     line.read();
+    line.print();
 }
 
 void setup1() {
