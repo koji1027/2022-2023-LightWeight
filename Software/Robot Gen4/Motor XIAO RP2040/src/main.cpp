@@ -8,15 +8,13 @@ float machine_angle = 0.0;
 int speed = 0;
 float vx = 0.0;
 float vy = 0.0;
-int flag = 1;
+int flag = 0;
 
 void setup() {
     // put your setup code here, to run once:
     Serial.begin(115200);
     motor.begin();
-    while (1) {
-        motor.cal(0.0, 1.0, 200, 0.0, 0.0);
-    }
+    
 }
 
 void loop() {
@@ -25,7 +23,7 @@ void loop() {
         motor.brake();
     } else {
         motor.cal(vx, vy, speed, machine_angle, gyro_angle);
-        // motor.cal(0.0, 0.0, 0, 0.0, gyro_angle);
+        //motor.cal(0.0, 0.0, 0, 0.0, gyro_angle);
     }
 }
 

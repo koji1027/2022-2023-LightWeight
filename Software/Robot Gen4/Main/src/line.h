@@ -105,6 +105,7 @@ void Line::read() {
         sum_vector[0] += sin(cluster_theta[i]);
         sum_vector[1] += cos(cluster_theta[i]);
     }
+    line_theta = atan2(sum_vector[0], sum_vector[1]);
     if (numILW == 0) {
         entire_sensor_state = false;
         return;
@@ -137,18 +138,16 @@ void Line::read() {
             line_theta = SENSOR_THETA[posILW[posMaxIntvL] + maxIntvL / 2];
         }
         line_theta += PI;
-        line_theta = fmod(line_theta, PI * 2.0);
-        if (line_theta > PI) {
+        while (line_theta > PI) {
             line_theta -= PI * 2.0;
+        }
+        while (line_theta < -PI) {
+            line_theta += PI * 2.0;
         }
     }
 }
 void Line::print() {
-    for (int i = 0; i < 16; i++) {
-        Serial.print(sensor_state[i]);
-        Serial.print("\t");
-    }
-    Serial.println();
+    Serial.println(line_theta);
     delay(100);
 }
 

@@ -19,29 +19,9 @@ void set_led(int color[3], int brightness) {
 
 void init_led() {
     for (int i = 0; i < LED_NUM; i++) {
-        for (int j = 0; j < i + 1; j++) {
-            led.setPixelColor(j, led.Color(255, 0, 0));
-        }
-        led.setBrightness(50);
-        led.show();
-        delay(50);
+        led.setPixelColor(i, led.Color(255, 0, 0));
     }
-    for (int i = 0; i < LED_NUM; i++) {
-        led.setPixelColor(i, led.Color(0, 255, 0));
-    }
-    led.setBrightness(50);
-    led.show();
-    delay(500);
-    for (int i = 0; i < LED_NUM; i++) {
-        led.setPixelColor(i, led.Color(0, 0, 255));
-    }
-    led.setBrightness(50);
-    led.show();
-    delay(500);
-    for (int i = 0; i < LED_NUM; i++) {
-        led.setPixelColor(i, led.Color(255, 255, 255));
-    }
-    led.setBrightness(50);
+    led.setBrightness(200);
     led.show();
 }
 

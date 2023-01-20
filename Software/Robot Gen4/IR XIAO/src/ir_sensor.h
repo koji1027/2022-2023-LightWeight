@@ -123,7 +123,7 @@ void IR::IR_get() {
         //                   7.869 * IR_Cur_LPF[i] + 2272.8;
         IR_Cur_Length[i] = IR_Cur_LPF[i];
     }
-    //IR_Cur_LPF[2] = (IR_Cur_LPF[1] + IR_Cur_LPF[3]) / 2;
+    IR_Cur_LPF[2] = (IR_Cur_LPF[1] + IR_Cur_LPF[3]) / 2;
     //IR_Cur_Length[2] = IR_Cur_LPF[2];
     int maxVal = 0;
     int maxIndex = 0;

@@ -5,7 +5,7 @@
 #include "line.h"
 
 #define DIST_BALL -20.0
-#define CIRC_BASE pow(0.75, 1.0 / 20.0)
+#define CIRC_BASE pow(1.0, 1.0 / 20.0)
 #define LINE_FLAG_MAX 100
 
 SerialPIO motor(D17, D16, 32);
@@ -32,7 +32,6 @@ void setup() {
     Serial.begin(115200);
     gyro.begin();
     line.begin();
-    set_led(led_color, led_brightness);
     init_led();
     delay(1000);
 }
@@ -74,26 +73,30 @@ void loop1() {
     float vx = sin(move_angle);
     float vy = cos(move_angle);
 
-    /* ミスター齊藤のライン制作領域
+    // ミスター齊藤のライン制作領域
+    /*
     if (line.entire_sensor_state) {
+        
         if ((line.line_theta >= 0 && line.line_theta <= PI / 4) ||
             (line.line_theta > -PI / 4 && line.line_theta <= 0)) {
-            vy = 0;
+            vy = 1;
         }
         if (line.line_theta > PI / 4 && line.line_theta <= 3 * PI / 4) {
-            vx = 0;
+            vx = 1;
         }
         if ((line.line_theta > 3 * PI / 4 && line.line_theta <= PI) ||
             (line.line_theta >= -PI && line.line_theta <= -3 * PI / 4)) {
-            vy = 0;
+            vy = -1;
         }
         if (line.line_theta > -3 * PI / 4 && line.line_theta >= -PI / 4) {
-            vx = 0;
+            vx = -1;
         }
+        
     }
-
-    if (line.entire_sensor_state){vx=0; vy=0;}
     */
+
+    //if (line.entire_sensor_state){vx=0; vy=0;}
+
 
     vx = (vx + 1.0) * 100.0;
     vy = (vy + 1.0) * 100.0;
