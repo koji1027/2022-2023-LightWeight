@@ -75,6 +75,7 @@ private:
     vectorRT_t vector_RT;
     int IR_Cur[IR_NUM];
     int IR_Cur_LPF[IR_NUM];
+    float IR_Cur_Length[IR_NUM];
     float IR_IN[IR_NUM] = {
         0, -PI / 8, -PI * 2 / 8, -PI * 3 / 8,
         -PI * 4 / 8, -PI * 5 / 8, -PI * 6 / 8, -PI * 7 / 8,
@@ -123,6 +124,9 @@ void IR::IR_get()
     }
     IR_Cur_LPF[2] = (IR_Cur_LPF[1] + IR_Cur_LPF[3]) / 2;
     int sum = 0;
+    Serial.print(IR_Cur[1]);
+    Serial.print("\t");
+    Serial.println(IR_Cur[2]);
     for (int i = 0; i < IR_NUM; i++)
     {
         sum += IR_Cur_LPF[i];
@@ -152,6 +156,7 @@ void IR::IR_get()
             int index = (maxIndex + i - 2) % IR_NUM;
             vector_XY.x += IR_Cur_LPF[index] * unit_cos[index];
             vector_XY.y += IR_Cur_LPF[index] * unit_sin[index];
+            IR_Cur_Length[index] = -0.4408 * IR_Cur_LPF[index] + 372.54;
         }
         vector_RT.angle = atan2(vector_XY.y, vector_XY.x);
         vector_RT.radius = -0.4408 * IR_Cur_LPF[maxIndex] + 372.54;

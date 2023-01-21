@@ -1,11 +1,12 @@
 #include <Arduino.h>
+#include <hardware/flash.h>
 
 #include "MPU6050/gyro.h"
 #include "led.h"
 #include "line.h"
 
 #define DIST_BALL -20.0
-#define CIRC_BASE pow(1.0, 1.0 / 20.0)
+#define CIRC_BASE pow(0.8, 1.0 / 20.0)
 #define LINE_FLAG_MAX 100
 
 SerialPIO motor(D17, D16, 32);
@@ -29,6 +30,8 @@ int line_emergency_flag = 0;
 float circulate_angle = 0.0;
 
 int linetrace();
+static void save_setting_to_flash();
+void load_setting_from_flash();
 
 void setup()
 {
@@ -36,6 +39,7 @@ void setup()
     pinMode(BUTTON_PIN[1], INPUT_PULLUP);
     pinMode(BUTTON_PIN[2], INPUT_PULLUP);
     Serial.begin(115200);
+    load_setting_from_flash();
     gyro.begin();
     line.begin();
     init_led();
@@ -48,11 +52,16 @@ void loop()
     {
         gyro.getEuler();
         line.read();
-        Serial.println(gyro.angle);
+        if (digitalRead(BUTTON_PIN[2]) == LOW)
+        {
+            start_flag = false;
+        }
     }
     if (digitalRead(BUTTON_PIN[0]) == LOW)
     {
         start_flag = true;
+        gyro.getEuler();
+        gyro.angle_offset = gyro.angle;
     }
     delay(10);
 }
@@ -137,6 +146,7 @@ void loop1()
         }
         else
         {
+            Serial.println("Hello");
             byte data[8];
             data[0] = 0; // 送るもとの値は -1~1 だが、送るときは 0~200 にする
             data[1] = 0;
@@ -145,13 +155,25 @@ void loop1()
             data[4] = (byte)((int)((gyro.angle + PI) * 100) >> 8);
             data[5] = (byte)((machine_angle + PI) * 100);
             data[6] = (byte)((int)((machine_angle + PI) * 100) >> 8);
-            data[7] = 0;
+            data[7] = 1;
 
             motor.write(255);
             motor.write(data, 8);
             delay(10);
         }
     }
+    byte data[8];
+    data[0] = 0;
+    data[1] = 0;
+    data[2] = 0;
+    data[3] = 0;
+    data[4] = 0;
+    data[5] = 0;
+    data[6] = 0;
+    data[7] = 1;
+    motor.write(255);
+    motor.write(data, 8);
+    delay(10);
 }
 
 int linetrace()
@@ -518,5 +540,34 @@ int linetrace()
     {
         move_angle = (line.line_theta + PI) * 100;
         return 1;
+    }
+}
+
+static void save_setting_to_flash()
+{
+    const uint32_t FLASH_TARGET_OFFSET = 0x1F0000;
+    uint8_t write_data[FLASH_PAGE_SIZE];
+    // write_dataに書き込みたいデータを格納
+
+    uint32_t ints = save_and_disable_interrupts();
+    flash_range_erase(FLASH_TARGET_OFFSET, FLASH_PAGE_SIZE);
+    flash_range_program(FLASH_TARGET_OFFSET, write_data, FLASH_PAGE_SIZE);
+    restore_interrupts(ints);
+}
+
+void load_setting_from_flash()
+{
+    const uint32_t FLASH_TARGET_OFFSET = 0x1F0000;
+    const uint8_t *flash_target_contents = (const uint8_t *)(XIP_BASE + FLASH_TARGET_OFFSET);
+    for (int i = 0; i < 6; i++)
+    {
+        uint8_t low = flash_target_contents[i * 2];
+        uint8_t high = flash_target_contents[i * 2 + 1];
+        int value = (high << 8) + low;
+        if (value >= 16384)
+        {
+            value -= 32768;
+        }
+        gyro.offset[i] = value;
     }
 }

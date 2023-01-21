@@ -9,15 +9,18 @@ MPU6050 mpu;
 
 #define OUTPUT_READABLE_YAWPITCHROLL
 
-class Gyro {
-   public:
+class Gyro
+{
+public:
     void begin();
     void getEuler();
     float angle = 0.0;
+    float angle_offset = 0.0;
     float vel_x = 0.0;
     float vel_y = 0.0;
+    int offset[6] = {0, 0, 0, 0, 0, 0};
 
-   private:
+private:
     bool blinkState = false;
 
     bool dmpReady = false;
@@ -39,14 +42,15 @@ class Gyro {
     int16_t gyroRaw[3];
     float accel[3];
 
-    uint8_t teapotPacket[14] = {'$', 0x02, 0, 0,    0,    0,    0,
-                                0,   0,    0, 0x00, 0x00, '\r', '\n'};
+    uint8_t teapotPacket[14] = {'$', 0x02, 0, 0, 0, 0, 0,
+                                0, 0, 0, 0x00, 0x00, '\r', '\n'};
 
     volatile bool mpuInterrupt = false;
     void dmpDataReady() { mpuInterrupt = true; }
 };
 
-void Gyro::begin() {
+void Gyro::begin()
+{
 #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
     Wire.setSCL(D5);
     Wire.setSDA(D4);
@@ -60,13 +64,15 @@ void Gyro::begin() {
     mpu.initialize();
     devStatus = mpu.dmpInitialize();
 
-    mpu.setXGyroOffset(241);
-    mpu.setYGyroOffset(-193);
-    mpu.setZGyroOffset(-29);
-    mpu.setXAccelOffset(-2231);
-    mpu.setYAccelOffset(365);
-    mpu.setZAccelOffset(747);
-    if (devStatus == 0) {
+    mpu.setXAccelOffset(offset[0]);
+    mpu.setYAccelOffset(offset[1]);
+    mpu.setZAccelOffset(offset[2]);
+    mpu.setXGyroOffset(offset[3]);
+    mpu.setYGyroOffset(offset[4]);
+    mpu.setZGyroOffset(offset[5]);
+
+    if (devStatus == 0)
+    {
         mpu.CalibrateAccel(6);
         mpu.CalibrateGyro(6);
         Serial.println();
@@ -78,8 +84,10 @@ void Gyro::begin() {
     }
 }
 
-void Gyro::getEuler() {
-    if (!dmpReady) return;
+void Gyro::getEuler()
+{
+    if (!dmpReady)
+        return;
     if (mpu.dmpGetCurrentFIFOPacket(fifoBuffer))
 
 #ifdef OUTPUT_READABLE_QUATERNION
@@ -110,6 +118,7 @@ void Gyro::getEuler() {
     mpu.dmpGetGravity(&gravity, &q);
     mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
     angle = ypr[0];
+    angle -= angle_offset;
 #endif
 
 #ifdef OUTPUT_READABLE_REALACCEL
