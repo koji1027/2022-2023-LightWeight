@@ -174,21 +174,18 @@ void Line::read()
             line_theta = SENSOR_THETA[posILW[posMaxIntvL] + maxIntvL / 2];
         }
         line_theta += PI;
-        line_theta = fmod(line_theta, PI * 2.0);
-        if (line_theta > PI) {
+        while (line_theta > PI) {
             line_theta -= PI * 2.0;
+        }
+        while (line_theta < -PI) {
+            line_theta += PI * 2.0;
         }
     }
     */
 }
-void Line::print()
-{
-    for (int i = 0; i < 16; i++)
-    {
-        Serial.print(sensor_value[i]);
-        Serial.print("\t");
-    }
-    Serial.println();
+void Line::print() {
+    Serial.println(line_theta);
+    delay(100);
 }
 
 void Line::set_threshold()

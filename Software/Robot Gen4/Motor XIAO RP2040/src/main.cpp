@@ -8,7 +8,7 @@ float machine_angle = 0.0;
 int speed = 0;
 float vx = 0.0;
 float vy = 0.0;
-int flag = 1;
+int flag = 0;
 
 void setup()
 {
@@ -20,25 +20,11 @@ void setup()
 void loop()
 {
     // put your main code here, to run repeatedly:
-    motor.brake();
-    /*digitalWrite(D4, LOW);  // 4番のpwm
-    digitalWrite(D5, HIGH);
-    digitalWrite(D8, LOW);  // 3番のPWM
-    digitalWrite(D9, LOW);  // 3番dir*/
-    while (1)
-    {
-        motor.cal(0, 1, 100, 0, 0);
-    }
-    if (flag)
-    {
-        motor.cal(1.0, 0, 100, 0, 0);
-        // motor.brake();
-    }
-    else
-    {
-        // motor.cal(vx, vy, speed, machine_angle, gyro_angle);
-        motor.cal(1.0, 0, 100, 0, 0);
-        // motor.cal(0, 0, 0, 0, 0);
+    if (flag) {
+        motor.brake();
+    } else {
+        motor.cal(vx, vy, speed, machine_angle, gyro_angle);
+        //motor.cal(0.0, 0.0, 0, 0.0, gyro_angle);
     }
 }
 

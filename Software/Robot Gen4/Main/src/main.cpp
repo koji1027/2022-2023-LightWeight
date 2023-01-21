@@ -5,7 +5,7 @@
 #include "line.h"
 
 #define DIST_BALL -20.0
-#define CIRC_BASE pow(0.75, 1.0 / 20.0)
+#define CIRC_BASE pow(1.0, 1.0 / 20.0)
 #define LINE_FLAG_MAX 100
 
 SerialPIO motor(D17, D16, 32);
