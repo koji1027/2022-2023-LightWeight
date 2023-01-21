@@ -10,38 +10,56 @@ float vx = 0.0;
 float vy = 0.0;
 int flag = 1;
 
-void setup() {
+void setup()
+{
     // put your setup code here, to run once:
     Serial.begin(115200);
     motor.begin();
-    while (1) {
-        motor.cal(0.0, 1.0, 200, 0.0, 0.0);
-    }
 }
 
-void loop() {
+void loop()
+{
     // put your main code here, to run repeatedly:
-    if (flag) {
-        motor.brake();
-    } else {
-        motor.cal(vx, vy, speed, machine_angle, gyro_angle);
-        // motor.cal(0.0, 0.0, 0, 0.0, gyro_angle);
+    motor.brake();
+    /*digitalWrite(D4, LOW);  // 4番のpwm
+    digitalWrite(D5, HIGH);
+    digitalWrite(D8, LOW);  // 3番のPWM
+    digitalWrite(D9, LOW);  // 3番dir*/
+    while (1)
+    {
+        motor.cal(0, 1, 100, 0, 0);
+    }
+    if (flag)
+    {
+        motor.cal(1.0, 0, 100, 0, 0);
+        // motor.brake();
+    }
+    else
+    {
+        // motor.cal(vx, vy, speed, machine_angle, gyro_angle);
+        motor.cal(1.0, 0, 100, 0, 0);
+        // motor.cal(0, 0, 0, 0, 0);
     }
 }
 
-void setup1() {
+void setup1()
+{
     Serial1.begin(115200);
-    while (!Serial1) {
+    while (!Serial1)
+    {
     }
 }
-void loop1() {
-    if (Serial1.available() > 8) {
+void loop1()
+{
+    if (Serial1.available() > 8)
+    {
         int recv_data = Serial1.read();
-        if (recv_data == 255) {
-            int data[8];  //[0] Vx, [1] Vy, [2] Speed. [3] Gyro(下位8bit),
-                          //[4] Gyro(上位8bit), [5] ロボの向き(下位8bit),
-                          //[6] ロボの向き(上位8bit), [7]フラグ (0:通常
-                          // 1:ブレーキ)
+        if (recv_data == 255)
+        {
+            int data[8]; //[0] Vx, [1] Vy, [2] Speed. [3] Gyro(下位8bit),
+                         //[4] Gyro(上位8bit), [5] ロボの向き(下位8bit),
+                         //[6] ロボの向き(上位8bit), [7]フラグ (0:通常
+                         // 1:ブレーキ)
             data[0] = Serial1.read();
             data[1] = Serial1.read();
             data[2] = Serial1.read();

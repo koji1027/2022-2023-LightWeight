@@ -15,6 +15,9 @@ void draw_template();
 
 void setup() {
     Serial.begin(115200);
+    Wire.setSCL(D5);
+    Wire.setSDA(D4);
+    Wire.begin();
     display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
     display.clearDisplay();
     display.display();
