@@ -19,6 +19,7 @@ const int BUTTON_PIN[3] = {D18, D19, D20};
 bool start_flag = false;
 float machine_angle = 0.0;
 float ir_angle = 0.0;
+float absolute_ir_angle = 0.0;
 float ir_radius = 0.0;
 float move_angle = 0.0;
 int ball_flag = 0; // 0:なし 1:あり
@@ -52,6 +53,15 @@ void loop()
     {
         gyro.getEuler();
         line.read();
+        line.absolute_line_theta = line.line_theta + gyro.angle;
+        if (line.absolute_line_theta > PI)
+        {
+            line.absolute_line_theta -= 2 * PI;
+        }
+        if (line.absolute_line_theta < -PI)
+        {
+            line.absolute_line_theta += 2 * PI;
+        }
         if (digitalRead(BUTTON_PIN[2]) == LOW)
         {
             start_flag = false;
@@ -62,6 +72,11 @@ void loop()
         start_flag = true;
         gyro.getEuler();
         gyro.angle_offset = gyro.angle;
+    }
+    if (digitalRead(BUTTON_PIN[1]) == LOW)
+    {
+        line.set_threshold();
+        delay(1000);
     }
     delay(10);
 }
@@ -93,6 +108,15 @@ void loop1()
                 {
                     ir_angle = _ir_angle;
                 }
+                absolute_ir_angle = ir_angle + gyro.angle;
+                if (absolute_ir_angle > PI)
+                {
+                    absolute_ir_angle -= 2 * PI;
+                }
+                if (absolute_ir_angle < -PI)
+                {
+                    absolute_ir_angle += 2 * PI;
+                }
                 ir_radius = (float)data[2];
                 ball_flag = data[3];
             }
@@ -103,8 +127,8 @@ void loop1()
             circulate_angle = ir_angle + ir_angle * Circ_Kp;
             move_angle = circulate_angle;
             // float line_flag = linetrace();
-            float vx = sin(move_angle);
-            float vy = cos(move_angle);
+            float vx = cos(move_angle);
+            float vy = sin(move_angle);
 
             /* ミスター齊藤のライン制作領域
             if (line.line_flag) {
@@ -146,7 +170,6 @@ void loop1()
         }
         else
         {
-            Serial.println("Hello");
             byte data[8];
             data[0] = 0; // 送るもとの値は -1~1 だが、送るときは 0~200 にする
             data[1] = 0;

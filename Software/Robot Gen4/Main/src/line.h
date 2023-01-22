@@ -16,6 +16,7 @@ public:
     bool line_flag = false;
     bool floor_flag = false;
     float line_theta = 0.0;
+    float absolute_line_theta = 0.0;
 
 private:
     const int COM_PIN[2] = {A1, A0};
@@ -183,7 +184,8 @@ void Line::read()
     }
     */
 }
-void Line::print() {
+void Line::print()
+{
     Serial.println(line_theta);
     delay(100);
 }
@@ -201,35 +203,53 @@ void Line::set_threshold()
     Serial.println("1");
     delay(1000);
     Serial.println("Start");
-    int maxValue[16] = {0};
-    int minValue[16] = {1023};
-    unsigned long long start_time = millis();
-    while (millis() - start_time < 5000)
+    int maxValue[32];
+    int minValue[32];
+    for (int i = 0; i < 32; i++)
+    {
+        maxValue[i] = 0;
+        minValue[i] = 1023;
+    }
+    bool loop_flag = true;
+    while (loop_flag)
     {
         for (int i = 0; i < 16; i++)
         {
             for (int j = 0; j < 4; j++)
             {
                 digitalWrite(SELECT_PIN[0][j], (byte)i & (1 << j));
+                digitalWrite(SELECT_PIN[1][j], (byte)i & (1 << j));
             }
-            int value = analogRead(COM_PIN[0]);
-            if (value > maxValue[i])
+            int value0 = analogRead(COM_PIN[0]);
+            int value1 = analogRead(COM_PIN[1]);
+            if (value0 > maxValue[i])
             {
-                maxValue[i] = value;
+                maxValue[i] = value0;
             }
-            if (value < minValue[i])
+            if (value0 < minValue[i])
             {
-                minValue[i] = value;
+                minValue[i] = value0;
+            }
+            if (value1 > maxValue[i + 16])
+            {
+                maxValue[i + 16] = value1;
+            }
+            if (value1 < minValue[i + 16])
+            {
+                minValue[i + 16] = value1;
             }
         }
+        if (digitalRead(D19) == LOW)
+        {
+            loop_flag = false;
+        }
     }
-    for (int i = 0; i < 16; i++)
+    for (int i = 0; i < 32; i++)
     {
         THRESHOLD[i] = (float)(maxValue[i] + minValue[i]) / 2.0;
     }
-    THRESHOLD[15] = 400;
     Serial.println("自動しきい値設定完了！");
-    for (int i = 0; i < 16; i++)
+    for (int i = 0; i < 32; i++)
     {
         Serial.print(THRESHOLD[i]);
         Serial.print("\t");
