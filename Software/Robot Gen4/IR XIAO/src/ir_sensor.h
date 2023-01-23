@@ -122,11 +122,9 @@ void IR::IR_get()
         }
         IR_Cur_LPF[i] = kLPF * IR_Cur[i] + (1 - kLPF) * IR_Cur_LPF[i];
     }
-    IR_Cur_LPF[2] = (IR_Cur_LPF[1] + IR_Cur_LPF[3]) / 2;
+    //IR_Cur_LPF[2] = (IR_Cur_LPF[1] + IR_Cur_LPF[3]) / 2;
     int sum = 0;
-    Serial.print(IR_Cur[1]);
-    Serial.print("\t");
-    Serial.println(IR_Cur[2]);
+    
     for (int i = 0; i < IR_NUM; i++)
     {
         sum += IR_Cur_LPF[i];

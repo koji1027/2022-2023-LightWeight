@@ -114,6 +114,7 @@ void Line::read()
     }
     else
     {
+        line_flag = true;
         if (cluster[0] == 0 &&
             cluster[cluster_num] + cluster_size[cluster_num] == SENSOR_NUM)
         {
@@ -186,8 +187,11 @@ void Line::read()
 }
 void Line::print()
 {
-    Serial.println(line_theta);
-    delay(100);
+    for (int i = 0; i < SENSOR_NUM; i++){
+        Serial.print(sensor_state[i]);
+        Serial.print("\t");
+    }
+    Serial.println("");
 }
 
 void Line::set_threshold()

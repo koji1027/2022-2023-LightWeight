@@ -30,6 +30,11 @@ int line_flag_count = 0;
 int line_emergency_flag = 0;
 float circulate_angle = 0.0;
 
+float vx = 0.0;
+float vy = 0.0;
+int default_speed = 100;
+int speed = 0;
+
 int linetrace();
 static void save_setting_to_flash();
 void load_setting_from_flash();
@@ -53,6 +58,7 @@ void loop()
     {
         gyro.getEuler();
         line.read();
+        //line.print();
         line.absolute_line_theta = line.line_theta + gyro.angle;
         if (line.absolute_line_theta > PI)
         {
@@ -126,64 +132,54 @@ void loop1()
             float Circ_Kp = pow(CIRC_BASE, ir_radius);
             circulate_angle = ir_angle + ir_angle * Circ_Kp;
             move_angle = circulate_angle;
-            // float line_flag = linetrace();
-            float vx = cos(move_angle);
-            float vy = sin(move_angle);
-
-            /* ミスター齊藤のライン制作領域
-            if (line.line_flag) {
-                if ((line.line_theta >= 0 && line.line_theta <= PI / 4) ||
-                    (line.line_theta > -PI / 4 && line.line_theta <= 0)) {
-                    vy = 0;
-                }
-                if (line.line_theta > PI / 4 && line.line_theta <= 3 * PI / 4) {
-                    vx = 0;
-                }
-                if ((line.line_theta > 3 * PI / 4 && line.line_theta <= PI) ||
-                    (line.line_theta >= -PI && line.line_theta <= -3 * PI / 4))
-            { vy = 0;
-                }
-                if (line.line_theta > -3 * PI / 4 && line.line_theta >= -PI / 4)
-            { vx = 0;
-                }
-            }
-
-            if (line.line_flag){vx=0; vy=0;}
-            */
-
-            vx = (vx + 1.0) * 100.0;
-            vy = (vy + 1.0) * 100.0;
-
-            byte data[8];
-            data[0] = vx; // 送るもとの値は -1~1 だが、送るときは 0~200 にする
-            data[1] = vy;
-            data[2] = 100;
-            data[3] = (byte)((gyro.angle + PI) * 100);
-            data[4] = (byte)((int)((gyro.angle + PI) * 100) >> 8);
-            data[5] = (byte)((machine_angle + PI) * 100);
-            data[6] = (byte)((int)((machine_angle + PI) * 100) >> 8);
-            data[7] = 0;
-
-            motor.write(255);
-            motor.write(data, 8);
-            delay(10);
+            vx = cos(move_angle);
+            vy = sin(move_angle);
+            speed = default_speed;
         }
         else
         {
-            byte data[8];
-            data[0] = 0; // 送るもとの値は -1~1 だが、送るときは 0~200 にする
-            data[1] = 0;
-            data[2] = 0;
-            data[3] = (byte)((gyro.angle + PI) * 100);
-            data[4] = (byte)((int)((gyro.angle + PI) * 100) >> 8);
-            data[5] = (byte)((machine_angle + PI) * 100);
-            data[6] = (byte)((int)((machine_angle + PI) * 100) >> 8);
-            data[7] = 1;
-
-            motor.write(255);
-            motor.write(data, 8);
-            delay(10);
+            vx = 0;
+            vy = 0;
+            speed = 0;
         }
+
+        // float line_flag = linetrace();
+        // Serial.println(line.line_flag);
+        //ミスター齊藤のライン制作領域
+        if (line.line_flag) {
+            speed = default_speed;
+            Serial.println(line.line_theta);
+            if ((line.line_theta >= 0 && line.line_theta <= PI / 4) ||
+                (line.line_theta > -PI / 4 && line.line_theta <= 0)) 
+            { vx = 1;}
+            if (line.line_theta > PI / 4 && line.line_theta <= 3 * PI / 4) 
+            { vy = 1;}
+            if ((line.line_theta > 3 * PI / 4 && line.line_theta <= PI) ||
+                (line.line_theta >= -PI && line.line_theta <= -3 * PI / 4))
+            { vx = -1;}
+                if (line.line_theta > -3 * PI / 4 && line.line_theta >= -PI / 4)
+            { vy = -1;}
+        }
+
+        //if (line.line_flag){vx=0; vy=0;}
+    
+
+        float _vx = (vx + 1.0) * 100.0;
+        float _vy = (vy + 1.0) * 100.0;
+        byte data[8];
+        data[0] = _vx; // 送るもとの値は -1~1 だが、送るときは 0~200 にする
+        data[1] = _vy;
+        data[2] = speed;
+        data[3] = (byte)((gyro.angle + PI) * 100);
+        data[4] = (byte)((int)((gyro.angle + PI) * 100) >> 8);
+        data[5] = (byte)((machine_angle + PI) * 100);
+        data[6] = (byte)((int)((machine_angle + PI) * 100) >> 8);
+        data[7] = 0;
+        motor.write(255);
+        motor.write(data, 8);
+        delay(10);
+
+        
     }
     byte data[8];
     data[0] = 0;

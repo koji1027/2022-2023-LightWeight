@@ -22,6 +22,7 @@ void loop()
 {
     // put your main code here, to run repeatedly:
     ir.IR_get();
+    //ir.IRpin_read();
     if (Serial1.available() > 0)
     {
         int recv_data = Serial1.read();
