@@ -142,6 +142,7 @@ void Line::read()
             sum_vector[0] += sin(cluster_theta[i]);
             sum_vector[1] += cos(cluster_theta[i]);
         }
+        line_theta = atan2(sum_vector[0], sum_vector[1]);
     }
     /*
     if (numILW == 0) {

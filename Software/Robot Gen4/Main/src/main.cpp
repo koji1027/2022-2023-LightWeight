@@ -58,7 +58,7 @@ void loop()
     //{
     gyro.getEuler();
     line.read();
-    Serial.println(gyro.angle);
+    // Serial.println(gyro.angle);
     // line.print();
     line.absolute_line_theta = line.line_theta + gyro.angle;
     if (line.absolute_line_theta > PI)
@@ -151,24 +151,28 @@ void loop1()
     {
         speed = default_speed;
         Serial.println(line.line_theta);
+        vx = cos(line.line_theta + PI);
+        vy = sin(line.line_theta + PI);
+        /*
         if ((line.line_theta >= 0 && line.line_theta <= PI / 4) ||
             (line.line_theta > -PI / 4 && line.line_theta <= 0))
         {
-            vx = 1;
+            vx = -1;
         }
         if (line.line_theta > PI / 4 && line.line_theta <= 3 * PI / 4)
         {
-            vy = 1;
+            vy = -1;
         }
         if ((line.line_theta > 3 * PI / 4 && line.line_theta <= PI) ||
             (line.line_theta >= -PI && line.line_theta <= -3 * PI / 4))
         {
-            vx = -1;
+            vx = 1;
         }
-        if (line.line_theta > -3 * PI / 4 && line.line_theta >= -PI / 4)
+        if (line.line_theta > -3 * PI / 4 && line.line_theta <= -PI / 4)
         {
-            vy = -1;
+            vy = 1;
         }
+        */
     }
 
     // if (line.line_flag){vx=0; vy=0;}
