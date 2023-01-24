@@ -54,37 +54,38 @@ void setup()
 
 void loop()
 {
-    while (start_flag)
+    // while (start_flag)
+    //{
+    gyro.getEuler();
+    line.read();
+    Serial.println(gyro.angle);
+    // line.print();
+    line.absolute_line_theta = line.line_theta + gyro.angle;
+    if (line.absolute_line_theta > PI)
     {
-        gyro.getEuler();
-        line.read();
-        //line.print();
-        line.absolute_line_theta = line.line_theta + gyro.angle;
-        if (line.absolute_line_theta > PI)
-        {
-            line.absolute_line_theta -= 2 * PI;
-        }
-        if (line.absolute_line_theta < -PI)
-        {
-            line.absolute_line_theta += 2 * PI;
-        }
-        if (digitalRead(BUTTON_PIN[2]) == LOW)
-        {
-            start_flag = false;
-        }
+        line.absolute_line_theta -= 2 * PI;
     }
-    if (digitalRead(BUTTON_PIN[0]) == LOW)
+    if (line.absolute_line_theta < -PI)
     {
-        start_flag = true;
-        gyro.getEuler();
-        gyro.angle_offset = gyro.angle;
+        line.absolute_line_theta += 2 * PI;
     }
-    if (digitalRead(BUTTON_PIN[1]) == LOW)
-    {
-        line.set_threshold();
-        delay(1000);
-    }
-    delay(10);
+    // if (digitalRead(BUTTON_PIN[2]) == LOW)
+    //{
+    // start_flag = false;
+    //}
+    //}
+    // if (digitalRead(BUTTON_PIN[0]) == LOW)
+    //{
+    //    start_flag = true;
+    //    gyro.getEuler();
+    // gyro.angle_offset = gyro.angle;
+    //}
+    // if (digitalRead(BUTTON_PIN[1]) == LOW)
+    //{
+    // line.set_threshold();
+    // delay(1000);
+    //}
+    // delay(10);
 }
 
 void setup1()
@@ -96,92 +97,98 @@ void setup1()
 
 void loop1()
 {
-    while (start_flag)
+    // while (start_flag)
+    //{
+    ir.write(255);
+    if (ir.available() > 5)
     {
-        ir.write(255);
-        if (ir.available() > 5)
+        int recv_data = ir.read();
+        if (recv_data == 255)
         {
-            int recv_data = ir.read();
-            if (recv_data == 255)
+            byte data[4];
+            data[0] = ir.read();
+            data[1] = ir.read();
+            data[2] = ir.read();
+            data[3] = ir.read();
+            float _ir_angle = (float)(data[0] + (data[1] << 8)) / 100.0 - PI;
+            if (abs(_ir_angle) <= PI)
             {
-                byte data[4];
-                data[0] = ir.read();
-                data[1] = ir.read();
-                data[2] = ir.read();
-                data[3] = ir.read();
-                float _ir_angle = (float)(data[0] + (data[1] << 8)) / 100.0 - PI;
-                if (abs(_ir_angle) <= PI)
-                {
-                    ir_angle = _ir_angle;
-                }
-                absolute_ir_angle = ir_angle + gyro.angle;
-                if (absolute_ir_angle > PI)
-                {
-                    absolute_ir_angle -= 2 * PI;
-                }
-                if (absolute_ir_angle < -PI)
-                {
-                    absolute_ir_angle += 2 * PI;
-                }
-                ir_radius = (float)data[2];
-                ball_flag = data[3];
+                ir_angle = _ir_angle;
             }
+            absolute_ir_angle = ir_angle + gyro.angle;
+            if (absolute_ir_angle > PI)
+            {
+                absolute_ir_angle -= 2 * PI;
+            }
+            if (absolute_ir_angle < -PI)
+            {
+                absolute_ir_angle += 2 * PI;
+            }
+            ir_radius = (float)data[2];
+            ball_flag = data[3];
         }
-        if (ball_flag)
-        {
-            float Circ_Kp = pow(CIRC_BASE, ir_radius);
-            circulate_angle = ir_angle + ir_angle * Circ_Kp;
-            move_angle = circulate_angle;
-            vx = cos(move_angle);
-            vy = sin(move_angle);
-            speed = default_speed;
-        }
-        else
-        {
-            vx = 0;
-            vy = 0;
-            speed = 0;
-        }
-
-        // float line_flag = linetrace();
-        // Serial.println(line.line_flag);
-        //ミスター齊藤のライン制作領域
-        if (line.line_flag) {
-            speed = default_speed;
-            Serial.println(line.line_theta);
-            if ((line.line_theta >= 0 && line.line_theta <= PI / 4) ||
-                (line.line_theta > -PI / 4 && line.line_theta <= 0)) 
-            { vx = 1;}
-            if (line.line_theta > PI / 4 && line.line_theta <= 3 * PI / 4) 
-            { vy = 1;}
-            if ((line.line_theta > 3 * PI / 4 && line.line_theta <= PI) ||
-                (line.line_theta >= -PI && line.line_theta <= -3 * PI / 4))
-            { vx = -1;}
-                if (line.line_theta > -3 * PI / 4 && line.line_theta >= -PI / 4)
-            { vy = -1;}
-        }
-
-        //if (line.line_flag){vx=0; vy=0;}
-    
-
-        float _vx = (vx + 1.0) * 100.0;
-        float _vy = (vy + 1.0) * 100.0;
-        byte data[8];
-        data[0] = _vx; // 送るもとの値は -1~1 だが、送るときは 0~200 にする
-        data[1] = _vy;
-        data[2] = speed;
-        data[3] = (byte)((gyro.angle + PI) * 100);
-        data[4] = (byte)((int)((gyro.angle + PI) * 100) >> 8);
-        data[5] = (byte)((machine_angle + PI) * 100);
-        data[6] = (byte)((int)((machine_angle + PI) * 100) >> 8);
-        data[7] = 0;
-        motor.write(255);
-        motor.write(data, 8);
-        delay(10);
-
-        
     }
+    if (ball_flag)
+    {
+        float Circ_Kp = pow(CIRC_BASE, ir_radius);
+        circulate_angle = ir_angle + ir_angle * Circ_Kp;
+        move_angle = circulate_angle;
+        vx = cos(move_angle);
+        vy = sin(move_angle);
+        speed = default_speed;
+    }
+    else
+    {
+        vx = 0;
+        vy = 0;
+        speed = 0;
+    }
+
+    // float line_flag = linetrace();
+    // Serial.println(line.line_flag);
+    // ミスター齊藤のライン制作領域
+    if (line.line_flag)
+    {
+        speed = default_speed;
+        Serial.println(line.line_theta);
+        if ((line.line_theta >= 0 && line.line_theta <= PI / 4) ||
+            (line.line_theta > -PI / 4 && line.line_theta <= 0))
+        {
+            vx = 1;
+        }
+        if (line.line_theta > PI / 4 && line.line_theta <= 3 * PI / 4)
+        {
+            vy = 1;
+        }
+        if ((line.line_theta > 3 * PI / 4 && line.line_theta <= PI) ||
+            (line.line_theta >= -PI && line.line_theta <= -3 * PI / 4))
+        {
+            vx = -1;
+        }
+        if (line.line_theta > -3 * PI / 4 && line.line_theta >= -PI / 4)
+        {
+            vy = -1;
+        }
+    }
+
+    // if (line.line_flag){vx=0; vy=0;}
+
+    float _vx = (vx + 1.0) * 100.0;
+    float _vy = (vy + 1.0) * 100.0;
     byte data[8];
+    data[0] = _vx; // 送るもとの値は -1~1 だが、送るときは 0~200 にする
+    data[1] = _vy;
+    data[2] = speed;
+    data[3] = (byte)((gyro.angle + PI) * 100);
+    data[4] = (byte)((int)((gyro.angle + PI) * 100) >> 8);
+    data[5] = (byte)((machine_angle + PI) * 100);
+    data[6] = (byte)((int)((machine_angle + PI) * 100) >> 8);
+    data[7] = 0;
+    motor.write(255);
+    motor.write(data, 8);
+    delay(10);
+    //}
+    /*byte data[8];
     data[0] = 0;
     data[1] = 0;
     data[2] = 0;
@@ -192,7 +199,7 @@ void loop1()
     data[7] = 1;
     motor.write(255);
     motor.write(data, 8);
-    delay(10);
+    delay(10);*/
 }
 
 int linetrace()
