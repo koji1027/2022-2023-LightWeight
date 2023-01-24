@@ -62,6 +62,7 @@ void loop1()
             int recv_machine_angle = data[5] + (data[6] << 8);
             machine_angle = (recv_machine_angle / 100.0) - PI;
             flag = data[7];
+            //Serial.println(vx);
         }
     }
 }
