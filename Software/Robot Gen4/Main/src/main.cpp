@@ -128,6 +128,7 @@ void loop1()
             ball_flag = data[3];
         }
     }
+    //Serial.println(ir_angle);
     if (ball_flag)
     {
         float Circ_Kp = pow(CIRC_BASE, ir_radius);
@@ -150,7 +151,7 @@ void loop1()
     if (line.line_flag)
     {
         speed = default_speed;
-        Serial.println(line.line_theta);
+        //Serial.println(line.line_theta);
         vx = cos(line.line_theta + PI);
         vy = sin(line.line_theta + PI);
         /*
