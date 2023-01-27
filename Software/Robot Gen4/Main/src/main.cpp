@@ -6,7 +6,8 @@
 #include "line.h"
 
 #define DIST_BALL -20.0
-#define CIRC_BASE pow(0.8, 1.0 / 20.0)
+#define CIRC_BASE pow(0.6, 1.0 / 20.0)
+#define CIRC_WEIGHT 3
 #define LINE_FLAG_MAX 100
 
 SerialPIO motor(D17, D16, 32);
@@ -131,8 +132,9 @@ void loop1()
     //Serial.println(ir_angle);
     if (ball_flag)
     {
-        float Circ_Kp = pow(CIRC_BASE, ir_radius);
-        circulate_angle = ir_angle + ir_angle * Circ_Kp;
+        float circ_exp = pow(CIRC_BASE, ir_radius);
+        float circ_sigmoid = 1/(1+exp((ir_radius-40)/5));
+        circulate_angle = ir_angle + ir_angle * circ_exp * CIRC_WEIGHT * circ_sigmoid;
         move_angle = circulate_angle;
         vx = cos(move_angle);
         vy = sin(move_angle);
