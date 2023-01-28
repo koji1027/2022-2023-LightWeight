@@ -13,10 +13,11 @@ public:
     void print();
     void onepin_print(int i); // デバッグ用
     void set_threshold();
-    bool line_flag = false;
+    int is_line = false;
     bool floor_flag = false;
     float line_theta = 0.0;
     float absolute_line_theta = 0.0;
+    int cluster_num = -1;//実際の数-１
 
 private:
     const int COM_PIN[2] = {A1, A0};
@@ -82,7 +83,7 @@ void Line::read()
             sensor_state[i] = false;
         }
     }
-    int cluster_num = -1;
+    cluster_num = -1;//実際の数-１
     int cluster[SENSOR_NUM] = {0};
     int cluster_size[SENSOR_NUM] = {0};
     for (int i = 0; i < SENSOR_NUM; i++)
@@ -109,12 +110,12 @@ void Line::read()
     }
     if (cluster_num == -1)
     {
-        line_flag = false;
+        is_line = false;
         return;
     }
     else
     {
-        line_flag = true;
+        is_line = true;
         if (cluster[0] == 0 &&
             cluster[cluster_num] + cluster_size[cluster_num] == SENSOR_NUM)
         {
@@ -146,14 +147,14 @@ void Line::read()
     }
     /*
     if (numILW == 0) {
-        line_flag = false;
+        is_line = false;
         return;
     } else if (numILW == 1) {
         line_theta = SENSOR_THETA[posILW[0]];
-        line_flag = true;
+        is_line = true;
         return;
     } else {
-        line_flag = true;
+        is_line = true;
         int intvLine[numILW] = {0};  // 白線上にあるセンサの間隔
         for (int i = 0; i < numILW; i++) {
             intvLine[i] = posILW[i + 1] - posILW[i];
@@ -185,6 +186,7 @@ void Line::read()
         }
     }
     */
+   //Serial.println(cluster_num);
 }
 void Line::print()
 {

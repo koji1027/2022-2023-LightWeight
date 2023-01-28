@@ -116,11 +116,10 @@ void IR::IR_get()
         }
         delayMicroseconds(1);
         IR_Cur[i] = IR_CUR_MAX - analogRead(SIG_pin);
+
         IR_Cur_LPF[i] = kLPF * IR_Cur[i] + (1 - kLPF) * IR_Cur_LPF[i];
     }
-    // IR_Cur[2] = IR_CUR_MAX - analogRead(A0);
-    // IR_Cur_LPF[2] = kLPF * IR_Cur[2] + (1 - kLPF) * IR_Cur_LPF[2];
-    //  IR_Cur_LPF[2] = (IR_Cur_LPF[1] + IR_Cur_LPF[3]) / 2;
+   
     int sum = 0;
     for (int i = 0; i < IR_NUM; i++)
     {
@@ -159,6 +158,7 @@ void IR::IR_get()
             vector_XY.y += IR_Cur_LPF[i] * unit_sin[i];
             IR_Cur_Length[i] = -0.4408 * IR_Cur_LPF[i] + 372.54;
         }
+        
         vector_RT.angle = atan2(vector_XY.y, vector_XY.x);
         vector_RT.radius = -0.4408 * IR_Cur_LPF[maxIndex] + 372.54;
         for (int i = 0; i < MOVE_AVE_NUM - 1; i++)
