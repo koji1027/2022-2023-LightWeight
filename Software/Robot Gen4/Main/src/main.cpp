@@ -405,8 +405,19 @@ void line_trace()
     }
     else
     { // もともとラインを踏んでいるが前後左右ではない
+        
         vx = cos(line.line_theta + PI);
         vy = sin(line.line_theta + PI);
+        
+        /*
+        if(abs(line.line_theta) > PI/2){
+            vx = -1;
+            vy = 0;
+        } else{
+            vx = 1;
+            vy = 0;
+        }
+        */
         if (now_line_flag == 0)
         { // 今はラインを踏んでいない
             if (is_line_count >= IS_LINE_GOAL)
@@ -442,7 +453,333 @@ void line_trace()
         }
     }
     //Serial.println(atan2(vy,vx)/PI);
+    if(line.cluster_num == 2){
+        if(abs(line.line_theta) > PI/2){
+            vx = -1;
+            vy = 0;
+        } else{
+            vx = 1;
+            vy = 0;
+        }
+    }
 }
+
+/*
+void line_trace()
+{   // 現在、ラインがどこにあるかを判定　0:なし 1:前 2:後ろ 3:右 4:左 5:その他
+    int now_line_flag = 0;
+    int pre_line_flag = 0;
+    if (line.is_line)
+    {
+        no_line_count = 0;
+        if (abs(line.line_theta) < PI / 4.0)
+        { // ロボの前側にラインあり
+            now_line_flag = 1;
+        }
+        else if (line.line_theta > PI / 4.0 * 3.0 || line.line_theta < -PI / 4.0 * 3.0)
+        { // ロボの後ろ側にラインあり
+            now_line_flag = 2;
+        }
+        else if (line.line_theta > PI / 4.0 && line.line_theta < PI / 4.0 * 3.0)
+        { // ロボの右側にラインあり
+            now_line_flag = 3;
+        }
+        else if (line.line_theta < -PI / 4.0 && line.line_theta > -PI / 4.0 * 3.0)
+        { // ロボの左側にラインあり
+            now_line_flag = 4;
+        }
+        else
+        { // ラインを踏んでいるが左右ではない
+            now_line_flag = 5;
+        }
+    }
+    else
+    { // ラインを踏んでいない
+        now_line_flag = 0;
+    }
+
+    if (line_flag == 0)
+    { // もともとラインを踏んでいないとき
+        no_line_count = 0;
+        if (now_line_flag == 0){}// 今も踏んでいない
+        else if (now_line_flag == 1)
+        { // 今は前にラインが有る
+            line_flag = 1;
+        }
+        else if (now_line_flag == 2)
+        { // 今は後ろにラインが有る
+            line_flag = 2;
+        }
+        else if (now_line_flag == 3)
+        { // 今は右にラインが有る
+            line_flag = 3;
+        }
+        else if (line_flag == 4)
+        { // 今は左にラインが有る
+            line_flag = 4;
+        }
+        else
+        { // ラインを踏んでいるが前後左右ではない
+            line_flag = 5;
+        }
+    }
+    else if (line_flag == 1)
+    { // もともと前にラインが有るとき
+        if(vx > 0){
+            vx = 0;
+        }
+        if (now_line_flag == 0)
+        { // 今はラインを踏んでいない
+            if (pre_line_flag == line_flag){
+                count_available = true;
+            }
+            if (count_available){
+                no_line_count++;
+                if (no_line_count >= NO_LINE_GOAL)
+                {
+                    line_flag = 0;
+                    no_line_count = 0;
+                    count_available = false;
+                    //Serial.println("Reset");
+                }
+            }
+            else {
+                vx = -1;
+                escape_flag = true;
+            }
+            
+        }
+        else if (now_line_flag == 1)
+        { // 前を踏んでいる
+            line_flag = 1;
+            if (escape_flag){
+                count_available = true;
+                escape_flag = false;
+            }
+        }
+        else if (now_line_flag == 2)
+        { // 後ろを踏んでいる
+            count_available = false;
+            vx = -1;
+        }
+        else if (now_line_flag == 3)
+        { // 右を踏んでいる
+            line_flag = 3;
+        }
+        else if (now_line_flag == 4)
+        { // 左を踏んでいる
+            line_flag = 4;
+        }
+        else
+        { // ラインを踏んでいるが前後左右ではない
+            line_flag = 5;
+        }
+    }
+    else if (line_flag == 2)
+    { // もともと後ろにラインが有るとき
+        if(vx < 0){
+            vx = 0;
+        }
+        if (now_line_flag == 0)
+        { // 今はラインを踏んでいない
+            if (pre_line_flag == line_flag){
+                count_available = true;
+            }
+            if (count_available){
+                no_line_count++;
+                if (no_line_count >= NO_LINE_GOAL)
+                {
+                    line_flag = 0;
+                    no_line_count = 0;
+                    count_available = false;
+                    //Serial.println("Reset");
+                }
+            }
+            else {
+                vx = 1;
+                escape_flag = true;
+            }
+        }
+        else if (now_line_flag == 1)
+        { // 前を踏んでいる
+            count_available = false;
+            vx = 1;
+        }
+        else if (now_line_flag == 2)
+        { // 後ろを踏んでいる
+            line_flag = 2;
+            if (escape_flag){
+                count_available = true;
+                escape_flag = false;
+            }
+        }
+        else if (now_line_flag == 3)
+        { // 右を踏んでいる
+            line_flag = 3;
+        }
+        else if (now_line_flag == 4)
+        { // 左を踏んでいる
+            line_flag = 4;
+        }
+        else
+        { // ラインを踏んでいるが前後左右ではない
+            line_flag = 5;
+        }
+    }
+    else if (line_flag == 3)
+    { // もともと右にラインが有るとき
+        if(vy > 0){
+            vy = 0;
+        }
+        if (now_line_flag == 0)
+        { // 今はラインを踏んでいない
+            if (pre_line_flag == line_flag){
+                count_available = true;
+            }
+            if (count_available){
+                no_line_count++;
+                if (no_line_count >= NO_LINE_GOAL)
+                {
+                    line_flag = 0;
+                    no_line_count = 0;
+                    count_available = false;
+                    //Serial.println("Reset");
+                }
+            }
+            else {
+                vy = -1;
+                escape_flag = true;
+            }
+        }
+        else if (now_line_flag == 1)
+        { // 前を踏んでいる
+            line_flag = 1;
+        }
+        else if (now_line_flag == 2)
+        { // 後ろを踏んでいる
+            line_flag = 2;
+        }
+        else if (now_line_flag == 3)
+        { // 右を踏んでいる
+            line_flag = 3;
+            if (escape_flag){
+                count_available = true;
+                escape_flag = false;
+            }
+        }
+        else if (now_line_flag == 4)
+        { // 左を踏んでいる
+            count_available = false;
+            vy = -1;
+        }
+        else
+        { // ラインを踏んでいるが前後左右ではない
+            line_flag = 5;
+        }
+    }
+    else if (line_flag == 4)
+    { // もともと左にラインが有るとき
+        if(vy < 0){
+            vy = 0;
+        }
+        if (now_line_flag == 0)
+        { // 今はラインを踏んでいない
+            if (pre_line_flag == line_flag){
+                count_available = true;
+            }
+            if (count_available){
+                no_line_count++;
+                if (no_line_count >= NO_LINE_GOAL)
+                {
+                    line_flag = 0;
+                    no_line_count = 0;
+                    count_available = false;
+                    //Serial.println("Reset");
+                }
+            }
+            else {
+                vy = 1;
+                escape_flag = true;
+            }
+        }
+        else if (now_line_flag == 1)
+        { // 前を踏んでいる
+            line_flag = 1;
+        }
+        else if (now_line_flag == 2)
+        { // 後ろを踏んでいる
+            line_flag = 2;
+        }
+        else if (now_line_flag == 3)
+        { // 右を踏んでいる
+            count_available = false;
+            vy = 1;
+        }
+        else if (now_line_flag == 4)
+        { // 左を踏んでいる
+            line_flag = 4;
+            if (escape_flag){
+                count_available = true;
+                escape_flag = false;
+            }
+        }
+        else
+        { // ラインを踏んでいるが前後左右ではない
+            line_flag = 5;
+        }
+    }
+    else
+    { // もともとラインを踏んでいるが前後左右ではない
+        
+        vx = cos(line.line_theta + PI);
+        vy = sin(line.line_theta + PI);
+        
+        if (now_line_flag == 0)
+        { // 今はラインを踏んでいない
+            if (no_line_count >= NO_LINE_GOAL)
+            {
+                line_flag = 0;
+                no_line_count = 0;
+                //Serial.println("Reset");
+            }
+            else
+            {
+                no_line_count++;
+            }
+        }
+        else if (now_line_flag == 1)
+        { // 前を踏んでいる
+            line_flag = 1;
+        }
+        else if (now_line_flag == 2)
+        { // 後ろを踏んでいる
+            line_flag = 2;
+        }
+        else if (now_line_flag == 3)
+        { // 右を踏んでいる
+            line_flag = 3;
+        }
+        else if (now_line_flag == 4)
+        { // 左を踏んでいる
+            line_flag = 4;
+        }
+        else
+        { // ラインを踏んでいるが前後左右ではない
+            line_flag = 5;
+        }
+    }
+    //Serial.println(atan2(vy,vx)/PI);
+    if(line.cluster_num == 2){
+        if(abs(line.line_theta) > PI/2){
+            vx = -1;
+            vy = 0;
+        } else{
+            vx = 1;
+            vy = 0;
+        }
+    }
+    pre_line_flag = now_line_flag;
+}*/
 
 static void save_setting_to_flash()
 {

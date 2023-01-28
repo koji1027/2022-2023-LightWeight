@@ -17,6 +17,7 @@ public:
     bool floor_flag = false;
     float line_theta = 0.0;
     float absolute_line_theta = 0.0;
+    int cluster_num = -1;//実際の数-１
 
 private:
     const int COM_PIN[2] = {A1, A0};
@@ -82,7 +83,7 @@ void Line::read()
             sensor_state[i] = false;
         }
     }
-    int cluster_num = -1;
+    cluster_num = -1;//実際の数-１
     int cluster[SENSOR_NUM] = {0};
     int cluster_size[SENSOR_NUM] = {0};
     for (int i = 0; i < SENSOR_NUM; i++)
@@ -185,7 +186,7 @@ void Line::read()
         }
     }
     */
-   Serial.println(cluster_num);
+   //Serial.println(cluster_num);
 }
 void Line::print()
 {
