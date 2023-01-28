@@ -8,9 +8,11 @@
 #define DIST_BALL -20.0
 #define CIRC_BASE pow(0.8, 1.0 / 20.0)
 #define LINE_FLAG_MAX 100
+#define KEEPER_SPEED_Kp 3.0
+#define KEEPER_X_Kp 7.5
 
 SerialPIO motor(D17, D16, 32);
-SerialPIO ir(D0, D1, 32);
+SerialPIO esp32(D12, D13, 32);
 Gyro gyro;
 Line line;
 
@@ -23,12 +25,13 @@ float absolute_ir_angle = 0.0;
 float ir_radius = 0.0;
 float move_angle = 0.0;
 int ball_flag = 0; // 0:なし 1:あり
-int line_flag = 0;
+int line_flag = 0; // 0:前 1:後ろ
 int led_color[3] = {255, 255, 255};
 int led_brightness = 50;
 int line_flag_count = 0;
 int line_emergency_flag = 0;
 float circulate_angle = 0.0;
+int distance[3];
 
 float vx = 0.0;
 float vy = 0.0;
@@ -45,6 +48,10 @@ void setup()
     pinMode(BUTTON_PIN[1], INPUT_PULLUP);
     pinMode(BUTTON_PIN[2], INPUT_PULLUP);
     Serial.begin(115200);
+    esp32.begin(115200);
+    while (!esp32)
+        ;
+
     load_setting_from_flash();
     gyro.begin();
     line.begin();
@@ -59,7 +66,6 @@ void loop()
     gyro.getEuler();
     line.read();
     // Serial.println(gyro.angle);
-    line.print();
     line.absolute_line_theta = line.line_theta + gyro.angle;
     if (line.absolute_line_theta > PI)
     {
@@ -86,30 +92,49 @@ void loop()
     // delay(1000);
     //}
     // delay(10);
+    if (esp32.available() > 3)
+    {
+        int recv_data = esp32.read();
+        if (recv_data == 255)
+        {
+            byte data[3];
+            for (int i = 0; i < 3; i++)
+            {
+                data[i] = esp32.read();
+            }
+            for (int i = 0; i < 3; i++)
+            {
+                distance[i] = distance[i] * 0.15 + data[i] * 0.85;
+                Serial.print(distance[i]);
+                Serial.print("\t");
+            }
+            Serial.println();
+        }
+    }
 }
 
 void setup1()
 {
     motor.begin(115200);
-    ir.begin(115200);
-    delay(3000);
+    Serial1.begin(115200);
+    delay(4000);
 }
 
 void loop1()
 {
     // while (start_flag)
     //{
-    ir.write(255);
-    if (ir.available() > 5)
+    Serial1.write(255);
+    if (Serial1.available() > 4)
     {
-        int recv_data = ir.read();
+        int recv_data = Serial1.read();
         if (recv_data == 255)
         {
             byte data[4];
-            data[0] = ir.read();
-            data[1] = ir.read();
-            data[2] = ir.read();
-            data[3] = ir.read();
+            data[0] = Serial1.read();
+            data[1] = Serial1.read();
+            data[2] = Serial1.read();
+            data[3] = Serial1.read();
             float _ir_angle = (float)(data[0] + (data[1] << 8)) / 100.0 - PI;
             if (abs(_ir_angle) <= PI)
             {
@@ -128,50 +153,171 @@ void loop1()
             ball_flag = data[3];
         }
     }
-    ball_flag = true;
+
     if (ball_flag)
     {
-        if (!line.line_flag)
+        /*if (distance[0] < 50)
         {
-            move_angle = PI;
-            vx = cos(move_angle);
-            vy = sin(move_angle);
+            vx = 0;
+            vy = -1;
             speed = default_speed;
+            Serial.println("Right");
+        }
+        else if (distance[2] < 50)
+        {
+            vx = 0;
+            vy = 1;
+            speed = default_speed;
+            Serial.println("Left");
         }
         else
         {
-            if (abs(line.line_theta) <= PI / 4.0)
+            if (!line.line_flag)
             {
-                move_angle = 0;
-                vx = cos(move_angle);
-                vy = sin(move_angle);
-                speed = default_speed;
-            }
-            else if (line.line_theta > PI / 4.0 && line.line_theta * 3.0 / 4.0)
-            {
-                move_angle = -PI / 2.0;
-                vx = cos(move_angle);
-                vy = sin(move_angle);
-                speed = default_speed;
-            }
-            else if (line.line_theta < -PI / 4.0 && line.line_theta > -PI * 3.0 / 4.0)
-            {
-                move_angle = PI / 2.0;
-                vx = cos(move_angle);
-                vy = sin(move_angle);
-                speed = default_speed;
+                if (line_flag)
+                {
+                    if (abs(ir_angle) < PI / 6.0)
+                    {
+                        vx = -1;
+                        vy = 0;
+                        speed = default_speed;
+                    }
+                    else if (ir_angle >= PI / 6.0 && ir_angle <= PI / 2.0)
+                    {
+                        vx = -sqrt(3) / 2;
+                        vy = 0.5;
+                        speed = default_speed;
+                    }
+                    else if (ir_angle <= -PI / 6.0 && ir_angle >= -PI / 2.0)
+                    {
+                        vx = -sqrt(3) / 2;
+                        vy = -0.5;
+                        speed = default_speed;
+                    }
+                }
+                else
+                {
+                    if (abs(ir_angle) < PI / 6.0)
+                    {
+                        vx = 1;
+                        vy = 0;
+                        speed = default_speed;
+                    }
+                    else if (ir_angle >= PI / 6.0 && ir_angle <= PI / 2.0)
+                    {
+                        vx = sqrt(3) / 2;
+                        vy = 0.5;
+                        speed = default_speed;
+                    }
+                    else if (ir_angle <= -PI / 6.0 && ir_angle >= -PI / 2.0)
+                    {
+                        vx = sqrt(3) / 2;
+                        vy = -0.5;
+                        speed = default_speed;
+                    }
+                }
             }
             else
             {
+                if (abs(line.line_theta) < PI / 2.0)
+                {
+                    line_flag = 0;
+                }
+                else
+                {
+                    line_flag = 1;
+                }
+                if (abs(ir_angle) < PI / 6.0)
+                {
+                    vx = 0;
+                    vy = 0;
+                    speed = 0;
+                }
+                else if (ir_angle >= PI / 6.0 && ir_angle <= PI / 2.0)
+                {
+                    vx = 0;
+                    vy = 1;
+                    speed = default_speed;
+                }
+                else if (ir_angle <= -PI / 6.0 && ir_angle >= -PI / 2.0)
+                {
+                    vx = 0;
+                    vy = -1;
+                    speed = default_speed;
+                }
+                else
+                {
+                    vx = 0;
+                    vy = 0;
+                    speed = 0;
+                }
+            }
+        }*/
+        vx = 0;
+        vy = 0;
+        speed = default_speed;
+        if (distance[0] < 53)
+        {
+            vy = -1;
+        }
+        if (distance[2] < 53)
+        {
+            vy = 1;
+        }
+        else
+        {
+            ir_angle += PI / 12.0;
+            if (ir_angle > PI)
+            {
+                ir_angle -= 2 * PI;
+            }
+            if (ir_angle > 0)
+            {
+                vx = 0;
+                vy = 1;
+                speed = (ir_angle / PI * 180.0) * KEEPER_SPEED_Kp * 1.25;
+            }
+            else if (ir_angle < 0)
+            {
+                vx = 0;
+                vy = -1;
+                speed = -(ir_angle / PI * 180.0) * KEEPER_SPEED_Kp * 1.25;
+            }
+            else
+            {
+                vx = 0;
+                vy = 0;
                 speed = 0;
             }
+            speed = constrain(speed, 0, 125);
+        }
+
+        vx = (float)(25 - distance[1]) / KEEPER_X_Kp;
+        vx = constrain(vx, -1, 1);
+
+        if (vy == 0)
+        {
+            speed = KEEPER_SPEED_Kp * abs(25 - distance[1]) * 2.0;
+            vx /= abs(vx);
+        }
+        else
+        {
+            vx = vx / sqrt(vx * vx + vy * vy);
+            vy = vy / sqrt(vx * vx + vy * vy);
         }
     }
     else
     {
         vx = 0;
-        vy = 0;
-        speed = 0;
+        if (distance[0] - distance[2] > 0)
+        {
+            vy = 1;
+        }
+        else
+        {
+            vy = -1;
+        }
+        speed = KEEPER_SPEED_Kp * abs(distance[0] - distance[2]) * 2.0;
     }
 
     float _vx = (vx + 1.0) * 100.0;
