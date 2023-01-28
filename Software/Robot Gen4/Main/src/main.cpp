@@ -7,8 +7,8 @@
 
 #define DIST_BALL -20.0
 #define CIRC_BASE pow(0.6, 1.0 / 20.0)
-#define CIRC_WEIGHT 3
-#define LINE_FLAG_MAX 100
+#define CIRC_WEIGHT 3.5
+#define IS_LINE_GOAL 50
 
 SerialPIO motor(D17, D16, 32);
 SerialPIO ir(D0, D1, 32);
@@ -27,7 +27,8 @@ int ball_flag = 0; // 0:なし 1:あり
 int line_flag = 0;
 int led_color[3] = {255, 255, 255};
 int led_brightness = 50;
-int line_flag_count = 0;
+int volt = 0;
+int is_line_count = 0;
 int line_emergency_flag = 0;
 float circulate_angle = 0.0;
 
@@ -36,7 +37,7 @@ float vy = 0.0;
 int default_speed = 100;
 int speed = 0;
 
-int linetrace();
+void line_trace();
 static void save_setting_to_flash();
 void load_setting_from_flash();
 
@@ -61,6 +62,7 @@ void loop()
     line.read();
     // Serial.println(gyro.angle);
     // line.print();
+    volt = analogRead(A3);
     line.absolute_line_theta = line.line_theta + gyro.angle;
     if (line.absolute_line_theta > PI)
     {
@@ -133,8 +135,8 @@ void loop1()
     if (ball_flag)
     {
         float circ_exp = pow(CIRC_BASE, ir_radius);
-        float circ_sigmoid = 1/(1+exp((ir_radius-40)/5));
-        circulate_angle = ir_angle + ir_angle * circ_exp * CIRC_WEIGHT * circ_sigmoid;
+        //float circ_sigmoid = 1/(1+exp((ir_radius-80)/10));
+        circulate_angle = ir_angle + ir_angle * circ_exp * CIRC_WEIGHT;
         move_angle = circulate_angle;
         vx = cos(move_angle);
         vy = sin(move_angle);
@@ -147,38 +149,16 @@ void loop1()
         speed = 0;
     }
 
-    // float line_flag = linetrace();
-    // Serial.println(line.line_flag);
+    line_trace();
+    
     // ミスター齊藤のライン制作領域
+    /*
     if (line.line_flag)
     {
-        speed = default_speed;
-        //Serial.println(line.line_theta);
         vx = cos(line.line_theta + PI);
         vy = sin(line.line_theta + PI);
-        /*
-        if ((line.line_theta >= 0 && line.line_theta <= PI / 4) ||
-            (line.line_theta > -PI / 4 && line.line_theta <= 0))
-        {
-            vx = -1;
-        }
-        if (line.line_theta > PI / 4 && line.line_theta <= 3 * PI / 4)
-        {
-            vy = -1;
-        }
-        if ((line.line_theta > 3 * PI / 4 && line.line_theta <= PI) ||
-            (line.line_theta >= -PI && line.line_theta <= -3 * PI / 4))
-        {
-            vx = 1;
-        }
-        if (line.line_theta > -3 * PI / 4 && line.line_theta <= -PI / 4)
-        {
-            vy = 1;
-        }
-        */
     }
-
-    // if (line.line_flag){vx=0; vy=0;}
+    */
 
     float _vx = (vx + 1.0) * 100.0;
     float _vy = (vy + 1.0) * 100.0;
@@ -209,14 +189,12 @@ void loop1()
     delay(10);*/
 }
 
-int linetrace()
-{
-    // 現在、ラインがどこにあるかを判定　0:なし 1:前 2:後ろ 3:右 4:左
-    // 5:その他
+void line_trace()
+{   // 現在、ラインがどこにあるかを判定　0:なし 1:前 2:後ろ 3:右 4:左 5:その他
     int now_line_flag = 0;
-    if (line.line_flag)
+    if (line.is_line)
     {
-        line_flag_count = 0;
+        is_line_count = 0;
         if (abs(line.line_theta) < PI / 6.0)
         { // ロボの前側にラインあり
             now_line_flag = 1;
@@ -245,12 +223,8 @@ int linetrace()
 
     if (line_flag == 0)
     { // もともとラインを踏んでいないとき
-        line_flag_count = 0;
-        if (now_line_flag == 0)
-        {                                              // 今も踏んでいない
-            move_angle = (circulate_angle + PI) * 100; // 回り込みをする
-            return 0;
-        }
+        is_line_count = 0;
+        if (now_line_flag == 0){}// 今も踏んでいない
         else if (now_line_flag == 1)
         { // 今は前にラインが有る
             line_flag = 1;
@@ -274,18 +248,17 @@ int linetrace()
     }
     else if (line_flag == 1)
     { // もともと前にラインが有るとき
+        if(vx > 0){
+            vx = 0;
+        }
         if (now_line_flag == 0)
         { // 今はラインを踏んでいない
-            if (line_flag_count < LINE_FLAG_MAX)
+            is_line_count++;
+            if (is_line_count >= IS_LINE_GOAL)
             {
-                move_angle = (circulate_angle + PI) * 100; // 回り込みをする
-                line_flag_count = 0;
-                Serial.println("Reset");
-                return 0;
-            }
-            else
-            {
-                line_flag_count++;
+                line_flag = 0;
+                is_line_count = 0;
+                //Serial.println("Reset");
             }
         }
         else if (now_line_flag == 1)
@@ -295,8 +268,7 @@ int linetrace()
         else if (now_line_flag == 2)
         { // 後ろを踏んでいる
             line_emergency_flag = 1;
-            move_angle = (PI + PI) * 100; // 後ろに下がってもとに戻る
-            return 0;
+            vx = -1;
         }
         else if (now_line_flag == 3)
         { // 右を踏んでいる
@@ -313,25 +285,26 @@ int linetrace()
     }
     else if (line_flag == 2)
     { // もともと後ろにラインが有るとき
+        if(vx < 0){
+            vx = 0;
+        }
         if (now_line_flag == 0)
         { // 今はラインを踏んでいない
-            if (line_flag_count < LINE_FLAG_MAX)
+            if (is_line_count >= IS_LINE_GOAL)
             {
-                move_angle = (circulate_angle + PI) * 100; // 回り込みをする
-                line_flag_count = 0;
-                Serial.println("Reset");
-                return 0;
+                line_flag = 0;
+                is_line_count = 0;
+                //Serial.println("Reset");
             }
             else
             {
-                line_flag_count++;
+                is_line_count++;
             }
         }
         else if (now_line_flag == 1)
         { // 前を踏んでいる
             line_emergency_flag = 1;
-            move_angle = (0 + PI) * 100; // 前に進んでもとに戻る
-            return 0;
+            vx = 1;
         }
         else if (now_line_flag == 2)
         { // 後ろを踏んでいる
@@ -352,18 +325,20 @@ int linetrace()
     }
     else if (line_flag == 3)
     { // もともと右にラインが有るとき
+        if(vy > 0){
+            vy = 0;
+        }
         if (now_line_flag == 0)
         { // 今はラインを踏んでいない
-            if (line_flag_count < LINE_FLAG_MAX)
+            if (is_line_count >= IS_LINE_GOAL)
             {
-                move_angle = (circulate_angle + PI) * 100; // 回り込みをする
-                line_flag_count = 0;
-                Serial.println("Reset");
-                return 0;
+                line_flag = 0;
+                is_line_count = 0;
+                //Serial.println("Reset");
             }
             else
             {
-                line_flag_count++;
+                is_line_count++;
             }
         }
         else if (now_line_flag == 1)
@@ -381,8 +356,7 @@ int linetrace()
         else if (now_line_flag == 4)
         { // 左を踏んでいる
             line_emergency_flag = 1;
-            move_angle = (-PI / 2.0 + PI) * 100; // 左に進んでもとに戻る
-            return 0;
+            vy = -1;
         }
         else
         { // ラインを踏んでいるが前後左右ではない
@@ -391,18 +365,20 @@ int linetrace()
     }
     else if (line_flag == 4)
     { // もともと左にラインが有るとき
+        if(vy < 0){
+            vy = 0;
+        }
         if (now_line_flag == 0)
         { // 今はラインを踏んでいない
-            if (line_flag_count < LINE_FLAG_MAX)
+            if (is_line_count >= IS_LINE_GOAL)
             {
-                move_angle = (circulate_angle + PI) * 100; // 回り込みをする
-                line_flag_count = 0;
-                Serial.println("Reset");
-                return 0;
+                line_flag = 0;
+                is_line_count = 0;
+                //Serial.println("Reset");
             }
             else
             {
-                line_flag_count++;
+                is_line_count++;
             }
         }
         else if (now_line_flag == 1)
@@ -416,8 +392,7 @@ int linetrace()
         else if (now_line_flag == 3)
         { // 右を踏んでいる
             line_emergency_flag = 1;
-            move_angle = (PI / 2.0 + PI) * 100; // 右に進んでもとに戻る
-            return 0;
+            vy = 1;
         }
         else if (now_line_flag == 4)
         { // 左を踏んでいる
@@ -430,18 +405,19 @@ int linetrace()
     }
     else
     { // もともとラインを踏んでいるが前後左右ではない
+        vx = cos(line.line_theta + PI);
+        vy = sin(line.line_theta + PI);
         if (now_line_flag == 0)
         { // 今はラインを踏んでいない
-            if (line_flag_count < LINE_FLAG_MAX)
+            if (is_line_count >= IS_LINE_GOAL)
             {
-                move_angle = (circulate_angle + PI) * 100; // 回り込みをする
-                line_flag_count = 0;
-                Serial.println("Reset");
-                return 0;
+                line_flag = 0;
+                is_line_count = 0;
+                //Serial.println("Reset");
             }
             else
             {
-                line_flag_count++;
+                is_line_count++;
             }
         }
         else if (now_line_flag == 1)
@@ -465,115 +441,7 @@ int linetrace()
             line_flag = 5;
         }
     }
-    if (line_flag == 0)
-    {                                              // ラインを分でない
-        move_angle = (circulate_angle + PI) * 100; // 回り込みをする
-        return 0;
-    }
-    else if (line_flag == 1)
-    { // 前を踏んでいる
-        if (abs(ir_angle) <= PI / 6.0)
-        {             // ボールが前にある
-            return 2; // 静止
-        }
-        else if (ir_angle > PI / 6.0 && ir_angle < PI / 2.0)
-        {                                              // ボールが右前にある
-            move_angle = (PI / 12.0 * 7.0 + PI) * 100; // 右に動く
-            return 0;
-        }
-        else if (ir_angle < -PI / 6.0 && ir_angle > -PI / 2.0)
-        {                                               // ボールが左前にある
-            move_angle = (-PI / 12.0 * 7.0 + PI) * 100; // 左に動く
-            return 0;
-        }
-        else
-        {                                              // ボールが後ろにある
-            move_angle = (circulate_angle + PI) * 100; // 回り込み
-            return 0;
-        }
-    }
-    else if (line_flag == 2)
-    { // 後ろを踏んでいる
-        if (abs(ir_angle) <= PI / 3.0)
-        {
-            move_angle = (circulate_angle + PI) * 100;
-            return 0;
-        }
-        else if (ir_angle > PI / 3.0 && ir_angle <= PI / 9.0 * 8.0)
-        {
-            move_angle = (PI / 2.0 + PI) * 100;
-            return 0;
-        }
-        else if (ir_angle < -PI / 3.0 && ir_angle >= -PI / 9.0 * 8.0)
-        {
-            move_angle = (-PI / 2.0 + PI) * 100;
-            return 0;
-        }
-        else
-        {
-            return 2;
-        }
-        return 0;
-    }
-    else if (line_flag == 3)
-    { // 右を踏んでいる
-        if (ir_angle >= 0 && ir_angle <= PI / 9.0 * 4.0)
-        {
-            move_angle = (0 + PI) * 100;
-            return 0;
-        }
-        else if (ir_angle > PI / 9.0 * 4.0 && ir_angle < PI / 9.0 * 5.0)
-        {
-            return 2;
-        }
-        else if (ir_angle >= PI / 9.0 * 5.0)
-        {
-            move_angle = (PI + PI) * 100;
-            return 0;
-        }
-        else if (ir_angle < 0 && ir_angle >= -PI / 3.0 * 2.0)
-        {
-            move_angle = (circulate_angle + PI) * 100;
-            return 0;
-        }
-        else
-        {
-            move_angle = ((ir_angle + PI / 3.0) + PI) * 100;
-            return 0;
-        }
-    }
-    else if (line_flag == 4)
-    { // 左を踏んでいる
-        if (ir_angle <= 0 && ir_angle >= -PI / 9.0 * 4.0)
-        {
-            move_angle = (0 + PI) * 100;
-            return 0;
-        }
-        else if (ir_angle < -PI / 9.0 * 4.0 && ir_angle > -PI / 9.0 * 5.0)
-        {
-            return 2;
-        }
-        else if (ir_angle <= -PI / 9.0 * 5.0)
-        {
-            move_angle = (PI + PI) * 100;
-            return 0;
-        }
-        else if (ir_angle > 0 && ir_angle <= PI / 3.0 * 2.0)
-        {
-            move_angle = (circulate_angle + PI) * 100;
-            return 0;
-        }
-        else
-        {
-            move_angle = ((ir_angle - PI / 3.0) + PI) * 100;
-            return 0;
-        }
-    }
-    else
-    {
-        move_angle = (line.line_theta + PI) * 100;
-        return 1;
-    }
+    //Serial.println(atan2(vy,vx)/PI);
 }
 
 static void save_setting_to_flash()
