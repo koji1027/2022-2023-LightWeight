@@ -50,6 +50,7 @@ void Motor::cal(float vx, float vy, int speed, float machine_angle,
     {
         power[i] = power[i] * LPF + pre_power[i] * (1 - LPF);
         pre_power[i] = power[i];
+        pre_power[i] = constrain(pre_power[i], 0, 150);//
     }
     move(power);
 }
