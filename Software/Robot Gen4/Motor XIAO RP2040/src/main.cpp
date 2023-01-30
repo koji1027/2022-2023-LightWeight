@@ -8,23 +8,35 @@ float machine_angle = 0.0;
 int speed = 0;
 float vx = 0.0;
 float vy = 0.0;
-int flag = 0;
+int flag = 1;
 
 void setup()
 {
     // put your setup code here, to run once:
     Serial.begin(115200);
+    digitalWrite(D2, LOW);
+    digitalWrite(D3, LOW);
+    digitalWrite(D0, LOW);
+    digitalWrite(D1, LOW);
+    digitalWrite(D8, LOW);
+    digitalWrite(D9, LOW);
+    digitalWrite(D4, LOW);
+    digitalWrite(D5, LOW);
+    delay(3000);
     motor.begin();
 }
 
 void loop()
 {
     // put your main code here, to run repeatedly:
-    if (flag) {
+    if (flag)
+    {
         motor.brake();
-    } else {
+    }
+    else
+    {
         motor.cal(vx, vy, speed, machine_angle, gyro_angle);
-        //motor.cal(0.0, 0.0, 0, 0.0, gyro_angle);
+        // motor.cal(0.0, 0.0, 0, 0.0, gyro_angle);
     }
 }
 
@@ -62,7 +74,7 @@ void loop1()
             int recv_machine_angle = data[5] + (data[6] << 8);
             machine_angle = (recv_machine_angle / 100.0) - PI;
             flag = data[7];
-            //Serial.println(vx);
+            // Serial.println(vx);
         }
     }
 }
