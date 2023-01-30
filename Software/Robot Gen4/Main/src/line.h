@@ -68,6 +68,14 @@ void Line::read()
         sensor_value[i] = analogRead(COM_PIN[1]);
     }
 
+    /*
+    for (int i = 0; i < SENSOR_NUM; i++){
+        Serial.print(sensor_value[i]);
+        Serial.print("\t");
+    }
+    Serial.println("");
+    */
+
     int posILW[SENSOR_NUM] = {0}; // 白線上にあるセンサの番号を格納
     int numILW = 0;               // 白線上にあるセンサの数
     for (int i = 0; i < SENSOR_NUM; i++)
