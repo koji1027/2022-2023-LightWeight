@@ -155,9 +155,6 @@ void loop1()
         }
 
         line_trace();
-        Serial.print(line.cluster_num);
-        Serial.print("\t");
-        Serial.println(line.line_theta);
 
         // ミスター齊藤のライン制作領域
         /*
@@ -422,8 +419,8 @@ void line_trace()
         else
         { // もともとラインを踏んでいるが前後左右ではない
 
-            vx = cos(line.line_theta + PI)/2;
-            vy = sin(line.line_theta + PI)/2;
+            vx = cos(line.line_theta + PI) / 2;
+            vy = sin(line.line_theta + PI) / 2;
 
             /*
             if(abs(line.line_theta) > PI/2){
@@ -473,27 +470,33 @@ void line_trace()
         {
             is_corner = true;
             corner_dir = line.line_theta;
-          }
+        }
     }
-    else{
-        if(corner_dir > 0 && corner_dir < PI/2){
+    else
+    {
+        if (corner_dir > 0 && corner_dir < PI / 2)
+        {
             vx = -1;
             vy = -1;
         }
-        else if(corner_dir > PI/2 && corner_dir < PI){
+        else if (corner_dir > PI / 2 && corner_dir < PI)
+        {
             vx = 1;
             vy = -1;
         }
-        else if(corner_dir > -PI && corner_dir < -PI/2){
+        else if (corner_dir > -PI && corner_dir < -PI / 2)
+        {
             vx = 1;
             vy = 1;
         }
-        else if(corner_dir > -PI/2 && corner_dir < 0){
+        else if (corner_dir > -PI / 2 && corner_dir < 0)
+        {
             vx = -1;
             vy = 1;
         }
         is_corner_count++;
-        if(is_corner_count >= IS_CORNER_GOAL){
+        if (is_corner_count >= IS_CORNER_GOAL)
+        {
             is_corner = false;
             is_corner_count = 0;
             corner_dir = 0;
@@ -730,7 +733,7 @@ void line_trace()
             vx = cos(line.line_theta + PI)/2;
             vy = sin(line.line_theta + PI)/2;
 
-            
+
             if (now_line_flag == 0)
             { // 今はラインを踏んでいない
                 if (is_line_count >= IS_LINE_GOAL)
