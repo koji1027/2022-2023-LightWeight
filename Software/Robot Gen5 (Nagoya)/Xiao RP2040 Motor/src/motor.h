@@ -3,9 +3,9 @@
 #define MOTOR_NUM 4
 #define PWM_RES 9
 #define MAX_PWM pow(2, PWM_RES)
-#define PWM_FREQ 70000
-#define KP 0.0
-#define KI 0.0
+#define PWM_FREQ 100000
+#define KP 1.8
+#define KI 0.00005
 #define KD 0.0
 
 class Motor
@@ -13,7 +13,7 @@ class Motor
 public:
         void begin(void);
         void cal(double move_angle, double gyro_angle, uint8_t speed);
-        void drive(uint8_t *p, bool *d);
+        void drive(uint8_t *p);
         void brake(void);
         void release(void);
 
