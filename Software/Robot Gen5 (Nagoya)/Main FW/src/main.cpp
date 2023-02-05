@@ -72,10 +72,10 @@ void motor_uart_send(void)
         buf[0] = constrain(motor_flag, 0, 254);   // 0: normal, 1: release, 2 or others: brake (0~254)
         uint16_t tmp = (move_angle + PI) * 100.0; //-PI ~ PI -> 0 ~ 200PI
         buf[1] = tmp & 0b0000000001111111;        // 下位7bit
-        buf[2] = tmp >> 7;                        // 上位9bit
+        buf[2] = tmp >> 7;                        // 上位2bit
         tmp = (gyro_angle + PI) * 100.0;          //-PI ~ PI -> 0 ~ 200PI
         buf[3] = tmp & 0b0000000001111111;        // 下位7bit
-        buf[4] = tmp >> 7;                        // 上位9bit
+        buf[4] = tmp >> 7;                        // 上位2bit
         buf[5] = constrain(speed, 0, 254);        // constrain(speed, 0, 254); // 0~254
         motor.write(255);                         // ヘッダー
         motor.write(buf, 6);

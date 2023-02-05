@@ -2,6 +2,7 @@
 #include <Arduino.h>
 
 // 自作ライブラリのインクルード
+#include "ir.h"
 
 // 定数の宣言
 #define SERIAL_BAUD 115200
@@ -10,6 +11,7 @@ double SIN[628];
 double COS[628];
 
 // インスタンスの生成
+IR ir;
 
 // グローバル変数の宣言
 
@@ -45,10 +47,12 @@ void loop(void)
 void uart_send(void)
 {
         byte data[4];
-        data[0] = 0;        // 0: normal, 1: stop
-        data[1] = 0;        // 0~254
-        data[2] = 0;        // -PI ~ PI
-        data[3] = 0;        // 0~254
+        data[0] = ir.ball_flag;                  // 0: normal, 1: stop
+        uint16_t tmp = (ir.ir_angle + PI) * 100; //-PI ~ PI -> 0 ~ 628
+        data[1] = tmp && 0b0000000011111111;     // 下位7bit
+        data[2] = tmp >> 7;                      // 上位2bit
+        tmp = constrain(ir.ir_dist, 0, 254);     // 0 ~ 254
+        data[3] = (byte)tmp;
         Serial1.write(255); // ヘッダー
         Serial1.write(data, 4);
 }
