@@ -9,8 +9,8 @@ void IR::begin(void)
         }
         for (uint8_t i = 0; i < IR_NUM; i++)
         { // IRセンサの位置ベクトルを計算
-                IR_SENSOR_VECTOR[i][0] = cos(i * 2 * PI / IR_NUM);
-                IR_SENSOR_VECTOR[i][1] = sin(i * 2 * PI / IR_NUM);
+                IR_SENSOR_VECTOR[i][0] = cos(-i * 2 * PI / IR_NUM);
+                IR_SENSOR_VECTOR[i][1] = sin(-i * 2 * PI / IR_NUM);
         }
         analogReadResolution(ANALOG_READ_BIT); // analogReadを12bitに設定
 }
@@ -41,13 +41,28 @@ void IR::cal(void)
                 ball_flag = true;
         }
         double ir_vector[2] = {0, 0};
+        uint8_t max_index = 0;
         for (uint8_t i = 0; i < IR_NUM; i++)
         {
-                ir_vector[0] += ir_val_lpf[i] * IR_SENSOR_VECTOR[i][0];
-                ir_vector[1] += ir_val_lpf[i] * IR_SENSOR_VECTOR[i][1];
+                if (ir_val_lpf[i] > ir_val_lpf[max_index])
+                {
+                        max_index = i;
+                }
+        }
+        for (uint8_t i = 0; i < 5; i++)
+        {
+                uint8_t index = (max_index + i - 2 + 32) % IR_NUM;
+                ir_vector[0] += ir_val_lpf[index] * IR_SENSOR_VECTOR[index][0];
+                ir_vector[1] += ir_val_lpf[index] * IR_SENSOR_VECTOR[index][1];
         }
         ir_angle = atan2(ir_vector[1], ir_vector[0]); // -PI ~ PI
         ir_angle = (ir_angle + ir_pre_angle) / 2.0;   // 移動平均
         ir_pre_angle = ir_angle;
         ir_dist = sqrt(ir_vector[0] * ir_vector[0] + ir_vector[1] * ir_vector[1]); // ベクトルの大きさ √(x^2+y^2)
+        /*for (uint8_t i = 0; i < IR_NUM; i++)
+        {
+                Serial.print(ir_val_lpf[i]);
+                Serial.print("\t");
+        }
+        Serial.println();*/
 }

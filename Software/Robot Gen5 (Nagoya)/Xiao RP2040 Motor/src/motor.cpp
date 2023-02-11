@@ -11,18 +11,14 @@ void Motor::begin(void)
                 pinMode(DIR_PIN[i], OUTPUT);
                 analogWrite(DIR_PIN[i], MAX_PWM / 2);
         }
-        for (uint16_t i = 0; i < 628; i++)
-        {
-                SIN[i] = sin(i / 100.0);
-        }
 }
 
-void Motor::drive(uint8_t *p)
+void Motor::drive(int *p)
 {
-        uint8_t duty[MOTOR_NUM];
+        uint16_t duty[MOTOR_NUM];
         for (uint8_t i = 0; i < MOTOR_NUM; i++)
         {
-                duty[i] = MAX_PWM / 2 + p[i];
+                duty[i] = 256 - p[i];
                 digitalWrite(PWM_PIN[i], HIGH);
                 analogWrite(DIR_PIN[i], duty[i]);
         }
@@ -58,7 +54,7 @@ void Motor::cal(double move_angle, double gyro_angle, uint8_t speed)
         double pid = (p + i + d) / PI * 180.0;
         for (uint8_t i = 0; i < MOTOR_NUM; i++)
         {
-                power_ratio[i] = SIN[(int)(move_angle - MOTOR_RAD[i]) * 100];
+                power_ratio[i] = sin(move_angle - MOTOR_RAD[i]);
         }
         double max = 0;
         for (uint8_t i = 0; i < MOTOR_NUM; i++)
@@ -75,12 +71,12 @@ void Motor::cal(double move_angle, double gyro_angle, uint8_t speed)
                         power_ratio[i] *= speed / max;
                 }
         }
-        uint8_t power[MOTOR_NUM];
+        int power[MOTOR_NUM];
         for (uint8_t i = 0; i < MOTOR_NUM; i++)
         {
                 power_ratio[i] += pid;
                 power_ratio[i] = constrain(power_ratio[i], -255, 255);
-                power[i] = (uint8_t)power_ratio[i];
+                power[i] = (int)power_ratio[i];
         }
         drive(power);
 }

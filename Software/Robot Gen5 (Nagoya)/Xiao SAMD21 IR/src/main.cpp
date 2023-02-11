@@ -6,7 +6,7 @@
 
 // 定数の宣言
 #define SERIAL_BAUD 115200
-#define SERIAL1_BAUD 500000
+#define SERIAL1_BAUD 115200
 double SIN[628];
 double COS[628];
 
@@ -23,6 +23,9 @@ void setup(void)
         // put your setup code here, to run once:
         Serial.begin(SERIAL_BAUD);
         Serial1.begin(SERIAL1_BAUD);
+        while (!Serial1)
+                ;
+        ir.begin();
         for (int i = 0; i < 628; i++)
         {
                 SIN[i] = sin(i / 100.0);
@@ -33,6 +36,7 @@ void setup(void)
 void loop(void)
 {
         // put your main code here, to run repeatedly:
+        ir.cal();
         if (Serial1.available())
         {
                 uint8_t header = Serial1.read();
@@ -46,13 +50,13 @@ void loop(void)
 
 void uart_send(void)
 {
-        byte data[4];
-        data[0] = ir.ball_flag;                  // 0: normal, 1: stop
-        uint16_t tmp = (ir.ir_angle + PI) * 100; //-PI ~ PI -> 0 ~ 628
-        data[1] = tmp && 0b0000000011111111;     // 下位7bit
-        data[2] = tmp >> 7;                      // 上位2bit
-        tmp = constrain(ir.ir_dist, 0, 254);     // 0 ~ 254
-        data[3] = (byte)tmp;
+        byte buf[4];
+        buf[0] = ir.ball_flag;                     // 0: normal, 1: stop
+        uint16_t tmp = (ir.ir_angle + PI) * 100.0; //-PI ~ PI -> 0 ~ 628
+        buf[1] = tmp & 0b0000000001111111;         // 下位7bit
+        buf[2] = tmp >> 7;                         // 上位3bit
+        tmp = constrain(ir.ir_dist, 0, 254);       // 0 ~ 254
+        buf[3] = (byte)tmp;
         Serial1.write(255); // ヘッダー
-        Serial1.write(data, 4);
+        Serial1.write(buf, 4);
 }

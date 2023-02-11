@@ -1,5 +1,6 @@
 // ライブラリのインクルード
 #include <Arduino.h>
+#include <Adafruit_SSD1306.h>
 
 // 自作ライブラリのインクルード
 #include "led.h"
@@ -8,19 +9,20 @@
 // 定数の宣言
 #define SERIAL_BAUD 115200
 #define MOTOR_BAUD 500000
-#define IR_BAUD 500000
+#define IR_BAUD 115200
 
 // インスタンスの生成
 Gyro gyro;
 SerialPIO motor(D17, D16, 32); // TX, RX, buffer size
 SerialPIO ir(D0, D1, 32);
+Adafruit_SSD1306 display(128, 64, &Wire, -1);
 
 // グローバル変数の宣言
 
 // モーターの制御系
 double move_angle = 0;  // 進行方向（-PI ~ PI）
 double gyro_angle = 0;  // ジャイロの角度（-PI ~ PI）
-uint8_t speed = 0;      // 速度（0~254）
+uint8_t speed = 200;    // 速度（0~254）
 uint8_t motor_flag = 0; // 0: normal, 1: release, 2 or others: brake（0~254）
 
 // 赤外線センサー制御系
@@ -44,15 +46,36 @@ void setup(void)
                 ;
         gyro.begin();
         init_led();
+        display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+        display.setTextColor(SSD1306_WHITE);
 }
+
+int n = 0;
 
 void loop(void)
 {
         // put your main code here, to run repeatedly:
+        display.clearDisplay();
+        display.setTextSize(2);
+        display.setCursor(0, 0);
+        display.println(n);
+        display.display();
+        n++;
+        delay(100);
         gyro.getEuler();
-        gyro_angle = gyro.angle;
-        motor_uart_send();
         ir_uart_recv();
+        gyro_angle = gyro.angle;
+        if (ir_angle > PI / 6.0)
+                move_angle = ir_angle + PI / 3.0;
+        else if (ir_angle < -PI / 6.0)
+                move_angle = ir_angle - PI / 3.0;
+        else
+                move_angle = ir_angle;
+        if (move_angle > PI) // -PI ~ PI
+                move_angle -= 2 * PI;
+        else if (move_angle < -PI)
+                move_angle += 2 * PI;
+        motor_uart_send();
         delay(10);
 }
 
@@ -75,7 +98,7 @@ void motor_uart_send(void)
         buf[2] = tmp >> 7;                        // 上位2bit
         tmp = (gyro_angle + PI) * 100.0;          //-PI ~ PI -> 0 ~ 200PI
         buf[3] = tmp & 0b0000000001111111;        // 下位7bit
-        buf[4] = tmp >> 7;                        // 上位2bit
+        buf[4] = tmp >> 7;                        // 上位3bit
         buf[5] = constrain(speed, 0, 254);        // constrain(speed, 0, 254); // 0~254
         motor.write(255);                         // ヘッダー
         motor.write(buf, 6);
@@ -84,21 +107,8 @@ void motor_uart_send(void)
 void ir_uart_recv(void)
 {
         ir.write(255); // ヘッダー
-        uint8_t recv_fail_count = 0;
         while (ir.available() < 5)
-        {
-                if (recv_fail_count % 10 == 0 && recv_fail_count != 0 && recv_fail_count < 30)
-                {
-                        ir.write(255); // ヘッダーの再送信
-                }
-                else if (recv_fail_count >= 30)
-                {
-                        Serial.println("ir recv fail");
-                        return; // 受信失敗
-                }
-                delay(1);
-                recv_fail_count++;
-        }
+                ;
         byte header = ir.read();
         if (header != 255)
                 return;

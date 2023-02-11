@@ -7,8 +7,6 @@
 // 定数の宣言
 #define SERIAL_BAUD 115200
 #define SERIAL1_BAUD 500000
-double SIN[628];
-double COS[628];
 
 // インスタンスの生成
 Motor motor;
@@ -27,16 +25,18 @@ void setup()
         // put your setup code here, to run once:
         motor.begin();
         Serial.begin(SERIAL_BAUD);
-        for (int i = 0; i < 628; i++)
-        {
-                SIN[i] = sin(i / 100.0);
-                COS[i] = cos(i / 100.0);
-        }
 }
 
 void loop()
 {
         // put your main code here, to run repeatedly:
+        if (Serial1.available())
+        {
+                uart_recv();
+        }
+        Serial.print(move_angle);
+        Serial.print("\t");
+        Serial.println(gyro_angle);
         if (flag == 0)
         {
                 motor.cal(move_angle, gyro_angle, speed);
@@ -62,10 +62,6 @@ void setup1()
 void loop1()
 {
         // put your main code here, to run repeatedly:
-        if (Serial1.available())
-        {
-                uart_recv();
-        }
 }
 
 void uart_recv(void)
@@ -91,11 +87,9 @@ void uart_recv(void)
                 }
                 else
                 {
-                        Serial.println("Connection Error");
                 }
         }
         else
         {
-                Serial.println("Connection Error");
         }
 }
