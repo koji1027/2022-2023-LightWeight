@@ -21,6 +21,7 @@ void setup()
 void loop()
 {
     // put your main code here, to run repeatedly:
+    unsigned long start_time = micros();
     ir.IR_get();
     if (Serial1.available() > 0)
     {
@@ -36,4 +37,6 @@ void loop()
             Serial1.write(data, 5);
         }
     }
+    unsigned long end_time = micros();
+    Serial.println(end_time - start_time);
 }

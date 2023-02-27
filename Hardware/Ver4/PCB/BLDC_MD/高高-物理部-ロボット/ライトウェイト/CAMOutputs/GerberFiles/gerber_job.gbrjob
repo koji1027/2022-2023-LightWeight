@@ -1,0 +1,24 @@
+{
+    "Header": {
+        "Comment": "All values are metric (mm)",
+        "CreationDate": "2023-02-13T06:21:33Z",
+        "GenerationSoftware": {
+            "Application": "Fusion 360 Electronics",
+            "Vendor": "Autodesk",
+            "Version": "9.7.0"
+        },
+        "Part": "Single"
+    },
+    "Overall": {
+        "BoardThickness": 1.57,
+        "LayerNumber": 2,
+        "Name": {
+            "ProjectId": "モータードライバ v17"
+        },
+        "Owner": "孝次 根岸 <nkoji.personal@gmail.com>",
+        "Size": {
+            "X": 37,
+            "Y": 34
+        }
+    }
+}

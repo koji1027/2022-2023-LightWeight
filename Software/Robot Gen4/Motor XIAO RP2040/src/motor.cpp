@@ -44,7 +44,7 @@ void Motor::cal(float vx, float vy, int speed, float machine_angle,
     for (int i = 0; i < 4; i++)
     {
         power[i] += PID;
-        power[i] = constrain(power[i], -MAX_SPEED, MAX_SPEED);
+        power[i] = constrain(power[i], -150, 150);
     }
     for (int i = 0; i < 4; i++)
     {
@@ -59,10 +59,12 @@ void Motor::move(float power[4])
 {
     for (int i = 0; i < 4; i++)
     {
+        Serial.print(power[i]);
+        Serial.print("\t");
         power[i] += 256;
         digitalWrite(MOTOR_PIN[i][0], HIGH);
         analogWrite(MOTOR_PIN[i][1], (int)power[i]);
-    }
+\    Serial.println();
 }
 
 void Motor::brake()
