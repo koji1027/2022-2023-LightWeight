@@ -9,7 +9,7 @@
 #define CIRC_BASE pow(0.6, 1.0 / 20.0)
 #define CIRC_WEIGHT 3.5
 #define IS_LINE_GOAL 50
-#define IS_CORNER_GOAL 30
+#define IS_CORNER_GOAL 20
 
 SerialPIO motor(D17, D16, 32);
 SerialPIO ir(D0, D1, 32);
@@ -64,7 +64,7 @@ void loop()
     {
         gyro.getEuler();
         line.read();
-        // Serial.println(gyro.angle);
+         Serial.println(gyro.angle);
         // line.print();
         volt = analogRead(A3);
         line.absolute_line_theta = line.line_theta + gyro.angle;
@@ -87,11 +87,13 @@ void loop()
         gyro.getEuler();
         gyro.angle_offset = gyro.angle;
     }
+    /*
     if (digitalRead(BUTTON_PIN[1]) == LOW)
     {
         line.set_threshold();
         delay(1000);
     }
+    */
 
     delay(10);
 }
@@ -154,19 +156,21 @@ void loop1()
             speed = 0;
         }
 
-        line_trace();
+        //line_trace();
+        /*
         Serial.print(line.cluster_num);
         Serial.print("\t");
         Serial.println(line.line_theta);
+        */
 
         // ミスター齊藤のライン制作領域
-        /*
-        if (line.line_flag)
+        
+        if (line.is_line)
         {
             vx = cos(line.line_theta + PI);
             vy = sin(line.line_theta + PI);
         }
-        */
+        
 
         float _vx = (vx + 1.0) * 100.0;
         float _vy = (vy + 1.0) * 100.0;
@@ -422,8 +426,8 @@ void line_trace()
         else
         { // もともとラインを踏んでいるが前後左右ではない
 
-            vx = cos(line.line_theta + PI)/2;
-            vy = sin(line.line_theta + PI)/2;
+            vx = cos(line.line_theta + PI) / 2;
+            vy = sin(line.line_theta + PI) / 2;
 
             /*
             if(abs(line.line_theta) > PI/2){
@@ -473,27 +477,33 @@ void line_trace()
         {
             is_corner = true;
             corner_dir = line.line_theta;
-          }
+        }
     }
-    else{
-        if(corner_dir > 0 && corner_dir < PI/2){
+    else
+    {
+        if (corner_dir > 0 && corner_dir < PI / 2)
+        {
             vx = -1;
             vy = -1;
         }
-        else if(corner_dir > PI/2 && corner_dir < PI){
+        else if (corner_dir > PI / 2 && corner_dir < PI)
+        {
             vx = 1;
             vy = -1;
         }
-        else if(corner_dir > -PI && corner_dir < -PI/2){
+        else if (corner_dir > -PI && corner_dir < -PI / 2)
+        {
             vx = 1;
             vy = 1;
         }
-        else if(corner_dir > -PI/2 && corner_dir < 0){
+        else if (corner_dir > -PI / 2 && corner_dir < 0)
+        {
             vx = -1;
             vy = 1;
         }
         is_corner_count++;
-        if(is_corner_count >= IS_CORNER_GOAL){
+        if (is_corner_count >= IS_CORNER_GOAL)
+        {
             is_corner = false;
             is_corner_count = 0;
             corner_dir = 0;
@@ -730,7 +740,7 @@ void line_trace()
             vx = cos(line.line_theta + PI)/2;
             vy = sin(line.line_theta + PI)/2;
 
-            
+
             if (now_line_flag == 0)
             { // 今はラインを踏んでいない
                 if (is_line_count >= IS_LINE_GOAL)
