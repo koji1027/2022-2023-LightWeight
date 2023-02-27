@@ -64,7 +64,7 @@ void loop()
     {
         gyro.getEuler();
         line.read();
-         Serial.println(gyro.angle);
+        // Serial.println(gyro.angle);
         // line.print();
         volt = analogRead(A3);
         line.absolute_line_theta = line.line_theta + gyro.angle;
@@ -80,6 +80,7 @@ void loop()
         {
             start_flag = false;
         }
+        Serial.println(line.is_line);
     }
     if (digitalRead(BUTTON_PIN[0]) == LOW)
     {
@@ -139,6 +140,7 @@ void loop1()
             }
         }
         // Serial.println(ir_angle);
+        //Serial.println(gyro.angle);
         if (ball_flag)
         {
             float circ_exp = pow(CIRC_BASE, ir_radius);
@@ -498,8 +500,7 @@ void line_trace()
             vx = 1;
             vy = 1;
         }
-        else if (corner_dir > -PI / 2 && corner_dir < 0)
-        {
+
         else if (corner_dir > -PI / 2 && corner_dir < 0)
         {
             vx = -1;
@@ -513,6 +514,7 @@ void line_trace()
             is_corner = false;
             is_corner_count = 0;
             corner_dir = 0;
+        }
         }
     }
 }

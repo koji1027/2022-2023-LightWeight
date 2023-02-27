@@ -20,6 +20,7 @@ void Motor::cal(float vx, float vy, int speed, float machine_angle,
 {
     float power[4] = {0.0, 0.0, 0.0, 0.0};
     float diff = (gyro_angle - machine_angle) / PI * 180.0;
+    
     if (abs(diff) < 50)
     {
         if (vx != 0.0 || vy != 0.0)
@@ -50,8 +51,9 @@ void Motor::cal(float vx, float vy, int speed, float machine_angle,
     {
         power[i] = power[i] * LPF + pre_power[i] * (1 - LPF);
         pre_power[i] = power[i];
-        pre_power[i] = constrain(pre_power[i], 0, 150);//
+        pre_power[i] = constrain(pre_power[i], -150, 150);
     }
+    Serial.println(power[1]);
     move(power);
 }
 
@@ -59,12 +61,13 @@ void Motor::move(float power[4])
 {
     for (int i = 0; i < 4; i++)
     {
-        Serial.print(power[i]);
-        Serial.print("\t");
+        //Serial.print(power[i]);
+        //Serial.print("\t");
         power[i] += 256;
         digitalWrite(MOTOR_PIN[i][0], HIGH);
         analogWrite(MOTOR_PIN[i][1], (int)power[i]);
-\    Serial.println();
+    }
+    //Serial.println();
 }
 
 void Motor::brake()
