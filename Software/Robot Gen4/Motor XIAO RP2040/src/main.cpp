@@ -36,7 +36,7 @@ void loop()
     else
     {
         motor.cal(vx, vy, speed, machine_angle, gyro_angle);
-        // motor.cal(0.0, 0.0, 0, 0.0, gyro_angle);
+        //motor.cal(1.0, 1.0, speed, 0.0, gyro_angle);
     }
 }
 

@@ -6,7 +6,7 @@
 #define Kp 1.8
 #define Kd 0.00005
 #define Ki 0
-#define LPF 0.2
+#define LPF 0.1
 #define MAX_SPEED 255
 
 class Motor

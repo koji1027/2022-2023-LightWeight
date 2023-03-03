@@ -38,7 +38,7 @@ float circulate_angle = 0.0;
 
 float vx = 0.0;
 float vy = 0.0;
-int default_speed = 100;
+int default_speed = 180;
 int speed = 0;
 
 void line_trace();
@@ -80,7 +80,7 @@ void loop()
         {
             start_flag = false;
         }
-        Serial.println(line.is_line);
+        //Serial.println(line.is_line);
     }
     if (digitalRead(BUTTON_PIN[0]) == LOW)
     {
@@ -158,21 +158,23 @@ void loop1()
             speed = 0;
         }
 
-        //line_trace();
+        line_trace();
+        Serial.println(line.cluster_num);
+        
         /*
         Serial.print(line.cluster_num);
         Serial.print("\t");
         Serial.println(line.line_theta);
         */
-
-        // ミスター齊藤のライン制作領域
         
+        //↓ラインは出ないけどガクガクする単純な処理
+        /*
         if (line.is_line)
         {
             vx = cos(line.line_theta + PI);
             vy = sin(line.line_theta + PI);
         }
-        
+        */
 
         float _vx = (vx + 1.0) * 100.0;
         float _vy = (vy + 1.0) * 100.0;
@@ -430,8 +432,6 @@ void line_trace()
 
             vx = cos(line.line_theta + PI) / 2;
             vy = sin(line.line_theta + PI) / 2;
-            vx = cos(line.line_theta + PI) / 2;
-            vy = sin(line.line_theta + PI) / 2;
 
             /*
             if(abs(line.line_theta) > PI/2){
@@ -477,7 +477,7 @@ void line_trace()
             }
         }
         // Serial.println(atan2(vy,vx)/PI);
-        if (line.cluster_num == 2)
+        if (line.cluster_num >= 2)
         {
             is_corner = true;
             corner_dir = line.line_theta;
@@ -509,12 +509,9 @@ void line_trace()
         is_corner_count++;
         if (is_corner_count >= IS_CORNER_GOAL)
         {
-        if (is_corner_count >= IS_CORNER_GOAL)
-        {
             is_corner = false;
             is_corner_count = 0;
             corner_dir = 0;
-        }
         }
     }
 }

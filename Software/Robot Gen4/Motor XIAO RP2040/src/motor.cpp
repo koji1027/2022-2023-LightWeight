@@ -41,19 +41,19 @@ void Motor::cal(float vx, float vy, int speed, float machine_angle,
     pre_diff = diff;
     pre_time = now_time;
     PID = P + I + D;
-    PID = constrain(PID, -150, 150);
+    PID = constrain(PID, -200, 200);
     for (int i = 0; i < 4; i++)
     {
         power[i] += PID;
-        power[i] = constrain(power[i], -150, 150);
+        power[i] = constrain(power[i], -200, 200);
     }
     for (int i = 0; i < 4; i++)
     {
         power[i] = power[i] * LPF + pre_power[i] * (1 - LPF);
         pre_power[i] = power[i];
-        pre_power[i] = constrain(pre_power[i], -150, 150);
+        pre_power[i] = constrain(pre_power[i], -200, 200);
     }
-    Serial.println(power[1]);
+    //Serial.println(power[1]);
     move(power);
 }
 
@@ -61,13 +61,13 @@ void Motor::move(float power[4])
 {
     for (int i = 0; i < 4; i++)
     {
-        //Serial.print(power[i]);
-        //Serial.print("\t");
+        Serial.print(power[i]);
+        Serial.print("\t");
         power[i] += 256;
         digitalWrite(MOTOR_PIN[i][0], HIGH);
         analogWrite(MOTOR_PIN[i][1], (int)power[i]);
     }
-    //Serial.println();
+    Serial.println();
 }
 
 void Motor::brake()
