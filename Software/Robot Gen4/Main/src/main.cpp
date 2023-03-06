@@ -10,6 +10,8 @@
 #define CIRC_WEIGHT 3.5
 #define IS_LINE_GOAL 50
 #define IS_CORNER_GOAL 20
+#define CIRCULATE_SPEED 100
+#define STRAIGHT_SPEED 180
 
 SerialPIO motor(D17, D16, 32);
 SerialPIO ir(D0, D1, 32);
@@ -24,6 +26,7 @@ float ir_angle = 0.0;
 float absolute_ir_angle = 0.0;
 float ir_radius = 0.0;
 float move_angle = 0.0;
+float absolute_move_angle = 0.0;
 int ball_flag = 0; // 0:なし 1:あり
 int line_flag = 0;
 int led_color[3] = {255, 255, 255};
@@ -37,8 +40,8 @@ int line_emergency_flag = 0;
 float circulate_angle = 0.0;
 
 float vx = 0.0;
-float vy = 0.0;
-int default_speed = 180;
+float vy = 0.0;//機体から見た相対的な向き
+int default_speed = 100;
 int speed = 0;
 
 void line_trace_vertical();
@@ -145,15 +148,19 @@ void loop1()
         // Serial.println(gyro.angle);
         if (ball_flag)
         {
-            if(abs(ir_angle) < PI/2){
-                float circ_exp = pow(CIRC_BASE, ir_radius);
-                move_angle = ir_angle + constrain(ir_angle * circ_exp * CIRC_WEIGHT, -PI/2, PI/2);
+            float circ_exp = pow(CIRC_BASE, ir_radius);
+            if(abs(absolute_ir_angle) < PI/2){
+                absolute_move_angle = absolute_ir_angle + constrain(absolute_ir_angle * circ_exp * CIRC_WEIGHT, -PI/2, PI/2);
+                speed = CIRCULATE_SPEED;
             } else{
-                move_angle = PI;
+                absolute_move_angle = PI;
+                speed = STRAIGHT_SPEED;
             }
+            move_angle = absolute_move_angle - machine_angle;
             vx = cos(move_angle);
             vy = sin(move_angle);
-            speed = default_speed;
+
+            machine_angle = absolute_ir_angle * circ_exp;
         }
         else
         {

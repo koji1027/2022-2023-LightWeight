@@ -7,7 +7,7 @@ float gyro_angle = 0.0;
 float machine_angle = 0.0;
 int speed = 0;
 float vx = 0.0;
-float vy = 0.0;
+float vy = 0.0;//ロボットから見た相対的な向き
 int flag = 1;
 
 void setup()
