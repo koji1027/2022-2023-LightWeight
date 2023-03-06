@@ -41,7 +41,6 @@ float vy = 0.0;
 int default_speed = 180;
 int speed = 0;
 
-void line_trace_vertical();
 void line_trace();
 static void save_setting_to_flash();
 void load_setting_from_flash();
@@ -81,7 +80,7 @@ void loop()
         {
             start_flag = false;
         }
-        // Serial.println(line.is_line);
+        //Serial.println(line.is_line);
     }
     if (digitalRead(BUTTON_PIN[0]) == LOW)
     {
@@ -141,16 +140,14 @@ void loop1()
             }
         }
         // Serial.println(ir_angle);
-        // Serial.println(ir_radius);
-        // Serial.println(gyro.angle);
+        Serial.println(ir_radius);
+        //Serial.println(gyro.angle);
         if (ball_flag)
         {
-            if(abs(ir_angle) < PI/2){
-                float circ_exp = pow(CIRC_BASE, ir_radius);
-                move_angle = ir_angle + constrain(ir_angle * circ_exp * CIRC_WEIGHT, -PI/2, PI/2);
-            } else{
-                move_angle = PI;
-            }
+            float circ_exp = pow(CIRC_BASE, ir_radius);
+            // float circ_sigmoid = 1/(1+exp((ir_radius-80)/10));
+            circulate_angle = ir_angle + ir_angle * circ_exp * CIRC_WEIGHT;
+            move_angle = circulate_angle;
             vx = cos(move_angle);
             vy = sin(move_angle);
             speed = default_speed;
@@ -162,25 +159,24 @@ void loop1()
             speed = 0;
         }
 
+        line_trace();
+        //Serial.println(line.cluster_num);
+        
         /*
         Serial.print(line.cluster_num);
         Serial.print("\t");
         Serial.println(line.line_theta);
         */
-
-        //line_trace_vertical();
-
-        // ↓ラインは出ないけどガクガクする単純な処理
         
+        //↓ラインは出ないけどガクガクする単純な処理
+        /*
         if (line.is_line)
         {
             vx = cos(line.line_theta + PI);
             vy = sin(line.line_theta + PI);
         }
-        
+        */
 
-        vx = vx / sqrt(vx*vx + vy*vy);
-        vy = vy / sqrt(vx*vx + vy*vy);
         float _vx = (vx + 1.0) * 100.0;
         float _vy = (vy + 1.0) * 100.0;
         byte data[8];
@@ -208,265 +204,6 @@ void loop1()
     motor.write(255);
     motor.write(data, 8);
     delay(10);
-}
-
-void line_trace_vertical()
-{
-    // 現在、ラインがどこにあるかを判定　0:なし 1:前 2:後ろ 3:右 4:左 5:その他
-    int now_line_flag = 0;
-    if (line.is_line)
-    {
-        is_line_count = 0;
-        if (abs(line.line_theta) < PI / 6.0)
-        { // ロボの前側にラインあり
-            now_line_flag = 1;
-        }
-        else if (line.line_theta > PI / 6.0 * 5.0 || line.line_theta < -PI / 6.0 * 5.0)
-        { // ロボの後ろ側にラインあり
-            now_line_flag = 2;
-        }
-        else if (line.line_theta > PI / 3.0 && line.line_theta < PI / 3.0 * 2.0)
-        { // ロボの右側にラインあり
-            now_line_flag = 3;
-        }
-        else if (line.line_theta < -PI / 3.0 && line.line_theta > -PI / 3.0 * 2.0)
-        { // ロボの左側にラインあり
-            now_line_flag = 4;
-        }
-        else
-        { // ラインを踏んでいるが左右ではない
-            now_line_flag = 5;
-        }
-    }
-    else
-    { // ラインを踏んでいない
-        now_line_flag = 0;
-    }
-
-    if (line_flag == 0)
-    { // もともとラインを踏んでいないとき
-        is_line_count = 0;
-        if (now_line_flag == 0)
-        {
-        } // 今も踏んでいない
-        else if (now_line_flag == 1)
-        { // 今は前にラインが有る
-            line_flag = 1;
-        }
-        else if (now_line_flag == 2)
-        { // 今は後ろにラインが有る
-            line_flag = 2;
-        }
-        else if (now_line_flag == 3)
-        { // 今は右にラインが有る
-            line_flag = 3;
-        }
-        else if (line_flag == 4)
-        { // 今は左にラインが有る
-            line_flag = 4;
-        }
-        else
-        { // ラインを踏んでいるが前後左右ではない
-            line_flag = 5;
-        }
-    }
-    else if (line_flag == 1)
-    { // もともと前にラインが有るとき
-        vx = cos(line.line_theta + PI);
-        vy = sin(line.line_theta + PI);
-        if (now_line_flag == 0)
-        { // 今はラインを踏んでいない
-            is_line_count++;
-            if (is_line_count >= IS_LINE_GOAL)
-            {
-                line_flag = 0;
-                is_line_count = 0;
-                // Serial.println("Reset");
-            }
-        }
-        else if (now_line_flag == 1)
-        { // 前を踏んでいる
-            line_flag = 1;
-        }
-        else if (now_line_flag == 2)
-        { // 後ろを踏んでいる
-            line_emergency_flag = 1;
-            vx = -1;
-        }
-        else if (now_line_flag == 3)
-        { // 右を踏んでいる
-            line_flag = 3;
-        }
-        else if (now_line_flag == 4)
-        { // 左を踏んでいる
-            line_flag = 4;
-        }
-        else
-        { // ラインを踏んでいるが前後左右ではない
-            line_flag = 5;
-        }
-    }
-    else if (line_flag == 2)
-    { // もともと後ろにラインが有るとき
-        vx = cos(line.line_theta + PI);
-        vy = sin(line.line_theta + PI);
-        if (now_line_flag == 0)
-        { // 今はラインを踏んでいない
-            if (is_line_count >= IS_LINE_GOAL)
-            {
-                line_flag = 0;
-                is_line_count = 0;
-                // Serial.println("Reset");
-            }
-            else
-            {
-                is_line_count++;
-            }
-        }
-        else if (now_line_flag == 1)
-        { // 前を踏んでいる
-            line_emergency_flag = 1;
-            vx = 1;
-        }
-        else if (now_line_flag == 2)
-        { // 後ろを踏んでいる
-            line_flag = 2;
-        }
-        else if (now_line_flag == 3)
-        { // 右を踏んでいる
-            line_flag = 3;
-        }
-        else if (now_line_flag == 4)
-        { // 左を踏んでいる
-            line_flag = 4;
-        }
-        else
-        { // ラインを踏んでいるが前後左右ではない
-            line_flag = 5;
-        }
-    }
-    else if (line_flag == 3)
-    { // もともと右にラインが有るとき
-        if (vy > 0)
-        {
-            vy = 0;
-        }
-        if (now_line_flag == 0)
-        { // 今はラインを踏んでいない
-            if (is_line_count >= IS_LINE_GOAL)
-            {
-                line_flag = 0;
-                is_line_count = 0;
-                // Serial.println("Reset");
-            }
-            else
-            {
-                is_line_count++;
-            }
-        }
-        else if (now_line_flag == 1)
-        { // 前を踏んでいる
-            line_flag = 1;
-        }
-        else if (now_line_flag == 2)
-        { // 後ろを踏んでいる
-            line_flag = 2;
-        }
-        else if (now_line_flag == 3)
-        { // 右を踏んでいる
-            line_flag = 3;
-        }
-        else if (now_line_flag == 4)
-        { // 左を踏んでいる
-            line_emergency_flag = 1;
-            vy = -1;
-        }
-        else
-        { // ラインを踏んでいるが前後左右ではない
-            line_flag = 5;
-        }
-    }
-    else if (line_flag == 4)
-    { // もともと左にラインが有るとき
-        if (vy < 0)
-        {
-            vy = 0;
-        }
-        if (now_line_flag == 0)
-        { // 今はラインを踏んでいない
-            if (is_line_count >= IS_LINE_GOAL)
-            {
-                line_flag = 0;
-                is_line_count = 0;
-                // Serial.println("Reset");
-            }
-            else
-            {
-                is_line_count++;
-            }
-        }
-        else if (now_line_flag == 1)
-        { // 前を踏んでいる
-            line_flag = 1;
-        }
-        else if (now_line_flag == 2)
-        { // 後ろを踏んでいる
-            line_flag = 2;
-        }
-        else if (now_line_flag == 3)
-        { // 右を踏んでいる
-            line_emergency_flag = 1;
-            vy = 1;
-        }
-        else if (now_line_flag == 4)
-        { // 左を踏んでいる
-            line_flag = 4;
-        }
-        else
-        { // ラインを踏んでいるが前後左右ではない
-            line_flag = 5;
-        }
-    }
-    else
-    { // もともとラインを踏んでいるが前後左右ではない
-
-        vx = cos(line.line_theta + PI);
-        vy = sin(line.line_theta + PI);
-
-        if (now_line_flag == 0)
-        { // 今はラインを踏んでいない
-            if (is_line_count >= IS_LINE_GOAL)
-            {
-                line_flag = 0;
-                is_line_count = 0;
-                // Serial.println("Reset");
-            }
-            else
-            {
-                is_line_count++;
-            }
-        }
-        else if (now_line_flag == 1)
-        { // 前を踏んでいる
-            line_flag = 1;
-        }
-        else if (now_line_flag == 2)
-        { // 後ろを踏んでいる
-            line_flag = 2;
-        }
-        else if (now_line_flag == 3)
-        { // 右を踏んでいる
-            line_flag = 3;
-        }
-        else if (now_line_flag == 4)
-        { // 左を踏んでいる
-            line_flag = 4;
-        }
-        else
-        { // ラインを踏んでいるが前後左右ではない
-            line_flag = 5;
-        }
-    }
 }
 
 void line_trace()
