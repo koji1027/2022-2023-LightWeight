@@ -63,7 +63,8 @@ void setup()
 }
 
 void loop()
-{
+{//Serial.println(digitalRead(BUTTON_PIN[0]));
+ //Serial.println(start_flag);
     while (start_flag)
     {
         gyro.getEuler();
@@ -86,6 +87,7 @@ void loop()
         }
         // Serial.println(line.is_line);
     }
+    
     if (digitalRead(BUTTON_PIN[0]) == LOW)
     {
         start_flag = true;
@@ -146,6 +148,7 @@ void loop1()
         // Serial.println(ir_angle);
         // Serial.println(ir_radius);
         // Serial.println(gyro.angle);
+        ball_flag = false;
         if (ball_flag)
         {
             float circ_exp = pow(CIRC_BASE, ir_radius);
@@ -179,6 +182,7 @@ void loop1()
 
         // ↓ラインは出ないけどガクガクする単純な処理
         
+        Serial.println(line.is_line);
         if (line.is_line)
         {
             vx = cos(line.line_theta + PI);
