@@ -29,6 +29,10 @@ void setup()
 
 void loop()
 {
+        while (1)
+        {
+                motor.cal(0.0, 0.0, 100);
+        }
         // put your main code here, to run repeatedly:
         if (Serial1.available())
         {
