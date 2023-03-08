@@ -22,19 +22,23 @@ while(True):
     img = sensor.snapshot()
     goal = [0,0]
     for blob in img.find_blobs(thresholds, pixels_threshold=200, area_threshold=200):
-        img.draw_rectangle(blob.rect())
-        img.draw_cross(blob.cx(), blob.cy())
+        #img.draw_rectangle(blob.rect())
+        #img.draw_cross(blob.cx(), blob.cy())
         goal[0] = blob.cx()
         goal[1] = blob.cy()
+    goal_theta = 0
     abs_goal = [goal[0] - center[0], goal[1] - center[1]]
-    goal_theta = math.atan2(abs_goal[0], abs_goal[1])
-    goal_theta += math.pi / 2
-    if goal_theta > math.pi:
-        goal_theta = math.pi * 2 - goal_theta
-    elif goal_theta < -math.pi:
-        goal_theta = math.pi * 2 + goal_theta
+    if (goal[0] != 0) and (goal[1] != 0):
+        goal_theta = math.atan2(abs_goal[0], abs_goal[1])
+        goal_theta += math.pi / 2
+        if goal_theta > math.pi:
+            goal_theta = math.pi * 2 - goal_theta
+        elif goal_theta < -math.pi:
+            goal_theta = math.pi * 2 + goal_theta
+    else:
+        goal_theta = math.pi
     #print("角度: ", end="")
-    #print(goal_theta/math.pi*180, end="")
+    print(goal_theta/math.pi*180)
     #print("°\tFPS: ", end="")
     #print(clock.fps())
     x = int((goal_theta + math.pi) * 100)
