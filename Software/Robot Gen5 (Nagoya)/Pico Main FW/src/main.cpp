@@ -44,6 +44,7 @@ Servo esc;
 bool game_flag = false;           // ゲームの開始フラグ
 bool line_set_threshold_flag = 0; // ラインセンサーの閾値設定フラグ
 double battery_voltage = 0;
+bool battery_flag = 0;
 
 // モーターの制御系
 
@@ -129,6 +130,11 @@ void loop(void)
                 Serial.print(line.line_theta);
                 Serial.println();
                 battery_voltage = analogRead(A2) * 3.3 / 1024.0 * 4.0;
+                if (battery_voltage < 11.0)
+                {
+                        game_flag = false;
+                        battery_flag = true;
+                }
                 gyro.getEuler();
                 ir_uart_recv();
                 openmv_uart_recv();
@@ -192,6 +198,19 @@ void loop(void)
                 }
                 motor_uart_send();
                 delay(10);
+        }
+        if (battery_flag)
+        {
+                move_angle = 0;
+                speed = 0;
+                motor_flag = 2;
+                motor_uart_send();
+                bldc_drive(0);
+                while (1)
+                {
+                        Serial.println("Battery Low, Please Charge");
+                        delay(1000);
+                }
         }
 }
 
