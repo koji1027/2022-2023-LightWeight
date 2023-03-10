@@ -1,5 +1,7 @@
 #include <Arduino.h>
 #include <hardware/flash.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 
 #include "MPU6050/gyro.h"
 #include "led.h"
@@ -14,10 +16,16 @@
 #define STRAIGHT_SPEED 180
 #define GOAL_LPF 0.1
 
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+#define OLED_RESET -1
+#define SCREEN_ADDRESS 0x3C
+
 SerialPIO motor(D17, D16, 32);
 SerialPIO ir(D0, D1, 32);
 Gyro gyro;
 Line line;
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 const int BUTTON_PIN[3] = {D18, D19, D20};
 
@@ -51,6 +59,7 @@ void line_trace_vertical();
 void line_trace();
 static void save_setting_to_flash();
 void load_setting_from_flash();
+void monitor_update();
 
 void setup()
 {
@@ -58,13 +67,17 @@ void setup()
     pinMode(BUTTON_PIN[1], INPUT_PULLUP);
     pinMode(BUTTON_PIN[2], INPUT_PULLUP);
     Serial.begin(115200);
-        Serial1.setTX(D12);
-        Serial1.setRX(D13);
-        Serial1.begin(115200);
+    Serial1.setTX(D12);
+    Serial1.setRX(D13);
+    Serial1.begin(115200);
     load_setting_from_flash();
     gyro.begin();
     line.begin();
     init_led();
+    display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS);
+    display.display();
+    display.setTextSize(2);
+    display.setTextColor(SSD1306_WHITE);
     delay(1000);
 }
 
@@ -92,22 +105,23 @@ void loop()
             start_flag = false;
         }
         // Serial.println(line.is_line);
-                if (Serial1.available())
-                {
-                        if (Serial1.read() == 255)
-                        {
-                                while (Serial1.available() < 2)
-                                        ;
-                                uint8_t buf[2];
-                                buf[0] = Serial1.read();
-                                buf[1] = Serial1.read();
-                                goal_angle = (buf[0] + buf[1] * 128.0) / 100.0 - PI;
-                                Serial.println(goal_angle);
-                                //Serial.println(goal_angle / PI * 180.0);
-                        }
-                }
+        if (Serial1.available())
+        {
+            if (Serial1.read() == 255)
+            {
+                while (Serial1.available() < 2)
+                    ;
+                uint8_t buf[2];
+                buf[0] = Serial1.read();
+                buf[1] = Serial1.read();
+                goal_angle = (buf[0] + buf[1] * 128.0) / 100.0 - PI;
+                Serial.println(goal_angle);
+                // Serial.println(goal_angle / PI * 180.0);
+            }
+        }
+        monitor_update();
     }
-    
+
     if (digitalRead(BUTTON_PIN[0]) == LOW)
     {
         start_flag = true;
@@ -121,7 +135,10 @@ void loop()
         delay(1000);
     }
     */
-
+    display.setCursor(75, 50);
+    display.print(volt);
+    display.display();
+    
     delay(10);
 }
 
@@ -172,10 +189,13 @@ void loop1()
         if (ball_flag)
         {
             float circ_exp = pow(CIRC_BASE, ir_radius);
-            if(abs(absolute_ir_angle) < PI/2){
-                absolute_move_angle = absolute_ir_angle + constrain(absolute_ir_angle * circ_exp * CIRC_WEIGHT, -PI/2, PI/2);
+            if (abs(absolute_ir_angle) < PI / 2)
+            {
+                absolute_move_angle = absolute_ir_angle + constrain(absolute_ir_angle * circ_exp * CIRC_WEIGHT, -PI / 2, PI / 2);
                 speed = CIRCULATE_SPEED;
-            } else{
+            }
+            else
+            {
                 absolute_move_angle = PI;
                 speed = STRAIGHT_SPEED;
             }
@@ -183,7 +203,7 @@ void loop1()
             vx = cos(move_angle);
             vy = sin(move_angle);
 
-            //machine_angle = absolute_ir_angle * circ_exp;
+            // machine_angle = absolute_ir_angle * circ_exp;
         }
         else
         {
@@ -193,19 +213,25 @@ void loop1()
         }
 
         goal_angle = goal_angle - 0.1;
-        //Serial.println(goal_angle);
-        if(abs(goal_angle) < PI*2/3){
+        // Serial.println(goal_angle);
+        if (abs(goal_angle) < PI * 2 / 3)
+        {
             goal_flag = 1;
-        } else {
+        }
+        else
+        {
             goal_flag = 0;
         }
 
-        if(goal_flag){
+        if (goal_flag)
+        {
             goal_angle_LPF = goal_angle * GOAL_LPF + goal_angle_LPF * (1 - GOAL_LPF);
             machine_angle = goal_angle_LPF * 2.3;
-        }else{
+        }
+        else
+        {
             machine_angle = 0.0;
-            //goal_angle_LPF = 0.0;
+            // goal_angle_LPF = 0.0;
         }
 
         /*
@@ -214,19 +240,19 @@ void loop1()
         Serial.println(line.line_theta);
         */
 
-        //line_trace_vertical();
+        // line_trace_vertical();
 
         // ↓ラインは出ないけどガクガクする単純な処理
-        
-        //Serial.println(line.is_line);
+
+        // Serial.println(line.is_line);
         if (line.is_line)
         {
             vx = cos(line.line_theta + PI);
             vy = sin(line.line_theta + PI);
         }
-        
-        vx = vx / sqrt(vx*vx + vy*vy);
-        vy = vy / sqrt(vx*vx + vy*vy);
+
+        vx = vx / sqrt(vx * vx + vy * vy);
+        vy = vy / sqrt(vx * vx + vy * vy);
         float _vx = (vx + 1.0) * 100.0;
         float _vy = (vy + 1.0) * 100.0;
         byte data[8];
@@ -1424,6 +1450,37 @@ void line_trace()
     }
     pre_line_flag = now_line_flag;
 }*/
+
+void monitor_update()
+{
+    display.clearDisplay();
+    display.drawCircle(SCREEN_WIDTH / 4, SCREEN_HEIGHT / 2, 28, SSD1306_WHITE);
+    if (ball_flag)
+    {
+        display.fillCircle(SCREEN_WIDTH / 4 + cos(absolute_ir_angle) * 28, SCREEN_HEIGHT / 2 + sin(absolute_ir_angle) * 28, 4, SSD1306_WHITE);
+    }
+    display.drawLine(SCREEN_WIDTH / 4, SCREEN_HEIGHT / 2,
+                     SCREEN_WIDTH / 4 + cos(absolute_move_angle) * 24, SCREEN_HEIGHT / 2 + sin(absolute_move_angle) * 24, SSD1306_WHITE);
+    display.drawLine(SCREEN_WIDTH / 4 + cos(absolute_move_angle) * 24, SCREEN_HEIGHT / 2 + sin(absolute_move_angle) * 24,
+                     (SCREEN_WIDTH / 4 + cos(absolute_move_angle) * 24) + cos(absolute_move_angle - PI + PI / 6) * 8,
+                     (SCREEN_HEIGHT / 2 + sin(absolute_move_angle) * 24) + sin(absolute_move_angle - PI + PI / 6) * 8, SSD1306_WHITE);
+    display.drawLine(SCREEN_WIDTH / 4 + cos(absolute_move_angle) * 24, SCREEN_HEIGHT / 2 + sin(absolute_move_angle) * 24,
+                     (SCREEN_WIDTH / 4 + cos(absolute_move_angle) * 24) + cos(absolute_move_angle - PI - PI / 6) * 8,
+                     (SCREEN_HEIGHT / 2 + sin(absolute_move_angle) * 24) + sin(absolute_move_angle - PI - PI / 6) * 8, SSD1306_WHITE);
+    if (line.is_line)
+    {
+        display.setCursor(75, 5);
+        display.println("LINE");
+    }
+    if (goal_flag)
+    {
+        display.setCursor(75, 27);
+        display.println("GOAL");
+    }
+    display.setCursor(75, 50);
+    display.print(volt);
+    display.display();
+};
 
 static void save_setting_to_flash()
 {
