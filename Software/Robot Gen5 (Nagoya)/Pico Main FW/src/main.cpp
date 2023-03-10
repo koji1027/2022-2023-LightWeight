@@ -2,6 +2,7 @@
 #include <Arduino.h>
 #include <stdlib.h>
 #include <Adafruit_SSD1306.h>
+#include <Servo.h>
 
 // 自作ライブラリのインクルード
 #include "led.h"
@@ -10,7 +11,7 @@
 
 // 定数の宣言
 #define SERIAL_BAUD 115200
-#define MOTOR_BAUD 500000
+#define MOTOR_BAUD 115200
 #define IR_BAUD 115200
 #define ESP32_BAUD 115200
 #define OPENMV_BAUD 115200
@@ -22,6 +23,9 @@
 #define CIRC_SPEED 100
 #define STRAIGHT_SPEED 180
 #define GOAL_WEIGHT 2.3
+#define MAX_SIGNAL 2200
+#define MIN_SIGNAL 1000
+#define ESC_PIN D14
 
 const uint8_t button_pin[3] = {D18, D19, D20}; // ボタンのピン番号
 
@@ -32,11 +36,12 @@ SerialPIO motor(D17, D16, 32); // TX, RX, buffer size
 SerialPIO ir(D0, D1, 32);
 SerialPIO esp32(D22, D21, 32); // SerialPIOの多用により不具合の可能性あり
 Adafruit_SSD1306 display(128, 64, &Wire, -1);
+Servo esc;
 
 // グローバル変数の宣言
 
 // 全体の制御系
-bool game_flag = true;            // ゲームの開始フラグ
+bool game_flag = false;           // ゲームの開始フラグ
 bool line_set_threshold_flag = 0; // ラインセンサーの閾値設定フラグ
 double battery_voltage = 0;
 
@@ -71,6 +76,8 @@ void ir_uart_recv(void);    // 赤外線センサーの制御系の受信関数
 void openmv_uart_recv(void);
 void push_button(uint gpio, uint32_t events); // ボタンの処理
 void line_set_threshold(void);                // 閾値の設定
+void bldc_init(void);
+void bldc_drive(uint16_t volume);
 
 void setup(void)
 {
@@ -89,6 +96,7 @@ void setup(void)
         gyro.begin();
         init_led();
         line.begin();
+        bldc_init();
         pinMode(button_pin[0], INPUT_PULLUP);
         pinMode(button_pin[1], INPUT_PULLUP);
         pinMode(button_pin[2], INPUT_PULLUP);
@@ -98,6 +106,7 @@ void setup(void)
         gpio_set_irq_enabled(button_pin[0], GPIO_IRQ_EDGE_FALL, true);
         gpio_set_irq_enabled(button_pin[1], GPIO_IRQ_EDGE_FALL, true);
         gpio_set_irq_enabled(button_pin[2], GPIO_IRQ_EDGE_FALL, true);
+        bldc_drive(0);
 }
 
 void loop(void)
@@ -109,6 +118,16 @@ void loop(void)
         }
         while (game_flag)
         {
+                motor_flag = 0;
+                Serial.print("ir_rad: ");
+                Serial.print(ir_angle);
+                Serial.print("\tgyro_rad: ");
+                Serial.print(gyro.angle);
+                Serial.print("\tline: ");
+                Serial.print(line.on_line);
+                Serial.print("\tline_rad");
+                Serial.print(line.line_theta);
+                Serial.println();
                 battery_voltage = analogRead(A2) * 3.3 / 1024.0 * 4.0;
                 gyro.getEuler();
                 ir_uart_recv();
@@ -129,14 +148,6 @@ void loop(void)
                 {
                         abs_ir_angle -= TWO_PI;
                 }
-                if (goal_flag)
-                {
-                        machine_angle = goal_angle_LPF * GOAL_WEIGHT;
-                }
-                else
-                {
-                        machine_angle = 0;
-                }
                 if (line.on_line)
                 {
                         move_angle = line.line_theta + PI;
@@ -150,6 +161,15 @@ void loop(void)
                 {
                         if (ir_flag)
                         {
+                                if (goal_flag)
+                                {
+                                        machine_angle = goal_angle_LPF * GOAL_WEIGHT;
+                                }
+                                else
+                                {
+                                        machine_angle = 0;
+                                }
+                                machine_angle = 0;
                                 float circ_exp = pow(CIRC_BASE, ir_dist);
                                 if (abs(abs_ir_angle) < HALF_PI)
                                 {
@@ -201,6 +221,7 @@ void motor_uart_send(void)
         buf[5] = constrain(speed, 0, 254);        // constrain(speed, 0, 254); // 0~254
         motor.write(255);                         // ヘッダー
         motor.write(buf, 6);
+        motor.write(254);
 }
 
 void ir_uart_recv(void)
@@ -249,6 +270,10 @@ void push_button(uint gpio, uint32_t events)
                 gpio_set_irq_enabled(button_pin[2], GPIO_IRQ_EDGE_FALL, false);
                 game_flag = 0;
                 Serial.println("game stop");
+                speed = 0;
+                move_angle = 0;
+                motor_flag = 1;
+                motor_uart_send();
                 gpio_set_irq_enabled(button_pin[2], GPIO_IRQ_EDGE_FALL, true);
         }
 }
@@ -312,4 +337,18 @@ void openmv_uart_recv(void)
                         // Serial.println(goal_angle / PI * 180.0);
                 }
         }
+}
+
+void bldc_init(void)
+{
+        esc.attach(ESC_PIN);
+        esc.writeMicroseconds(MAX_SIGNAL);
+        delay(2000);
+        esc.writeMicroseconds(MIN_SIGNAL);
+        delay(2000);
+}
+
+void bldc_drive(uint16_t volume)
+{
+        esc.writeMicroseconds(volume);
 }

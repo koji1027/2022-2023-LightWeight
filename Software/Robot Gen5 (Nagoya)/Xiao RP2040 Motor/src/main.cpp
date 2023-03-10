@@ -6,7 +6,7 @@
 
 // 定数の宣言
 #define SERIAL_BAUD 115200
-#define SERIAL1_BAUD 500000
+#define SERIAL1_BAUD 115200
 
 // インスタンスの生成
 Motor motor;
@@ -29,10 +29,6 @@ void setup()
 
 void loop()
 {
-        while (1)
-        {
-                motor.cal(0.0, 0.0, 100);
-        }
         // put your main code here, to run repeatedly:
         if (Serial1.available())
         {
@@ -40,7 +36,9 @@ void loop()
         }
         Serial.print(move_angle);
         Serial.print("\t");
-        Serial.println(gyro_angle);
+        Serial.print(gyro_angle);
+        Serial.print("\tFlag: ");
+        Serial.println(flag);
         if (flag == 0)
         {
                 motor.cal(move_angle, gyro_angle, speed);
@@ -73,7 +71,7 @@ void uart_recv(void)
         uint8_t header = Serial1.read();
         if (header == 255)
         {
-                while (Serial1.available() < 6)
+                while (Serial1.available() < 7)
                         ;
                 uint8_t buf[6];
                 // 1bit目 : flag  2bit目 : move_angle（下位7bit）　3bit目 : move_angle（上位3bit）
@@ -82,18 +80,15 @@ void uart_recv(void)
                 {
                         buf[i] = Serial1.read();
                 }
-                if (buf[0] != 255 && buf[1] != 255 && buf[2] != 255 && buf[3] != 255 && buf[4] != 255 && buf[5] != 255) // どのデータもヘッダー（255）と被らない
+                if (Serial1.read() == 254)
                 {
-                        flag = buf[0];
-                        move_angle = (buf[1] + (buf[2] << 7)) / 100.0 - PI; // 0 ~ 200PI -> -PI ~ PI
-                        gyro_angle = (buf[3] + (buf[4] << 7)) / 100.0 - PI; // 0 ~ 200PI -> -PI ~ PI
-                        speed = buf[5];
+                        if (buf[0] != 255 && buf[1] != 255 && buf[2] != 255 && buf[3] != 255 && buf[4] != 255 && buf[5] != 255) // どのデータもヘッダー（255）と被らない
+                        {
+                                flag = buf[0];
+                                move_angle = (buf[1] + (buf[2] << 7)) / 100.0 - PI; // 0 ~ 200PI -> -PI ~ PI
+                                gyro_angle = (buf[3] + (buf[4] << 7)) / 100.0 - PI; // 0 ~ 200PI -> -PI ~ PI
+                                speed = buf[5];
+                        }
                 }
-                else
-                {
-                }
-        }
-        else
-        {
         }
 }
