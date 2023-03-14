@@ -135,10 +135,11 @@ void loop()
         delay(1000);
     }
     */
+    display.clearDisplay();
     display.setCursor(75, 50);
     display.print(volt);
     display.display();
-    
+
     delay(10);
 }
 
