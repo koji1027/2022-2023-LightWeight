@@ -43,9 +43,12 @@ void loop(void)
                 if (header == 255)
                 {
                         uart_send();
-                        Serial.println("send");
                 }
         }
+        // Serial.println(ir.ir_val_lpf[4]);
+        Serial.print(ir.ir_dist);
+        Serial.println("cm");
+        delay(10);
 }
 
 void uart_send(void)

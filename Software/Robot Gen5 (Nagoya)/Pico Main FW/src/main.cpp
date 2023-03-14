@@ -93,24 +93,39 @@ void setup(void)
         ir.begin(IR_BAUD);
         while (!ir)
                 ;
-
+        esp32.begin(ESP32_BAUD);
         gyro.begin();
         init_led();
         line.begin();
-        bldc_init();
+        //bldc_init();
         pinMode(button_pin[0], INPUT_PULLUP);
         pinMode(button_pin[1], INPUT_PULLUP);
         pinMode(button_pin[2], INPUT_PULLUP);
-        gpio_set_irq_enabled_with_callback(button_pin[0], GPIO_IRQ_EDGE_FALL, true, push_button);
-        gpio_set_irq_enabled_with_callback(button_pin[1], GPIO_IRQ_EDGE_FALL, true, push_button);
-        gpio_set_irq_enabled_with_callback(button_pin[2], GPIO_IRQ_EDGE_FALL, true, push_button);
-        gpio_set_irq_enabled(button_pin[0], GPIO_IRQ_EDGE_FALL, true);
-        gpio_set_irq_enabled(button_pin[1], GPIO_IRQ_EDGE_FALL, true);
-        gpio_set_irq_enabled(button_pin[2], GPIO_IRQ_EDGE_FALL, true);
-        bldc_drive(0);
+        //gpio_set_irq_enabled_with_callback(button_pin[0], GPIO_IRQ_EDGE_FALL, true, push_button);
+        //gpio_set_irq_enabled_with_callback(button_pin[1], GPIO_IRQ_EDGE_FALL, true, push_button);
+        //gpio_set_irq_enabled_with_callback(button_pin[2], GPIO_IRQ_EDGE_FALL, true, push_button);
+        //gpio_set_irq_enabled(button_pin[0], GPIO_IRQ_EDGE_FALL, true);
+        //gpio_set_irq_enabled(button_pin[1], GPIO_IRQ_EDGE_FALL, true);
+        //gpio_set_irq_enabled(button_pin[2], GPIO_IRQ_EDGE_FALL, true);
+        //bldc_drive(0);
 }
 
 void loop(void)
+{
+        move_angle += 0.03;
+        if (move_angle > PI)
+        {
+                move_angle -= TWO_PI;
+        }
+        gyro.getEuler();
+        speed = 100;
+        motor_uart_send();
+        Serial.println(move_angle);
+        esp32.println(move_angle);
+        delay(10);
+}
+/*
+void aaa(void)
 {
         // put your main code here, to run repeatedly:
         if (line_set_threshold_flag)
@@ -120,21 +135,12 @@ void loop(void)
         while (game_flag)
         {
                 motor_flag = 0;
-                Serial.print("ir_rad: ");
-                Serial.print(ir_angle);
-                Serial.print("\tgyro_rad: ");
-                Serial.print(gyro.angle);
-                Serial.print("\tline: ");
-                Serial.print(line.on_line);
-                Serial.print("\tline_rad");
-                Serial.print(line.line_theta);
-                Serial.println();
-                battery_voltage = analogRead(A2) * 3.3 / 1024.0 * 4.0;
-                if (battery_voltage < 11.0)
-                {
-                        game_flag = false;
-                        battery_flag = true;
-                }
+                //battery_voltage = analogRead(A2) * 3.3 / 1024.0 * 4.0;
+                //if (battery_voltage < 11.0)
+                //{
+                //        game_flag = false;
+                //        battery_flag = true;
+                //}
                 gyro.getEuler();
                 ir_uart_recv();
                 openmv_uart_recv();
@@ -154,6 +160,7 @@ void loop(void)
                 {
                         abs_ir_angle -= TWO_PI;
                 }
+                line.on_line = 0;
                 if (line.on_line)
                 {
                         move_angle = line.line_theta + PI;
@@ -175,18 +182,26 @@ void loop(void)
                                 {
                                         machine_angle = 0;
                                 }
-                                machine_angle = 0;
                                 float circ_exp = pow(CIRC_BASE, ir_dist);
-                                if (abs(abs_ir_angle) < HALF_PI)
+                                circ_exp = 0;
+                                if (ir_dist > 40)
                                 {
-                                        abs_move_angle = abs_ir_angle + constrain(abs_ir_angle * circ_exp * CIRC_WEIGHT, -PI / 2.0, PI / 2.0);
-                                        speed = CIRC_SPEED;
+                                        circ_exp = 0;
                                 }
                                 else
                                 {
-                                        abs_move_angle = PI;
-                                        speed = STRAIGHT_SPEED;
+                                        circ_exp = 1;
                                 }
+                                // if (abs(abs_ir_angle) < HALF_PI)
+                                //{
+                                abs_move_angle = abs_ir_angle + constrain(abs_ir_angle * circ_exp * CIRC_WEIGHT, -PI / 2.0, PI / 2.0);
+                                speed = CIRC_SPEED;
+                                //}
+                                //else
+                                //{
+                                //        abs_move_angle = PI;
+                                //        speed = STRAIGHT_SPEED;
+                                //}
                                 move_angle = abs_move_angle - machine_angle;
                         }
                         else
@@ -196,9 +211,37 @@ void loop(void)
                                 motor_flag = 2;
                         }
                 }
+                motor_flag = 2;
+                if (move_angle > 0)
+                {
+                        move_angle = fmod(abs(move_angle), TWO_PI);
+                        if (move_angle > PI)
+                        {
+                                move_angle = move_angle - TWO_PI;
+                        }
+                }
+                else if (move_angle < 0)
+                {
+                        move_angle = fmod(abs(move_angle), TWO_PI);
+                        if (move_angle > PI)
+                        {
+                                move_angle = move_angle - TWO_PI;
+                        }
+                        move_angle = -move_angle;
+                }
+                move_angle = ir_angle;
+                machine_angle = 0;
+                speed = 130;
+                motor_flag = 0;
                 motor_uart_send();
+                if (Serial.available())
+                {
+                        uint16_t volume = Serial.readStringUntil('\n').toInt();
+                        bldc_drive(volume);
+                }
                 delay(10);
         }
+        bldc_drive(0);
         if (battery_flag)
         {
                 move_angle = 0;
@@ -208,24 +251,12 @@ void loop(void)
                 bldc_drive(0);
                 while (1)
                 {
-                        Serial.println("Battery Low, Please Charge");
+                        // Serial.println("Battery Low, Please Charge");
                         delay(1000);
                 }
         }
 }
-
-void setup1()
-{
-        // put your setup code here, to run once:
-}
-
-void loop1()
-{
-        // put your main code here, to run repeatedly:
-        while (game_flag)
-        {
-        }
-}
+*/
 
 void motor_uart_send(void)
 {
@@ -241,8 +272,10 @@ void motor_uart_send(void)
         motor.write(255);                         // ヘッダー
         motor.write(buf, 6);
         motor.write(254);
+        // Serial.println("Send");
 }
 
+/*
 void ir_uart_recv(void)
 {
         ir.write(255); // ヘッダー
@@ -269,7 +302,7 @@ void push_button(uint gpio, uint32_t events)
                 gyro.getEuler();
                 gyro.angle_offset = gyro.angle;
                 game_flag = 1;
-                Serial.println("game start");
+                // Serial.println("game start");
                 gpio_set_irq_enabled(button_pin[0], GPIO_IRQ_EDGE_FALL, true);
         }
         else if (gpio == button_pin[1])
@@ -288,7 +321,7 @@ void push_button(uint gpio, uint32_t events)
         {
                 gpio_set_irq_enabled(button_pin[2], GPIO_IRQ_EDGE_FALL, false);
                 game_flag = 0;
-                Serial.println("game stop");
+                // Serial.println("game stop");
                 speed = 0;
                 move_angle = 0;
                 motor_flag = 1;
@@ -299,9 +332,9 @@ void push_button(uint gpio, uint32_t events)
 
 void line_set_threshold()
 {
-        Serial.println("Start auto threshold setting");
-        Serial.println("Please push middle button to start");
-        Serial.println("wait...");
+        // Serial.println("Start auto threshold setting");
+        // Serial.println("Please push middle button to start");
+        // Serial.println("wait...");
         uint8_t cnt = 0;
         delay(1000);
         while (1)
@@ -323,10 +356,10 @@ void line_set_threshold()
                 }
         }
         delay(1000);
-        Serial.println("run");
+        // Serial.println("run");
         line.set_threshold();
         delay(1000);
-        Serial.println("End auto threshold setting");
+        // Serial.println("End auto threshold setting");
         line_set_threshold_flag = false;
         gpio_set_irq_enabled(button_pin[1], GPIO_IRQ_EDGE_FALL, true);
 }
@@ -371,3 +404,4 @@ void bldc_drive(uint16_t volume)
 {
         esc.writeMicroseconds(volume);
 }
+*/

@@ -24,7 +24,11 @@ void setup()
 {
         // put your setup code here, to run once:
         motor.begin();
-        Serial.begin(SERIAL_BAUD);
+        while (1)
+        {
+                motor.cal(0, 0, 100);
+                delay(1000);
+        }
 }
 
 void loop()
@@ -34,11 +38,6 @@ void loop()
         {
                 uart_recv();
         }
-        Serial.print(move_angle);
-        Serial.print("\t");
-        Serial.print(gyro_angle);
-        Serial.print("\tFlag: ");
-        Serial.println(flag);
         if (flag == 0)
         {
                 motor.cal(move_angle, gyro_angle, speed);
@@ -64,6 +63,7 @@ void setup1()
 void loop1()
 {
         // put your main code here, to run repeatedly:
+        Serial.begin(SERIAL_BAUD);
 }
 
 void uart_recv(void)
@@ -88,6 +88,7 @@ void uart_recv(void)
                                 move_angle = (buf[1] + (buf[2] << 7)) / 100.0 - PI; // 0 ~ 200PI -> -PI ~ PI
                                 gyro_angle = (buf[3] + (buf[4] << 7)) / 100.0 - PI; // 0 ~ 200PI -> -PI ~ PI
                                 speed = buf[5];
+                                Serial.println("Received");
                         }
                 }
         }

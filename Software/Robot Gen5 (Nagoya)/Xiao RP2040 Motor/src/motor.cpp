@@ -16,9 +16,16 @@ void Motor::begin(void)
 void Motor::drive(int *p)
 {
         uint16_t duty[MOTOR_NUM];
+        for (int i = 0; i < 4; i++)
+        {
+                Serial.print(p[i]);
+                Serial.print("\t");
+        }
+        Serial.println();
+
         for (uint8_t i = 0; i < MOTOR_NUM; i++)
         {
-                duty[i] = 256 - p[i];
+                duty[i] = 256 + p[i];
                 digitalWrite(PWM_PIN[i], HIGH);
                 analogWrite(DIR_PIN[i], duty[i]);
         }
@@ -29,6 +36,7 @@ void Motor::brake(void)
         for (uint8_t i = 0; i < MOTOR_NUM; i++)
         {
                 digitalWrite(PWM_PIN[i], LOW);
+                analogWrite(DIR_PIN[i], 0);
         }
 }
 
@@ -36,8 +44,8 @@ void Motor::release(void)
 {
         for (uint8_t i = 0; i < MOTOR_NUM; i++)
         {
-                digitalWrite(PWM_PIN[i], HIGH);
-                analogWrite(DIR_PIN[i], MAX_PWM / 2);
+                digitalWrite(PWM_PIN[i], LOW);
+                analogWrite(DIR_PIN[i], 0);
         }
 }
 

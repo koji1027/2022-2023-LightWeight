@@ -18,7 +18,7 @@ public:
     void brake();
 
 private:
-    const int MOTOR_PIN[4][2] = {{D2, D3}, {D0, D1}, {D8, D9}, {D4, D5}};
+    const int MOTOR_PIN[4][2] = {{D2, D3}, {D0, D1}, {D10, D8}, {D4, D5}};
     const float MOTOR_POS[4][2] = {
         {1.0, -1.0}, {1.0, 1.0}, {-1.0, 1.0}, {-1.0, -1.0}};
     unsigned long long pre_time = 0;
