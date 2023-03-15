@@ -46,8 +46,8 @@ void loop(void)
                 }
         }
         // Serial.println(ir.ir_val_lpf[4]);
-        Serial.print(ir.ir_dist);
-        Serial.println("cm");
+        //Serial.print(ir.ir_dist);
+        //Serial.println("cm");
         delay(10);
 }
 

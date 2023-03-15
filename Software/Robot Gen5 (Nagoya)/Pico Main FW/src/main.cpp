@@ -2,10 +2,10 @@
 #include <Arduino.h>
 #include <stdlib.h>
 #include <Adafruit_SSD1306.h>
+#include <Adafruit_NeoPixel.h>
 #include <Servo.h>
 
 // 自作ライブラリのインクルード
-#include "led.h"
 #include "MPU6050/gyro.h"
 #include "line.h"
 
@@ -20,12 +20,14 @@
 #define TWO_THIRDS_PI PI * 2.0 / 3.0
 #define CIRC_BASE pow(0.6, 1.0 / 20.0)
 #define CIRC_WEIGHT 3.5
-#define CIRC_SPEED 100
+#define CIRC_SPEED 144
 #define STRAIGHT_SPEED 180
 #define GOAL_WEIGHT 2.3
 #define MAX_SIGNAL 2200
 #define MIN_SIGNAL 1000
 #define ESC_PIN D14
+#define LED_PIN D15
+#define LED_NUM 32
 
 const uint8_t button_pin[3] = {D18, D19, D20}; // ボタンのピン番号
 
@@ -95,39 +97,36 @@ void setup(void)
                 ;
         esp32.begin(ESP32_BAUD);
         gyro.begin();
-        init_led();
         line.begin();
         //bldc_init();
         pinMode(button_pin[0], INPUT_PULLUP);
         pinMode(button_pin[1], INPUT_PULLUP);
         pinMode(button_pin[2], INPUT_PULLUP);
-        //gpio_set_irq_enabled_with_callback(button_pin[0], GPIO_IRQ_EDGE_FALL, true, push_button);
-        //gpio_set_irq_enabled_with_callback(button_pin[1], GPIO_IRQ_EDGE_FALL, true, push_button);
-        //gpio_set_irq_enabled_with_callback(button_pin[2], GPIO_IRQ_EDGE_FALL, true, push_button);
-        //gpio_set_irq_enabled(button_pin[0], GPIO_IRQ_EDGE_FALL, true);
-        //gpio_set_irq_enabled(button_pin[1], GPIO_IRQ_EDGE_FALL, true);
-        //gpio_set_irq_enabled(button_pin[2], GPIO_IRQ_EDGE_FALL, true);
+        gpio_set_irq_enabled_with_callback(button_pin[0], GPIO_IRQ_EDGE_FALL, true, push_button);
+        gpio_set_irq_enabled_with_callback(button_pin[1], GPIO_IRQ_EDGE_FALL, true, push_button);
+        gpio_set_irq_enabled_with_callback(button_pin[2], GPIO_IRQ_EDGE_FALL, true, push_button);
+        gpio_set_irq_enabled(button_pin[0], GPIO_IRQ_EDGE_FALL, true);
+        gpio_set_irq_enabled(button_pin[1], GPIO_IRQ_EDGE_FALL, true);
+        gpio_set_irq_enabled(button_pin[2], GPIO_IRQ_EDGE_FALL, true);
         //bldc_drive(0);
+        analogReadResolution(10);
+
+        
+        Adafruit_NeoPixel* led = NULL;
+        led = new Adafruit_NeoPixel(LED_NUM, LED_PIN, NEO_GRB + NEO_KHZ800);
+        for (int i = 0; i < LED_NUM; i++)
+        {
+                led->setPixelColor(i, led->Color(255, 0, 0));
+        }
+        led->setBrightness(200);
+        led->show();
+
+        delete(led);
+        
 }
 
 void loop(void)
 {
-        move_angle += 0.03;
-        if (move_angle > PI)
-        {
-                move_angle -= TWO_PI;
-        }
-        gyro.getEuler();
-        speed = 100;
-        motor_uart_send();
-        Serial.println(move_angle);
-        esp32.println(move_angle);
-        delay(10);
-}
-/*
-void aaa(void)
-{
-        // put your main code here, to run repeatedly:
         if (line_set_threshold_flag)
         {
                 line_set_threshold();
@@ -135,12 +134,15 @@ void aaa(void)
         while (game_flag)
         {
                 motor_flag = 0;
-                //battery_voltage = analogRead(A2) * 3.3 / 1024.0 * 4.0;
-                //if (battery_voltage < 11.0)
-                //{
-                //        game_flag = false;
-                //        battery_flag = true;
-                //}
+                /*
+                battery_voltage = analogRead(A2) * 3.3 / 1024.0 * 4.0;;
+                Serial.println(battery_voltage);
+                if (battery_voltage < 11.0)
+                {
+                        game_flag = false;
+                        battery_flag = true;
+                }
+                */
                 gyro.getEuler();
                 ir_uart_recv();
                 openmv_uart_recv();
@@ -160,7 +162,6 @@ void aaa(void)
                 {
                         abs_ir_angle -= TWO_PI;
                 }
-                line.on_line = 0;
                 if (line.on_line)
                 {
                         move_angle = line.line_theta + PI;
@@ -183,7 +184,9 @@ void aaa(void)
                                         machine_angle = 0;
                                 }
                                 float circ_exp = pow(CIRC_BASE, ir_dist);
+                                /*
                                 circ_exp = 0;
+                                
                                 if (ir_dist > 40)
                                 {
                                         circ_exp = 0;
@@ -192,26 +195,27 @@ void aaa(void)
                                 {
                                         circ_exp = 1;
                                 }
-                                // if (abs(abs_ir_angle) < HALF_PI)
-                                //{
+                                */
+                                if (abs(abs_ir_angle) < HALF_PI ||abs(abs_ir_angle) > PI/3)
+                                {
+                                //circ_exp =  1;
                                 abs_move_angle = abs_ir_angle + constrain(abs_ir_angle * circ_exp * CIRC_WEIGHT, -PI / 2.0, PI / 2.0);
                                 speed = CIRC_SPEED;
-                                //}
-                                //else
-                                //{
-                                //        abs_move_angle = PI;
-                                //        speed = STRAIGHT_SPEED;
-                                //}
+                                }
+                                else
+                                {
+                                        abs_move_angle = PI;
+                                        speed = STRAIGHT_SPEED;
+                                }
                                 move_angle = abs_move_angle - machine_angle;
                         }
                         else
                         {
                                 move_angle = 0;
                                 speed = 0;
-                                motor_flag = 2;
+                                motor_flag = 0;
                         }
                 }
-                motor_flag = 2;
                 if (move_angle > 0)
                 {
                         move_angle = fmod(abs(move_angle), TWO_PI);
@@ -229,10 +233,6 @@ void aaa(void)
                         }
                         move_angle = -move_angle;
                 }
-                move_angle = ir_angle;
-                machine_angle = 0;
-                speed = 130;
-                motor_flag = 0;
                 motor_uart_send();
                 if (Serial.available())
                 {
@@ -256,6 +256,19 @@ void aaa(void)
                 }
         }
 }
+
+/*
+void aaa(void)
+{
+        // put your main code here, to run repeatedly:
+        move_angle = 0.0;
+        gyro.getEuler();
+        speed = 100;
+        motor_uart_send();
+        Serial.println(move_angle);
+        esp32.println(move_angle);
+        delay(10);
+}
 */
 
 void motor_uart_send(void)
@@ -275,7 +288,6 @@ void motor_uart_send(void)
         // Serial.println("Send");
 }
 
-/*
 void ir_uart_recv(void)
 {
         ir.write(255); // ヘッダー
@@ -332,9 +344,9 @@ void push_button(uint gpio, uint32_t events)
 
 void line_set_threshold()
 {
-        // Serial.println("Start auto threshold setting");
-        // Serial.println("Please push middle button to start");
-        // Serial.println("wait...");
+        Serial.println("Start auto threshold setting");
+        Serial.println("Please push middle button to start");
+        Serial.println("wait...");
         uint8_t cnt = 0;
         delay(1000);
         while (1)
@@ -404,4 +416,3 @@ void bldc_drive(uint16_t volume)
 {
         esc.writeMicroseconds(volume);
 }
-*/

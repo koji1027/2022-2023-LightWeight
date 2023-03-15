@@ -4,7 +4,7 @@
 
 #define SENSOR_NUM 32
 #define LINE_SENSOR_RADIUS 53.0
-#define DEFAULT_THRESHOLD 500
+#define DEFAULT_THRESHOLD 900
 
 class Line
 {

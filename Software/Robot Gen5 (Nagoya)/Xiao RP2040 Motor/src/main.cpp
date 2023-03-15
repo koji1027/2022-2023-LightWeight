@@ -24,11 +24,6 @@ void setup()
 {
         // put your setup code here, to run once:
         motor.begin();
-        while (1)
-        {
-                motor.cal(0, 0, 100);
-                delay(1000);
-        }
 }
 
 void loop()
