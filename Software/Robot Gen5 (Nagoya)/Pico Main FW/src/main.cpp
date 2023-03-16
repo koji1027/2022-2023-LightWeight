@@ -173,16 +173,16 @@ void loop(void)
                 }
                 else
                 {
+                        if (goal_flag)
+                        {
+                                machine_angle = goal_angle_LPF * GOAL_WEIGHT;
+                        }
+                        else
+                        {
+                                machine_angle = 0;
+                        }
                         if (ir_flag)
                         {
-                                if (goal_flag)
-                                {
-                                        machine_angle = goal_angle_LPF * GOAL_WEIGHT;
-                                }
-                                else
-                                {
-                                        machine_angle = 0;
-                                }
                                 float circ_exp = pow(CIRC_BASE, ir_dist);
                                 /*
                                 circ_exp = 0;
@@ -398,7 +398,7 @@ void openmv_uart_recv(void)
                         {
                                 goal_flag = 0;
                         }
-                        // Serial.println(goal_angle / PI * 180.0);
+                        //Serial.println(goal_angle / PI * 180.0);
                 }
         }
 }
