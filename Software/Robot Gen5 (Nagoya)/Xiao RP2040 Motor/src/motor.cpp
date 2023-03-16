@@ -18,10 +18,10 @@ void Motor::drive(int *p)
         uint16_t duty[MOTOR_NUM];
         for (int i = 0; i < 4; i++)
         {
-                Serial.print(p[i]);
-                Serial.print("\t");
+                //Serial.print(p[i]);
+                //Serial.print("\t");
         }
-        Serial.println();
+        //Serial.println();
 
         for (uint8_t i = 0; i < MOTOR_NUM; i++)
         {
@@ -49,10 +49,10 @@ void Motor::release(void)
         }
 }
 
-void Motor::cal(double move_angle, double gyro_angle, uint8_t speed)
+void Motor::cal(double move_angle, double gyro_angle, double machine_angle, uint8_t speed)
 {
         double power_ratio[MOTOR_NUM];
-        double gyro_angle_diff = 0 - gyro_angle;
+        double gyro_angle_diff = machine_angle - gyro_angle;
         unsigned long long now_time = micros();
         unsigned long long dt = now_time - pre_time;
         double p, i, d;

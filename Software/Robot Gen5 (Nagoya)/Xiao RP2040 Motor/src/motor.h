@@ -12,7 +12,7 @@ class Motor
 {
 public:
         void begin(void);
-        void cal(double move_angle, double gyro_angle, uint8_t speed);
+        void cal(double move_angle, double gyro_angle, double machine_angle, uint8_t speed);
         void drive(int *p);
         void brake(void);
         void release(void);

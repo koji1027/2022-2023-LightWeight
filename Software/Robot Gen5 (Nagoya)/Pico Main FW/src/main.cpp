@@ -59,6 +59,7 @@ double goal_angle_LPF = 0;
 // ゲーム開始時の正面（敵ゴール）方向を０°とし、右回転が正、左回転が負とする。
 double abs_move_angle = 0;
 double abs_goal_angle = 0;
+double abs_goal_angle_LPF = 0;
 double abs_line_angle = 0;
 
 // その他
@@ -157,6 +158,7 @@ void loop(void)
                         }
                 }
                 abs_ir_angle = ir_angle + gyro.angle;
+                abs_goal_angle_LPF = goal_angle_LPF + gyro.angle;
                 abs_ir_angle = fmod(abs_ir_angle, TWO_PI);
                 if (abs_ir_angle > PI)
                 {
@@ -175,7 +177,7 @@ void loop(void)
                 {
                         if (goal_flag)
                         {
-                                machine_angle = goal_angle_LPF * GOAL_WEIGHT;
+                                machine_angle = abs_goal_angle_LPF * GOAL_WEIGHT;
                         }
                         else
                         {
@@ -233,6 +235,8 @@ void loop(void)
                         }
                         move_angle = -move_angle;
                 }
+                speed = 0;
+                machine_angle = 0;
                 motor_uart_send();
                 if (Serial.available())
                 {
@@ -273,7 +277,7 @@ void aaa(void)
 
 void motor_uart_send(void)
 {
-        byte buf[6];
+        byte buf[8];
         buf[0] = constrain(motor_flag, 0, 254);   // 0: normal, 1: release, 2 or others: brake (0~254)
         uint16_t tmp = (move_angle + PI) * 100.0; //-PI ~ PI -> 0 ~ 200PI
         buf[1] = tmp & 0b0000000001111111;        // 下位7bit
@@ -281,7 +285,10 @@ void motor_uart_send(void)
         tmp = (gyro.angle + PI) * 100.0;          //-PI ~ PI -> 0 ~ 200PI
         buf[3] = tmp & 0b0000000001111111;        // 下位7bit
         buf[4] = tmp >> 7;                        // 上位3bit
-        buf[5] = constrain(speed, 0, 254);        // constrain(speed, 0, 254); // 0~254
+        tmp = (machine_angle + PI) * 100.0;
+        buf[5] = tmp & 0b0000000001111111;        // 下位7bit
+        buf[6] = tmp >> 7;                        // 上位3bit
+        buf[7] = constrain(speed, 0, 254);        // constrain(speed, 0, 254); // 0~254
         motor.write(255);                         // ヘッダー
         motor.write(buf, 6);
         motor.write(254);
@@ -387,8 +394,8 @@ void openmv_uart_recv(void)
                         uint8_t buf[2];
                         buf[0] = Serial1.read();
                         buf[1] = Serial1.read();
-                        goal_angle = (buf[0] + buf[1] * 128.0) / 100.0 - PI;
-                        goal_angle -= 0.1;
+                        abs_goal_angle = (buf[0] + buf[1] * 128.0) / 100.0 - PI;
+                        abs_goal_angle -= 0.1;
                         if (abs(goal_angle) < TWO_THIRDS_PI)
                         {
                                 goal_flag = 1;
