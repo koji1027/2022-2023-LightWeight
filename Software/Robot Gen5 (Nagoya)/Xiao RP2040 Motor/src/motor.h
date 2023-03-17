@@ -7,12 +7,14 @@
 #define KP 1.8
 #define KI 0.00005
 #define KD 0.0
+#define POWER_LPF 0.3
 
 class Motor
 {
 public:
         void begin(void);
         void cal(double move_angle, double gyro_angle, double machine_angle, uint8_t speed);
+        void esc_line(double move_angle, uint8_t speed);
         void drive(int *p);
         void brake(void);
         void release(void);
@@ -23,4 +25,5 @@ private:
         const double MOTOR_RAD[MOTOR_NUM] = {PI / 4.0, PI * 3.0 / 4.0, PI * 5.0 / 4.0, PI * 7.0 / 4.0};
         double SIN[628];
         unsigned long long pre_time = 0;
+        int pre_p[MOTOR_NUM] = {0, 0, 0, 0};
 };

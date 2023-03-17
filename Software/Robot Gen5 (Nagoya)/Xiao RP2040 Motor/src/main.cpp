@@ -13,7 +13,7 @@ Motor motor;
 
 // グローバル変数の宣言
 // モーターの制御系
-uint8_t flag = 1;      // 0: normal, 1: release, 2 or others: brake （0~254）
+uint8_t flag = 1;      // 0: normal, 1: release, 2: brake （0~254）, 3: ライン退避
 double move_angle = 0; // 進行方向（-PI ~ PI）
 double gyro_angle = 0; // ジャイロの角度（-PI ~ PI）
 double machine_angle = 0;
@@ -31,11 +31,14 @@ void setup()
 void loop()
 {
         // put your main code here, to run repeatedly:
+        Serial.print("Flag:");
+        Serial.print(flag);
+        Serial.print("\tAngle:");
+        Serial.println(move_angle);
         if (Serial1.available())
         {
                 uart_recv();
         }
-        Serial.println(machine_angle);
         if (flag == 0)
         {
                 motor.cal(move_angle, gyro_angle, machine_angle, speed);
@@ -44,10 +47,15 @@ void loop()
         {
                 motor.release();
         }
-        else
+        else if (flag == 2)
         {
                 motor.brake();
         }
+        else if (flag == 3)
+        {
+                motor.esc_line(move_angle, speed);
+        }
+        else {}
 }
 
 void setup1()
@@ -68,13 +76,13 @@ void uart_recv(void)
         uint8_t header = Serial1.read();
         if (header == 255)
         {
-                while (Serial1.available() < 7)
+                while (Serial1.available() < 9)
                         ;
                 uint8_t buf[8];
                 // 1bit目 : flag  2bit目 : move_angle（下位7bit）　3bit目 : move_angle（上位3bit）
                 // 4bit目 : gyro_angle（下位7bit） 5bit目 : gyro_angle（上位3bit）
                 // 6bit目 : machine_angle (下位7bit) 7bit目 : machine_angle (上位3bit) 8bit目 : speed
-                for (uint8_t i = 0; i < 6; i++)
+                for (uint8_t i = 0; i < 8; i++)
                 {
                         buf[i] = Serial1.read();
                 }
@@ -87,7 +95,7 @@ void uart_recv(void)
                                 gyro_angle = (buf[3] + (buf[4] << 7)) / 100.0 - PI; // 0 ~ 200PI -> -PI ~ PI
                                 machine_angle = (buf[5] + (buf[6] << 7)) / 100.0 - PI; // 0 ~ 200PI -> -PI ~ PI
                                 speed = buf[7];
-                                Serial.println("Received");
+                                //Serial.println("Received");
                         }
                 }
         }

@@ -53,6 +53,8 @@ void Line::read()
                         sensor_state[i] = false;
                 }
         }
+        sensor_value[12] = 0;
+        sensor_state[12] = 0;
         cluster_num = -1; // (実際の数) -１
         int cluster[SENSOR_NUM] = {0};
         int cluster_size[SENSOR_NUM] = {0};
@@ -170,5 +172,22 @@ void Line::set_threshold()
                 Serial.print(threshold[i]);
                 Serial.print("\t");
         }
+        Serial.println();
+}
+
+void Line::debug()
+{
+        for (int i = 0; i < 16; i++)
+        {
+                Serial.print(sensor_value[i]);
+                Serial.print("\t");
+        }
+        Serial.println();
+        for (int i = 16; i < 32; i++)
+        {
+                Serial.print(sensor_value[i]);
+                Serial.print("\t");
+        }
+        Serial.println();
         Serial.println();
 }
