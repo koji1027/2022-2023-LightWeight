@@ -66,8 +66,11 @@ double abs_line_angle = 0;
 // その他
 double machine_angle = 0; // ロボットに向かせる角度（-PI ~ PI）
 bool goal_flag = 0;       // 0:ゴールなし, 1:ゴールあり
+uint8_t goal_flag_ratio = 0;
+uint8_t goal_flag_count = 0;
+
 uint8_t speed = 0;      // 速度（0~254）
-uint8_t motor_flag = 0;   // 0: normal, 1: release, 2 or others: brake（0~254）
+uint8_t motor_flag = 0; // 0: normal, 1: release, 2 or others: brake（0~254）
 
 // 赤外線センサー制御系
 double ir_angle = 0; // 赤外線センサーの角度（-PI ~ PI）
@@ -83,7 +86,7 @@ void push_button(uint gpio, uint32_t events); // ボタンの処理
 void line_set_threshold(void);                // 閾値の設定
 void bldc_init(void);
 void bldc_drive(uint16_t volume);
-double fix_minusPItoPI(double angle);
+double normalize_angle(double angle); // 角度を-πからπまでに調整
 
 void setup(void)
 {
@@ -101,7 +104,7 @@ void setup(void)
         esp32.begin(ESP32_BAUD);
         gyro.begin();
         line.begin();
-        //bldc_init();
+        // bldc_init();
         pinMode(button_pin[0], INPUT_PULLUP);
         pinMode(button_pin[1], INPUT_PULLUP);
         pinMode(button_pin[2], INPUT_PULLUP);
@@ -111,11 +114,10 @@ void setup(void)
         gpio_set_irq_enabled(button_pin[0], GPIO_IRQ_EDGE_FALL, true);
         gpio_set_irq_enabled(button_pin[1], GPIO_IRQ_EDGE_FALL, true);
         gpio_set_irq_enabled(button_pin[2], GPIO_IRQ_EDGE_FALL, true);
-        //bldc_drive(0);
+        // bldc_drive(0);
         analogReadResolution(10);
 
-        
-        Adafruit_NeoPixel* led = NULL;
+        Adafruit_NeoPixel *led = NULL;
         led = new Adafruit_NeoPixel(LED_NUM, LED_PIN, NEO_GRB + NEO_KHZ800);
         for (int i = 0; i < LED_NUM; i++)
         {
@@ -124,8 +126,7 @@ void setup(void)
         led->setBrightness(200);
         led->show();
 
-        delete(led);
-        
+        delete (led);
 }
 
 void loop(void)
@@ -150,7 +151,7 @@ void loop(void)
                 ir_uart_recv();
                 openmv_uart_recv();
                 line.read();
-                //line.debug();
+                // line.debug();
                 if (line.on_line)
                 {
                         abs_line_angle = line.line_theta + gyro.angle;
@@ -170,7 +171,7 @@ void loop(void)
                 {
                         abs_ir_angle += TWO_PI;
                 }
-                //Serial.println(abs_goal_angle_LPF);
+                // Serial.println(abs_goal_angle_LPF);
                 Serial.println(line.on_line);
                 if (line.on_line)
                 {
@@ -185,6 +186,7 @@ void loop(void)
                 }
                 else
                 {
+                        /*
                         if (goal_flag)
                         {
                                 machine_angle = abs_goal_angle_LPF * GOAL_WEIGHT;
@@ -193,13 +195,37 @@ void loop(void)
                         {
                                 machine_angle = 0;
                         }
-                        machine_angle = fix_minusPItoPI(machine_angle);
+                        */
+                        if (goal_flag)
+                        {
+                                if (goal_flag_ratio < 100)
+                                {
+                                        goal_flag_ratio += 1;
+                                }
+                        }
+                        else
+                        {
+                                if (goal_flag_ratio > 0)
+                                {
+                                        goal_flag_ratio -= 1;
+                                }
+                        }
+                        if (goal_flag_count < 100)
+                        {
+                                machine_angle = 0;
+                                goal_flag_count += 1;
+                        }
+                        else
+                        {
+                                machine_angle = abs_goal_angle_LPF * GOAL_WEIGHT * goal_flag_ratio / 100;
+                        }
+                        machine_angle = normalize_angle(machine_angle);
                         if (ir_flag)
                         {
                                 float circ_exp = pow(CIRC_BASE, ir_dist);
                                 /*
                                 circ_exp = 0;
-                                
+
                                 if (ir_dist > 40)
                                 {
                                         circ_exp = 0;
@@ -209,11 +235,11 @@ void loop(void)
                                         circ_exp = 1;
                                 }
                                 */
-                                if (abs(ir_angle) < HALF_PI ||abs(ir_angle) > PI/3)
+                                if (abs(ir_angle) < HALF_PI || abs(ir_angle) > PI / 3)
                                 {
-                                //circ_exp =  1;
-                                move_angle = ir_angle + constrain(ir_angle * circ_exp * CIRC_WEIGHT, -PI / 2.0, PI / 2.0);
-                                speed = CIRC_SPEED;
+                                        // circ_exp =  1;
+                                        move_angle = ir_angle + constrain(ir_angle * circ_exp * CIRC_WEIGHT, -PI / 2.0, PI / 2.0);
+                                        speed = CIRC_SPEED;
                                 }
                                 else
                                 {
@@ -229,8 +255,8 @@ void loop(void)
                                 motor_flag = 0;
                         }
                 }
-                move_angle = fix_minusPItoPI(move_angle);
-                //Serial.println(machine_angle);
+                move_angle = normalize_angle(move_angle);
+                // Serial.println(machine_angle);
                 motor_uart_send();
                 if (Serial.available())
                 {
@@ -270,10 +296,10 @@ void motor_uart_send(void)
         buf[3] = tmp & 0b0000000001111111;        // 下位7bit
         buf[4] = tmp >> 7;                        // 上位3bit
         tmp = (machine_angle + PI) * 100.0;
-        buf[5] = tmp & 0b0000000001111111;        // 下位7bit
-        buf[6] = tmp >> 7;                        // 上位3bit
-        buf[7] = constrain(speed, 0, 254);        // constrain(speed, 0, 254); // 0~254
-        motor.write(255);                         // ヘッダー
+        buf[5] = tmp & 0b0000000001111111; // 下位7bit
+        buf[6] = tmp >> 7;                 // 上位3bit
+        buf[7] = constrain(speed, 0, 254); // constrain(speed, 0, 254); // 0~254
+        motor.write(255);                  // ヘッダー
         motor.write(buf, 8);
         motor.write(254);
         // Serial.println("Send");
@@ -402,13 +428,13 @@ void openmv_uart_recv(void)
                                 goal_flag = 1;
                                 abs_goal_angle = goal_angle + gyro.angle;
                                 abs_goal_angle_LPF = abs_goal_angle_LPF * GOAL_LPF + abs_goal_angle * (1.0 - GOAL_LPF);
-                                abs_goal_angle_LPF = fix_minusPItoPI(abs_goal_angle_LPF);
+                                abs_goal_angle_LPF = normalize_angle(abs_goal_angle_LPF);
                         }
                         else
                         {
                                 goal_flag = 0;
                         }
-                        //Serial.println(goal_angle / PI * 180.0);
+                        // Serial.println(goal_angle / PI * 180.0);
                 }
         }
 }
@@ -427,24 +453,24 @@ void bldc_drive(uint16_t volume)
         esc.writeMicroseconds(volume);
 }
 
-double fix_minusPItoPI(double angle)
+double normalize_angle(double angle)
 {
         if (angle > 0)
+        {
+                angle = fmod(angle, TWO_PI);
+                if (angle > PI)
                 {
-                        angle = fmod(angle, TWO_PI);
-                        if (angle > PI)
-                        {
-                                angle = angle - TWO_PI;
-                        }
+                        angle = angle - TWO_PI;
                 }
+        }
         else if (angle < 0)
+        {
+                angle = fmod(abs(angle), TWO_PI);
+                if (angle > PI)
                 {
-                        angle = fmod(abs(angle), TWO_PI);
-                        if (angle > PI)
-                        {
-                                angle = angle - TWO_PI;
-                        }
-                        angle = -angle;
+                        angle = angle - TWO_PI;
+                }
+                angle = -angle;
         }
         return angle;
 };
