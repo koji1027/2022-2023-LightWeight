@@ -200,7 +200,23 @@ void loop(void)
                         {
                                 if (goal_flag_ratio < 100)
                                 {
-                                        goal_flag_ratio += 1;
+                                        if(abs_goal_angle_LPF > 0){
+                                                if(goal_flag_ratio <= 96){
+                                                        goal_flag_ratio += 4;
+                                                }
+                                                else{
+                                                        goal_flag_ratio = 100;
+                                                }
+                                        }
+                                        if(abs_goal_angle_LPF < 0){
+                                                if(goal_flag_ratio <= 92){
+                                                        goal_flag_ratio += 8;
+                                                }
+                                                else{
+                                                        goal_flag_ratio = 100;
+                                                }
+                                                
+                                        }
                                 }
                         }
                         else
@@ -218,6 +234,14 @@ void loop(void)
                         else
                         {
                                 machine_angle = abs_goal_angle_LPF * GOAL_WEIGHT * goal_flag_ratio / 100;
+                                if(machine_angle > HALF_PI){
+                                        machine_angle = HALF_PI;
+                                }
+                                else if(machine_angle < -HALF_PI)
+                                {
+                                        machine_angle = -HALF_PI;
+                                }
+
                         }
                         machine_angle = normalize_angle(machine_angle);
                         if (ir_flag)
