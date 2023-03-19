@@ -45,7 +45,12 @@ void loop(void)
                         uart_send();
                 }
         }
-        // Serial.println(ir.ir_val_lpf[4]);
+        /*
+        Serial.print(ir.ir_angle/PI*180);
+        Serial.print("\t");
+        Serial.println(ir.ir_angle_LPF/PI*180);
+        */
+        // Serial.println(ir.ir_val_LPF[4]);
         //Serial.print(ir.ir_dist);
         //Serial.println("cm");
         delay(10);
@@ -55,7 +60,7 @@ void uart_send(void)
 {
         byte buf[4];
         buf[0] = ir.ball_flag;                     // 0: normal, 1: stop
-        uint16_t tmp = (ir.ir_angle + PI) * 100.0; //-PI ~ PI -> 0 ~ 628
+        uint16_t tmp = (ir.ir_angle_LPF + PI) * 100.0; //-PI ~ PI -> 0 ~ 628
         buf[1] = tmp & 0b0000000001111111;         // 下位7bit
         buf[2] = tmp >> 7;                         // 上位3bit
         tmp = constrain(ir.ir_dist, 0, 254);       // 0 ~ 254

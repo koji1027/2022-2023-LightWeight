@@ -24,12 +24,12 @@ void IR::cal(void)
                         digitalWrite(MUX_PIN[j], (i >> j) & 0x01);
                 }
                 ir_val[i] = IR_VAL_MAX - analogRead(COM_PIN);
-                ir_val_lpf[i] = KLPF * ir_val[i] + (1 - KLPF) * ir_val_lpf[i]; // LPF
+                ir_val_LPF[i] = VALUE_LPF * ir_val[i] + (1 - VALUE_LPF) * ir_val_LPF[i]; // LPF
         }
         uint16_t sum = 0;
         for (uint8_t i = 0; i < IR_NUM; i++)
         {
-                sum += ir_val_lpf[i];
+                sum += ir_val_LPF[i];
         }
         if (sum < 500)
         {
@@ -44,7 +44,7 @@ void IR::cal(void)
         uint8_t max_index = 0;
         for (uint8_t i = 0; i < IR_NUM; i++)
         {
-                if (ir_val_lpf[i] > ir_val_lpf[max_index])
+                if (ir_val_LPF[i] > ir_val_LPF[max_index])
                 {
                         max_index = i;
                 }
@@ -52,18 +52,23 @@ void IR::cal(void)
         for (uint8_t i = 0; i < 5; i++)
         {
                 uint8_t index = (max_index + i - 2 + 32) % IR_NUM;
-                ir_vector[0] += ir_val_lpf[index] * IR_SENSOR_VECTOR[index][0];
-                ir_vector[1] += ir_val_lpf[index] * IR_SENSOR_VECTOR[index][1];
+                ir_vector[0] += ir_val_LPF[index] * IR_SENSOR_VECTOR[index][0];
+                ir_vector[1] += ir_val_LPF[index] * IR_SENSOR_VECTOR[index][1];
         }
         ir_angle = atan2(ir_vector[1], ir_vector[0]); // -PI ~ PI
+        ir_angle_LPF = ir_angle_LPF * ANGLE_LPF + ir_angle * (1 - ANGLE_LPF);
+        
         ir_angle = (ir_angle + ir_pre_angle) / 2.0;   // 移動平均
         ir_pre_angle = ir_angle;
+        
         // ir_dist = sqrt(ir_vector[0] * ir_vector[0] + ir_vector[1] * ir_vector[1]); // ベクトルの大きさ √(x^2+y^2)
-        ir_dist = ((ir_val_lpf[max_index] * (-0.10471) + 346.74) + ir_dist) / 2.0; // 移動平均
-        /*for (uint8_t i = 0; i < IR_NUM; i++)
+        ir_dist = ((ir_val_LPF[max_index] * (-0.10471) + 346.74) + ir_dist) / 2.0; // 移動平均
+        /*
+        for (uint8_t i = 0; i < IR_NUM; i++)
         {
-                Serial.print(ir_val_lpf[i]);
+                Serial.print(int(ir_val_LPF[i]));
                 Serial.print("\t");
         }
-        Serial.println();*/
+        Serial.println();
+        */
 }
