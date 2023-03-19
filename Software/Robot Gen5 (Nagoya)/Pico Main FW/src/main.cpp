@@ -87,6 +87,7 @@ void line_set_threshold(void);                // 閾値の設定
 void bldc_init(void);
 void bldc_drive(uint16_t volume);
 double normalize_angle(double angle); // 角度を-πからπまでに調整
+void esc_line(void);
 
 void setup(void)
 {
@@ -135,6 +136,7 @@ void loop(void)
         {
                 line_set_threshold();
         }
+        game_flag = true;
         while (game_flag)
         {
                 motor_flag = 0;
@@ -152,6 +154,7 @@ void loop(void)
                 openmv_uart_recv();
                 line.read();
                 // line.debug();
+
                 if (line.on_line)
                 {
                         abs_line_angle = line.line_theta + gyro.angle;
@@ -172,50 +175,317 @@ void loop(void)
                         abs_ir_angle += TWO_PI;
                 }
                 // Serial.println(abs_goal_angle_LPF);
-                Serial.println(line.on_line);
+                // Serial.println(ir_angle);
                 if (line.on_line)
                 {
-                        move_angle = line.line_theta + PI;
-                        move_angle = fmod(move_angle, TWO_PI);
-                        if (move_angle > PI)
+                        if (line.line_theta > PI * 3.0 / 8.0 && line.line_theta <= PI * 5.0 / 8.0) // ライン右
                         {
-                                move_angle -= TWO_PI;
+                                // Serial.println("right");
+                                if (line.line_state_flag == 0 || line.line_state_flag == 2)
+                                {
+                                        line.line_state_flag = 2;
+                                        if (ir_angle > PI / 3.0 && ir_angle < PI * 2.0 / 3.0)
+                                        {
+                                                move_angle = 0;
+                                                speed = 0;
+                                                motor_flag = 1;
+                                                // Serial.println("stop");
+                                        }
+                                        else if (ir_angle <= PI / 3.0 && ir_angle > -HALF_PI)
+                                        {
+                                                move_angle = -PI / 9.0;
+                                                speed = 100;
+                                                motor_flag = 0;
+                                                // Serial.println("front");
+                                        }
+                                        else if (ir_angle >= PI * 2.0 / 3.0 || ir_angle <= -HALF_PI)
+                                        {
+                                                move_angle = -PI * 8.0 / 9.0;
+                                                speed = 100;
+                                                motor_flag = 0;
+                                                // Serial.println("back");
+                                        }
+                                }
+                                else if (line.line_state_flag == 1)
+                                {
+                                        move_angle = line.line_theta + PI;
+                                        if (move_angle > PI)
+                                        {
+                                                move_angle -= 2.0 * PI;
+                                        }
+                                        speed = ESC_LINE_SPEED;
+                                        motor_flag = 3;
+                                }
+                                else if (line.line_state_flag == 3)
+                                {
+                                        move_angle = line.line_theta + PI;
+                                        if (move_angle > PI)
+                                        {
+                                                move_angle -= 2.0 * PI;
+                                        }
+                                        speed = ESC_LINE_SPEED;
+                                        motor_flag = 3;
+                                }
+                                else if (line.line_state_flag == 4)
+                                {
+                                        move_angle = line.line_theta + PI;
+                                        if (move_angle > PI)
+                                        {
+                                                move_angle -= 2.0 * PI;
+                                        }
+                                        speed = ESC_LINE_SPEED;
+                                        motor_flag = 3;
+                                }
+                                else if (line.line_state_flag == 5)
+                                {
+                                        move_angle = line.line_theta + PI;
+                                        if (move_angle > PI)
+                                        {
+                                                move_angle -= 2.0 * PI;
+                                        }
+                                        speed = ESC_LINE_SPEED;
+                                        motor_flag = 3;
+                                }
+                                else if (line.line_state_flag == 6)
+                                {
+                                        move_angle = line.line_theta + PI;
+                                        if (move_angle > PI)
+                                        {
+                                                move_angle -= 2.0 * PI;
+                                        }
+                                        speed = ESC_LINE_SPEED;
+                                        motor_flag = 3;
+                                }
+                                else if (line.line_state_flag == 7)
+                                {
+                                        move_angle = line.line_theta + PI;
+                                        if (move_angle > PI)
+                                        {
+                                                move_angle -= 2.0 * PI;
+                                        }
+                                        speed = ESC_LINE_SPEED;
+                                        motor_flag = 3;
+                                }
+                                else
+                                {
+                                        move_angle = line.line_theta + PI;
+                                        if (move_angle > PI)
+                                        {
+                                                move_angle -= 2.0 * PI;
+                                        }
+                                        speed = ESC_LINE_SPEED;
+                                        motor_flag = 3;
+                                }
                         }
-                        speed = ESC_LINE_SPEED;
-                        motor_flag = 3;
+                        else if (line.line_theta <= -PI * 3.0 / 8.0 && line.line_theta > -PI * 5.0 / 8.0) // ライン左
+                        {
+                                // Serial.println("left");
+                                if (line.line_state_flag == 0 || line.line_state_flag == 4)
+                                {
+                                        line.line_state_flag = 4;
+                                        if (ir_angle < -PI / 3.0 && ir_angle > -PI * 2.0 / 3.0)
+                                        {
+                                                move_angle = 0;
+                                                speed = 0;
+                                                motor_flag = 1;
+                                                // Serial.println("stop");
+                                        }
+                                        else if (ir_angle >= -PI / 3.0 && ir_angle < HALF_PI)
+                                        {
+                                                move_angle = PI / 9.0;
+                                                speed = 100;
+                                                motor_flag = 0;
+                                                // Serial.println("front");
+                                        }
+                                        else if (ir_angle <= -PI * 2.0 / 3.0 || ir_angle >= HALF_PI)
+                                        {
+                                                move_angle = PI * 8.0 / 9.0;
+                                                speed = 100;
+                                                motor_flag = 0;
+                                                // Serial.println("back");
+                                        }
+                                }
+                                else
+                                {
+                                        esc_line();
+                                }
+                        }
+                        else if (line.line_theta <= PI / 8.0 && line.line_theta > -PI / 8.0) // ライン前
+                        {
+                                // Serial.println("front");
+                                if (line.line_state_flag == 0 || line.line_state_flag == 1)
+                                {
+                                        line.line_state_flag = 1;
+                                        move_angle = PI;
+                                        speed = ESC_LINE_SPEED;
+                                        motor_flag = 3;
+                                }
+                                else
+                                {
+                                        esc_line();
+                                }
+                        }
+                        else if (line.line_theta <= PI * 3.0 / 8.0 && line.line_theta > PI / 8.0) // ライン右前
+                        {
+                                // Serial.println("right front");
+                                if (line.line_state_flag == 0 || line.line_state_flag == 5)
+                                {
+                                        line.line_state_flag = 5;
+                                        move_angle = line.line_theta + PI;
+                                        if (move_angle > PI)
+                                        {
+                                                move_angle -= 2.0 * PI;
+                                        }
+                                        speed = ESC_LINE_SPEED;
+                                        motor_flag = 3;
+                                }
+                                else
+                                {
+                                        esc_line();
+                                }
+                        }
+                        else if (line.line_theta <= -PI / 8.0 && line.line_theta > -PI * 3.0 / 8.0) // ライン左前
+                        {
+                                // Serial.println("left front");
+                                if (line.line_state_flag == 0 || line.line_state_flag == 7)
+                                {
+                                        line.line_state_flag = 7;
+                                        move_angle = line.line_theta + PI;
+                                        if (move_angle > PI)
+                                        {
+                                                move_angle -= 2.0 * PI;
+                                        }
+                                        speed = ESC_LINE_SPEED;
+                                        motor_flag = 3;
+                                }
+                                else
+                                {
+                                        esc_line();
+                                }
+                        }
+                        else if (line.line_theta <= PI * 7.0 / 8.0 && line.line_theta > PI * 5.0 / 8.0) // ライン右後
+                        {
+                                // Serial.println("right back");
+                                if (line.line_state_flag == 0 || line.line_state_flag == 6)
+                                {
+                                        line.line_state_flag = 6;
+                                        move_angle = line.line_theta + PI;
+                                        if (move_angle > PI)
+                                        {
+                                                move_angle -= 2.0 * PI;
+                                        }
+                                        speed = ESC_LINE_SPEED;
+                                        motor_flag = 3;
+                                }
+                                else
+                                {
+                                        esc_line();
+                                }
+                        }
+                        else if (line.line_theta <= -PI * 5.0 / 8.0 && line.line_theta > -PI * 7.0 / 8.0) // ライン左後
+                        {
+                                // Serial.println("left back");
+                                if (line.line_state_flag == 0 || line.line_state_flag == 8)
+                                {
+                                        line.line_state_flag = 8;
+                                        move_angle = line.line_theta + PI;
+                                        if (move_angle > PI)
+                                        {
+                                                move_angle -= 2.0 * PI;
+                                        }
+                                        speed = ESC_LINE_SPEED;
+                                        motor_flag = 3;
+                                }
+                                else
+                                {
+                                        esc_line();
+                                }
+                        }
+                        else // ライン後
+                        {
+                                // Serial.println("back");
+                                if (line.line_state_flag == 0 || line.line_state_flag == 3)
+                                {
+                                        line.line_state_flag = 3;
+                                        if (ir_angle <= -PI * 8.0 / 9.0 || ir_angle > PI * 8.0 / 9.0)
+                                        {
+                                                move_angle = 0;
+                                                speed = 0;
+                                                motor_flag = 1;
+                                        }
+                                        else if (ir_angle > -PI * 8.0 / 9.0 && ir_angle <= -PI / 2.0)
+                                        {
+                                                move_angle = -PI * 7.0 / 18.0;
+                                                speed = 100;
+                                                motor_flag = 0;
+                                        }
+                                        else if (ir_angle > -PI / 2.0 && ir_angle <= PI / 2.0)
+                                        {
+                                                move_angle = ir_angle;
+                                                speed = 100;
+                                                motor_flag = 0;
+                                        }
+                                        else if (ir_angle > PI / 2.0 && ir_angle <= PI * 8.0 / 9.0)
+                                        {
+                                                move_angle = PI * 7.0 / 18.0;
+                                                speed = 100;
+                                                motor_flag = 0;
+                                        }
+                                }
+                                else
+                                {
+                                        esc_line();
+                                }
+                        }
+                        /*
+                                move_angle = line.line_theta + PI;
+                                move_angle = fmod(move_angle, TWO_PI);
+                                if (move_angle > PI)
+                                {
+                                        move_angle -= TWO_PI;
+                                }
+                                speed = ESC_LINE_SPEED;
+                                motor_flag = 3;
+                        */
                 }
                 else
                 {
-                        /*
-                        if (goal_flag)
-                        {
-                                machine_angle = abs_goal_angle_LPF * GOAL_WEIGHT;
-                        }
-                        else
-                        {
-                                machine_angle = 0;
-                        }
-                        */
+                        line.line_state_flag = 0;
+
+                        // if (goal_flag)
+                        //{
+                        //         machine_angle = abs_goal_angle_LPF * GOAL_WEIGHT;
+                        // }
+                        // else
+                        //{
+                        //         machine_angle = 0;
+                        // }
+
                         if (goal_flag)
                         {
                                 if (goal_flag_ratio < 100)
                                 {
-                                        if(abs_goal_angle_LPF > 0){
-                                                if(goal_flag_ratio <= 96){
+                                        if (abs_goal_angle_LPF > 0)
+                                        {
+                                                if (goal_flag_ratio <= 96)
+                                                {
                                                         goal_flag_ratio += 4;
                                                 }
-                                                else{
+                                                else
+                                                {
                                                         goal_flag_ratio = 100;
                                                 }
                                         }
-                                        if(abs_goal_angle_LPF < 0){
-                                                if(goal_flag_ratio <= 92){
+                                        if (abs_goal_angle_LPF < 0)
+                                        {
+                                                if (goal_flag_ratio <= 92)
+                                                {
                                                         goal_flag_ratio += 8;
                                                 }
-                                                else{
+                                                else
+                                                {
                                                         goal_flag_ratio = 100;
                                                 }
-                                                
                                         }
                                 }
                         }
@@ -234,32 +504,31 @@ void loop(void)
                         else
                         {
                                 machine_angle = abs_goal_angle_LPF * GOAL_WEIGHT * goal_flag_ratio / 100;
-                                if(machine_angle > HALF_PI){
+                                if (machine_angle > HALF_PI)
+                                {
                                         machine_angle = HALF_PI;
                                 }
-                                else if(machine_angle < -HALF_PI)
+                                else if (machine_angle < -HALF_PI)
                                 {
                                         machine_angle = -HALF_PI;
                                 }
-
                         }
                         machine_angle = normalize_angle(machine_angle);
                         if (ir_flag)
                         {
                                 float circ_exp = pow(CIRC_BASE, ir_dist);
-                                /*
-                                circ_exp = 0;
 
-                                if (ir_dist > 40)
-                                {
-                                        circ_exp = 0;
-                                }
-                                else
-                                {
-                                        circ_exp = 1;
-                                }
-                                */
-                                if (abs(ir_angle) < HALF_PI || abs(ir_angle) > PI / 3)
+                                // circ_exp = 0;
+                                // if (ir_dist > 40)
+                                //{
+                                //         circ_exp = 0;
+                                // }
+                                // else
+                                //{
+                                //         circ_exp = 1;
+                                // }
+
+                                if (abs(ir_angle) < PI / 3.0 || abs(ir_angle) > PI * 3.0 / 4.0)
                                 {
                                         // circ_exp =  1;
                                         move_angle = ir_angle + constrain(ir_angle * circ_exp * CIRC_WEIGHT, -PI / 2.0, PI / 2.0);
@@ -279,6 +548,7 @@ void loop(void)
                                 motor_flag = 0;
                         }
                 }
+
                 move_angle = normalize_angle(move_angle);
                 // Serial.println(machine_angle);
                 motor_uart_send();
@@ -370,8 +640,16 @@ void push_button(uint gpio, uint32_t events)
         if (gpio == button_pin[0])
         {
                 gpio_set_irq_enabled(button_pin[0], GPIO_IRQ_EDGE_FALL, false);
-                gyro.getEuler();
-                gyro.angle_offset = gyro.angle;
+                unsigned long long time1 = millis();
+                while (digitalRead(button_pin[0]) == 0)
+                {
+                        if (millis() - time1 > 1000)
+                        {
+                                break;
+                        }
+                }
+                // gyro.getEuler();
+                // gyro.angle_offset = gyro.angle;
                 game_flag = 1;
                 // Serial.println("game start");
                 gpio_set_irq_enabled(button_pin[0], GPIO_IRQ_EDGE_FALL, true);
@@ -379,6 +657,14 @@ void push_button(uint gpio, uint32_t events)
         else if (gpio == button_pin[1])
         {
                 gpio_set_irq_enabled(button_pin[1], GPIO_IRQ_EDGE_FALL, false);
+                unsigned long long time1 = millis();
+                while (digitalRead(button_pin[1]) == 0)
+                {
+                        if (millis() - time1 > 1000)
+                        {
+                                break;
+                        }
+                }
                 if (!game_flag)
                 {
                         line_set_threshold_flag = 1;
@@ -391,7 +677,15 @@ void push_button(uint gpio, uint32_t events)
         else if (gpio == button_pin[2])
         {
                 gpio_set_irq_enabled(button_pin[2], GPIO_IRQ_EDGE_FALL, false);
-                game_flag = 0;
+                unsigned long long time1 = millis();
+                while (digitalRead(button_pin[2]) == 0)
+                {
+                        if (millis() - time1 > 1000)
+                        {
+                                break;
+                        }
+                }
+                game_flag = 1;
                 // Serial.println("game stop");
                 speed = 0;
                 move_angle = 0;
@@ -497,4 +791,15 @@ double normalize_angle(double angle)
                 angle = -angle;
         }
         return angle;
-};
+}
+
+void esc_line(void)
+{
+        move_angle = line.line_theta + PI;
+        if (move_angle > PI)
+        {
+                move_angle -= 2.0 * PI;
+        }
+        speed = ESC_LINE_SPEED;
+        motor_flag = 3;
+}
