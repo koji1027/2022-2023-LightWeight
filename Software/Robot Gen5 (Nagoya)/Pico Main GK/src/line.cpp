@@ -27,6 +27,8 @@ void Line::begin()
 
 void Line::read()
 {
+        pre_line_theta = line_theta;
+        line_theta = 0.0;
         for (int i = 0; i < 16; i++)
         {
                 for (int j = 0; j < 4; j++)
@@ -116,7 +118,9 @@ void Line::read()
                         sum_vector[1] += cos(cluster_theta[i]);
                 }
                 line_theta = atan2(sum_vector[0], sum_vector[1]);
+
         }
+        Serial.println(line_theta);//すぐにけせ
 }
 
 void Line::set_threshold()

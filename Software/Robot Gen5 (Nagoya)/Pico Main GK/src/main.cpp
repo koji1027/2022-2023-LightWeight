@@ -19,7 +19,8 @@
 #define GOAL_LPF 0.1
 #define PI_THIRDS PI / 3.0
 #define TWO_THIRDS_PI PI * 2.0 / 3.0
-#define BACK_SPEED 150
+#define GUARD_SPEED 140
+#define BACK_SPEED 140
 #define STRAIGHT_SPEED 180
 #define ESC_LINE_SPEED 180
 #define GOAL_WEIGHT 1.48
@@ -159,9 +160,30 @@ void loop(void)
                 abs_ir_angle = ir_angle + gyro.angle;
                 abs_ir_angle = normalize_angle(abs_ir_angle);
 
-                if (line.on_line == 1 && abs(abs_line_angle) > PI_THIRDS)
+                while (line.on_line && abs(line.line_theta) < PI_THIRDS && game_flag)
                 {
-                        if (ir_flag && ir_angle > HALF_PI)
+                        line.read();
+                        gyro.getEuler();
+                        ir_uart_recv();
+                        openmv_uart_recv();
+                        while (!line.on_line)
+                        {
+                                line.read();
+                                gyro.getEuler();
+                                ir_uart_recv();
+                                openmv_uart_recv();
+                                if (ir_flag && abs_ir_angle < HALF_PI)
+                                {
+                                        move_angle = ir_angle;
+                                }
+                                else
+                                {
+                                        move_angle = 0;
+                                }
+                                speed = ESC_LINE_SPEED;
+                                motor_uart_send();
+                        }
+                        if (ir_flag && abs_ir_angle < HALF_PI)
                         {
                                 move_angle = ir_angle;
                         }
@@ -170,21 +192,48 @@ void loop(void)
                                 move_angle = 0;
                         }
                         speed = ESC_LINE_SPEED;
+                        motor_uart_send();
                 }
-                else if (!goal_flag)
+                while (!goal_flag || !line.on_line)
                 {
+                        line.read();
+                        gyro.getEuler();
+                        ir_uart_recv();
+                        openmv_uart_recv();
                         move_angle = PI;
                         speed = BACK_SPEED;
+                        motor_uart_send();
+                }/*
+                if(line.on_line && line.line_theta > PI*7/10){
+                       move_angle = HALF_PI; 
+                       speed = GUARD_SPEED;
                 }
-                else
+                else if(line.on_line && line.line_theta < -PI*7/10){
+                       move_angle = -HALF_PI; 
+                       speed = GUARD_SPEED;
+                }*/
+                if (goal_flag && line.on_line)
                 {
-                        if(ir_angle > 0){
+                        if (abs_ir_angle > PI/6)
+                        {
                                 move_angle = HALF_PI;
+                                speed = GUARD_SPEED * abs(sin(abs_ir_angle));
                         }
+                        else if (abs_ir_angle < -PI/6)
+                        {
+                                move_angle = -HALF_PI;
+                                speed = GUARD_SPEED * abs(sin(abs_ir_angle));
+                        }
+                        else
+                        {
+                                move_angle = ir_angle;
+                                speed = STRAIGHT_SPEED;
+                        }
+                        
                 }
 
                 move_angle = normalize_angle(move_angle);
-                // Serial.println(machine_angle);
+                
                 motor_uart_send();
                 if (Serial.available())
                 {
@@ -368,8 +417,7 @@ void openmv_uart_recv(void)
                         pre_goal_angle[2] = pre_goal_angle[1];
                         pre_goal_angle[1] = pre_goal_angle[0];
                         pre_goal_angle[0] = goal_angle;
-                        // Serial.println(goal_angle / PI * 180.0);
-                        Serial.println(goal_flag);
+                        // Serial.println(goal_angle / PI * 180.0);//すぐにけせ
                 }
         }
 }

@@ -16,7 +16,9 @@ public:
         int on_line = false;
         bool floor_flag = false;
         double line_theta = 0.0;
+        double pre_line_theta = 0.0;
         int cluster_num = -1; // 実際の数-１
+        int line_state_flag = 0;
 
 private:
         const int COM_PIN[2] = {A1, A0};
