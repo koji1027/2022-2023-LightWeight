@@ -27,6 +27,8 @@ void Line::begin()
 
 void Line::read()
 {
+        pre_line_theta = line_theta;
+        line_theta = 0.0;
         for (int i = 0; i < 16; i++)
         {
                 for (int j = 0; j < 4; j++)
