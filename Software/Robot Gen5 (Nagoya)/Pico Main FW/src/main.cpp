@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <Adafruit_SSD1306.h>
 #include <Adafruit_NeoPixel.h>
+#include <Adafruit_SSD1306.h>
 #include <Servo.h>
 
 // 自作ライブラリのインクルード
@@ -29,6 +30,9 @@
 #define ESC_PIN D14
 #define LED_PIN D15
 #define LED_NUM 32
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+#define SCREEN_ADDRESS 0x3C
 
 const uint8_t button_pin[3] = {D18, D19, D20}; // ボタンのピン番号
 
@@ -38,8 +42,8 @@ Line line;
 SerialPIO motor(D17, D16, 32); // TX, RX, buffer size
 SerialPIO ir(D0, D1, 32);
 SerialPIO esp32(D22, D21, 32); // SerialPIOの多用により不具合の可能性あり
-Adafruit_SSD1306 display(128, 64, &Wire, -1);
 Servo esc;
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 // グローバル変数の宣言
 
@@ -68,9 +72,12 @@ double machine_angle = 0; // ロボットに向かせる角度（-PI ~ PI）
 bool goal_flag = 0;       // 0:ゴールなし, 1:ゴールあり
 uint8_t goal_flag_ratio = 0;
 uint8_t goal_flag_count = 0;
-
 uint8_t speed = 0;      // 速度（0~254）
 uint8_t motor_flag = 0; // 0: normal, 1: release, 2 or others: brake（0~254）
+unsigned long long display_refresh_time = 0;
+unsigned long long start_time = 0;
+unsigned long long end_time = 0;
+int fps = 0;
 
 // 赤外線センサー制御系
 double ir_angle = 0; // 赤外線センサーの角度（-PI ~ PI）
@@ -104,6 +111,7 @@ void setup(void)
                 ;
         esp32.begin(ESP32_BAUD);
         gyro.begin();
+        display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS);
         line.begin();
         // bldc_init();
         pinMode(button_pin[0], INPUT_PULLUP);
@@ -139,6 +147,7 @@ void loop(void)
         game_flag = true;
         while (game_flag)
         {
+                start_time = micros();
                 motor_flag = 0;
                 /*
                 battery_voltage = analogRead(A2) * 3.3 / 1024.0 * 4.0;;
@@ -150,6 +159,51 @@ void loop(void)
                 }
                 */
                 gyro.getEuler();
+                if (millis() - display_refresh_time > 100)
+                {
+                        display.clearDisplay();
+                        display.drawCircle(32, 32, 23, WHITE);
+                        display.drawLine(4, 32, 60, 32, WHITE);
+                        display.drawLine(32, 4, 32, 60, WHITE);
+                        int16_t ir_x, ir_y;
+                        ir_x = 32 + 23 * sin(ir_angle);
+                        ir_y = 32 - 23 * cos(ir_angle);
+                        display.fillCircle(ir_x, ir_y, 3, WHITE);
+                        int16_t gyro_x = 32 + 25 * sin(gyro.angle);
+                        int16_t gyro_y = 32 - 25 * cos(gyro.angle);
+                        display.drawLine(32, 32, gyro_x, gyro_y, WHITE);
+                        display.setCursor(65, 0);
+                        display.setTextSize(1);
+                        display.setTextColor(WHITE);
+                        display.print("IR:");
+                        display.print(ir_angle * 180 / PI, 1);
+                        display.setCursor(65, 8);
+                        display.print("GY:");
+                        display.print(gyro.angle * 180 / PI, 1);
+                        display.setCursor(65, 16);
+                        display.print("FPS:");
+                        display.print(fps);
+                        display.setCursor(65, 24);
+                        display.print("BAT:");
+                        display.print(battery_voltage, 1);
+                        display.setCursor(65, 32);
+                        display.print("L:");
+                        if (line.on_line)
+                        {
+                                display.print(line.line_theta * 180 / PI, 1);
+                        }
+                        else
+                        {
+                                display.print("OFF");
+                        }
+                        display.setCursor(65, 40);
+                        display.print("Desined By");
+                        display.setCursor(73, 48);
+                        display.setTextSize(2);
+                        display.print("Koji");
+                        display.display();
+                        display_refresh_time = millis();
+                }
                 ir_uart_recv();
                 openmv_uart_recv();
                 line.read();
@@ -481,6 +535,8 @@ void loop(void)
                         bldc_drive(volume);
                 }
                 delay(10);
+                end_time = micros();
+                fps = 1000000.0 / (end_time - start_time);
         }
         move_angle = 0;
         speed = 0;
@@ -488,19 +544,15 @@ void loop(void)
         motor_uart_send();
 }
 
-/*
-void aaa(void)
+void setup1(void)
 {
-        // put your main code here, to run repeatedly:
-        move_angle = 0.0;
-        gyro.getEuler();
-        speed = 100;
-        motor_uart_send();
-        Serial.println(move_angle);
-        esp32.println(move_angle);
-        delay(10);
 }
-*/
+
+void loop1(void)
+{
+
+        delay(100);
+}
 
 void motor_uart_send(void)
 {
