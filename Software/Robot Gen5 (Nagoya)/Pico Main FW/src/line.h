@@ -19,6 +19,7 @@ public:
         double pre_line_theta = 0.0;
         int cluster_num = -1; // 実際の数-１
         int line_state_flag = 0;
+        uint16_t ave_threshold = DEFAULT_THRESHOLD;
 
 private:
         const int COM_PIN[2] = {A1, A0};

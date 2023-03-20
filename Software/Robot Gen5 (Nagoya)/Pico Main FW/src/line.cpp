@@ -173,7 +173,9 @@ void Line::set_threshold()
         {
                 Serial.print(threshold[i]);
                 Serial.print("\t");
+                ave_threshold += threshold[i];
         }
+        ave_threshold = (float)ave_threshold / (float)SENSOR_NUM;
         Serial.println();
 }
 

@@ -144,7 +144,6 @@ void loop(void)
         {
                 line_set_threshold();
         }
-        game_flag = true;
         while (game_flag)
         {
                 start_time = micros();
@@ -660,12 +659,19 @@ void push_button(uint gpio, uint32_t events)
                                 break;
                         }
                 }
-                game_flag = 1;
-                // Serial.println("game stop");
-                speed = 0;
-                move_angle = 0;
-                motor_flag = 1;
-                motor_uart_send();
+                if (!line_set_threshold_flag)
+                {
+                        game_flag = 0;
+                        // Serial.println("game stop");
+                        speed = 0;
+                        move_angle = 0;
+                        motor_flag = 1;
+                        motor_uart_send();
+                        display.clearDisplay();
+                        display.setCursor(0, 0);
+                        display.print("Waiting");
+                        display.display();
+                }
                 gpio_set_irq_enabled(button_pin[2], GPIO_IRQ_EDGE_FALL, true);
         }
 }
@@ -675,6 +681,14 @@ void line_set_threshold()
         Serial.println("Start auto threshold setting");
         Serial.println("Please push middle button to start");
         Serial.println("wait...");
+        display.clearDisplay();
+        display.setCursor(0, 0);
+        display.setTextSize(1);
+        display.setTextColor(WHITE);
+        display.print("Auto Set Threshold");
+        display.setCursor(0, 8);
+        display.print("Please Push Mid-Button");
+        display.display();
         uint8_t cnt = 0;
         delay(1000);
         while (1)
@@ -695,10 +709,22 @@ void line_set_threshold()
                         break;
                 }
         }
+        display.clearDisplay();
+        display.setCursor(0, 0);
+        display.print("Start");
+        display.setCursor(0, 8);
+        display.print("Move the Robot");
+        display.display();
         delay(1000);
         // Serial.println("run");
         line.set_threshold();
         delay(1000);
+        display.clearDisplay();
+        display.setCursor(0, 0);
+        display.print("Ended");
+        display.setCursor(0, 8);
+        display.print(line.ave_threshold);
+        display.display();
         // Serial.println("End auto threshold setting");
         line_set_threshold_flag = false;
         gpio_set_irq_enabled(button_pin[1], GPIO_IRQ_EDGE_FALL, true);
