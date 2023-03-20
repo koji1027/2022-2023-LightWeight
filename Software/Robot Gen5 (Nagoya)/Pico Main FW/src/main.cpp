@@ -144,19 +144,18 @@ void loop(void)
         {
                 line_set_threshold();
         }
+        game_flag = 1;
         while (game_flag)
         {
                 start_time = micros();
                 motor_flag = 0;
-                /*
-                battery_voltage = analogRead(A2) * 3.3 / 1024.0 * 4.0;;
+                battery_voltage = analogRead(A2) * 3.3 / 1023.0 * 4.0;
                 Serial.println(battery_voltage);
-                if (battery_voltage < 11.0)
+                /*if (battery_voltage < 11.0)
                 {
                         game_flag = false;
                         battery_flag = true;
-                }
-                */
+                }*/
                 gyro.getEuler();
                 if (millis() - display_refresh_time > 100)
                 {
@@ -378,23 +377,23 @@ void loop(void)
                                 if (line.line_state_flag == 0 || line.line_state_flag == 3)
                                 {
                                         line.line_state_flag = 3;
-                                        if (abs_ir_angle <= -PI * 8.0 / 9.0 || abs_ir_angle > PI * 8.0 / 9.0)
+                                        if (abs_ir_angle <= -PI * 7.0 / 9.0 || abs_ir_angle > PI * 7.0 / 9.0)
                                         {
                                                 esc_line();
                                         }
-                                        else if (abs_ir_angle > -PI * 8.0 / 9.0 && abs_ir_angle <= -PI / 2.0)
+                                        else if (abs_ir_angle > -PI * 7.0 / 9.0 && abs_ir_angle <= -PI / 3.0)
                                         {
                                                 move_angle = -PI / 3.0;
                                                 speed = 100;
                                                 motor_flag = 0;
                                         }
-                                        else if (abs_ir_angle > -PI / 2.0 && abs_ir_angle < PI / 2.0)
+                                        else if (abs_ir_angle > -PI / 3.0 && abs_ir_angle < PI / 3.0)
                                         {
                                                 move_angle = ir_angle;
                                                 speed = 100;
                                                 motor_flag = 0;
                                         }
-                                        else if (abs_ir_angle >= PI / 2.0 && abs_ir_angle <= PI * 8.0 / 9.0)
+                                        else if (abs_ir_angle >= PI / 3.0 && abs_ir_angle <= PI * 7.0 / 9.0)
                                         {
                                                 move_angle = PI / 3.0;
                                                 speed = 100;
@@ -496,25 +495,17 @@ void loop(void)
                                 //{
                                 //         circ_exp = 1;
                                 // }
-                                if (ir_dist > 50)
+                                if (abs(ir_angle) < PI / 3.0 || abs(ir_angle) > PI * 3.0 / 4.0)
                                 {
-                                        move_angle = ir_angle;
-                                        speed = STRAIGHT_SPEED;
+                                        // circ_exp =  1;
+                                        move_angle = ir_angle + constrain(ir_angle * circ_exp * CIRC_WEIGHT, -PI / 2.0, PI / 2.0);
+                                        speed = CIRC_SPEED;
                                 }
                                 else
                                 {
-                                        if (abs(ir_angle) < PI / 3.0 || abs(ir_angle) > PI * 3.0 / 4.0)
-                                        {
-                                                // circ_exp =  1;
-                                                move_angle = ir_angle + constrain(ir_angle * circ_exp * CIRC_WEIGHT, -PI / 2.0, PI / 2.0);
-                                                speed = CIRC_SPEED;
-                                        }
-                                        else
-                                        {
-                                                abs_move_angle = PI;
-                                                move_angle = abs_move_angle - machine_angle;
-                                                speed = STRAIGHT_SPEED;
-                                        }
+                                        abs_move_angle = PI;
+                                        move_angle = abs_move_angle - machine_angle;
+                                        speed = STRAIGHT_SPEED;
                                 }
                         }
                         else
@@ -796,12 +787,12 @@ double normalize_angle(double angle)
 
 void esc_line(void)
 {
-        abs_move_angle = abs_line_angle + PI;
-        if (abs_move_angle > PI)
+        move_angle = line.line_theta + PI;
+        if (move_angle > PI)
         {
-                abs_move_angle -= 2.0 * PI;
+                move_angle -= 2.0 * PI;
         }
-        move_angle = abs_move_angle - gyro.angle;
+        // move_angle = abs_move_angle - gyro.angle;
         speed = ESC_LINE_SPEED;
         motor_flag = 3;
 }
