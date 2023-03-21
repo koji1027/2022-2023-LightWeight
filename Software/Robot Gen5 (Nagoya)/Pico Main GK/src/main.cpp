@@ -203,23 +203,23 @@ void loop(void)
                         move_angle = PI;
                         speed = BACK_SPEED;
                         motor_uart_send();
-                }/*
-                if(line.on_line && line.line_theta > PI*7/10){
-                       move_angle = HALF_PI; 
-                       speed = GUARD_SPEED;
-                }
-                else if(line.on_line && line.line_theta < -PI*7/10){
-                       move_angle = -HALF_PI; 
-                       speed = GUARD_SPEED;
-                }*/
+                } /*
+                 if(line.on_line && line.line_theta > PI*7/10){
+                        move_angle = HALF_PI;
+                        speed = GUARD_SPEED;
+                 }
+                 else if(line.on_line && line.line_theta < -PI*7/10){
+                        move_angle = -HALF_PI;
+                        speed = GUARD_SPEED;
+                 }*/
                 if (goal_flag && line.on_line)
                 {
-                        if (abs_ir_angle > PI/6)
+                        if (abs_ir_angle > PI / 6)
                         {
                                 move_angle = HALF_PI;
                                 speed = GUARD_SPEED * abs(sin(abs_ir_angle));
                         }
-                        else if (abs_ir_angle < -PI/6)
+                        else if (abs_ir_angle < -PI / 6)
                         {
                                 move_angle = -HALF_PI;
                                 speed = GUARD_SPEED * abs(sin(abs_ir_angle));
@@ -229,11 +229,10 @@ void loop(void)
                                 move_angle = ir_angle;
                                 speed = STRAIGHT_SPEED;
                         }
-                        
                 }
 
                 move_angle = normalize_angle(move_angle);
-                
+
                 motor_uart_send();
                 if (Serial.available())
                 {
@@ -394,30 +393,25 @@ void openmv_uart_recv(void)
         {
                 if (Serial1.read() == 255)
                 {
-                        while (Serial1.available() < 2)
+                        while (Serial1.available() < 3)
                                 ;
-                        uint8_t buf[2];
+                        uint8_t buf[3];
                         buf[0] = Serial1.read();
                         buf[1] = Serial1.read();
+                        buf[2] = Serial1.read();
                         goal_angle = (buf[0] + buf[1] * 128.0) / 100.0 - PI;
-                        if (goal_angle == pre_goal_angle[0] &&
-                            goal_angle == pre_goal_angle[1] &&
-                            goal_angle == pre_goal_angle[2] &&
-                            goal_angle == pre_goal_angle[3] &&
-                            goal_angle == pre_goal_angle[4])
+                        goal_flag = buf[2];
+                        if (abs(goal_angle) > PI)
                         {
                                 goal_flag = 0;
                         }
-                        else
+                        if (goal_flag)
                         {
-                                goal_flag = 1;
+                                Serial.println(goal_angle / PI * 180.0);
+                                abs_goal_angle = goal_angle + gyro.angle;
+                                abs_goal_angle_LPF = abs_goal_angle_LPF * GOAL_LPF + abs_goal_angle * (1.0 - GOAL_LPF);
+                                abs_goal_angle_LPF = normalize_angle(abs_goal_angle_LPF);
                         }
-                        pre_goal_angle[4] = pre_goal_angle[3];
-                        pre_goal_angle[3] = pre_goal_angle[2];
-                        pre_goal_angle[2] = pre_goal_angle[1];
-                        pre_goal_angle[1] = pre_goal_angle[0];
-                        pre_goal_angle[0] = goal_angle;
-                        // Serial.println(goal_angle / PI * 180.0);//すぐにけせ
                 }
         }
 }

@@ -21,7 +21,7 @@
 #define TWO_THIRDS_PI PI * 2.0 / 3.0
 #define CIRC_BASE pow(0.6, 1.0 / 20.0)
 #define CIRC_WEIGHT 3.5
-#define CIRC_SPEED 150
+#define CIRC_SPEED 140
 #define STRAIGHT_SPEED 180
 #define ESC_LINE_SPEED 180
 #define GOAL_WEIGHT 1.28
@@ -150,7 +150,7 @@ void loop(void)
                 start_time = micros();
                 motor_flag = 0;
                 battery_voltage = analogRead(A2) * 3.3 / 1023.0 * 4.0;
-                Serial.println(battery_voltage);
+                // Serial.println(battery_voltage);
                 /*if (battery_voltage < 11.0)
                 {
                         game_flag = false;
@@ -210,12 +210,16 @@ void loop(void)
                 if (line.on_line)
                 {
                         abs_line_angle = line.line_theta + gyro.angle;
-                        abs_line_angle = fmod(abs_line_angle, TWO_PI);
                         if (abs_line_angle > PI)
                         {
-                                abs_line_angle = abs_line_angle - TWO_PI;
+                                abs_line_angle -= TWO_PI;
+                        }
+                        else if (abs_line_angle <= -PI)
+                        {
+                                abs_line_angle += TWO_PI;
                         }
                 }
+                // Serial.println(abs_line_angle);
                 abs_ir_angle = ir_angle + gyro.angle;
                 abs_ir_angle = fmod(abs_ir_angle, TWO_PI);
                 if (abs_ir_angle > PI)
@@ -499,7 +503,14 @@ void loop(void)
                                 {
                                         // circ_exp =  1;
                                         move_angle = ir_angle + constrain(ir_angle * circ_exp * CIRC_WEIGHT, -PI / 2.0, PI / 2.0);
-                                        speed = CIRC_SPEED;
+                                        if (abs(move_angle) < PI / 6.0)
+                                        {
+                                                speed = STRAIGHT_SPEED;
+                                        }
+                                        else
+                                        {
+                                                speed = CIRC_SPEED;
+                                        }
                                 }
                                 else
                                 {
@@ -727,24 +738,25 @@ void openmv_uart_recv(void)
         {
                 if (Serial1.read() == 255)
                 {
-                        while (Serial1.available() < 2)
+                        while (Serial1.available() < 3)
                                 ;
-                        uint8_t buf[2];
+                        uint8_t buf[3];
                         buf[0] = Serial1.read();
                         buf[1] = Serial1.read();
+                        buf[2] = Serial1.read();
                         goal_angle = (buf[0] + buf[1] * 128.0) / 100.0 - PI;
-                        if (abs(goal_angle) < TWO_THIRDS_PI)
+                        goal_flag = buf[2];
+                        if (abs(goal_angle) > PI)
                         {
-                                goal_flag = 1;
+                                goal_flag = 0;
+                        }
+                        if (goal_flag)
+                        {
+                                Serial.println(goal_angle / PI * 180.0);
                                 abs_goal_angle = goal_angle + gyro.angle;
                                 abs_goal_angle_LPF = abs_goal_angle_LPF * GOAL_LPF + abs_goal_angle * (1.0 - GOAL_LPF);
                                 abs_goal_angle_LPF = normalize_angle(abs_goal_angle_LPF);
                         }
-                        else
-                        {
-                                goal_flag = 0;
-                        }
-                        // Serial.println(goal_angle / PI * 180.0);
                 }
         }
 }
