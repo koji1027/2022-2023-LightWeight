@@ -21,7 +21,7 @@
 #define TWO_THIRDS_PI PI * 2.0 / 3.0
 #define CIRC_BASE pow(0.6, 1.0 / 20.0)
 #define CIRC_WEIGHT 3.5
-#define CIRC_SPEED 150
+#define CIRC_SPEED 140
 #define STRAIGHT_SPEED 180
 #define ESC_LINE_SPEED 180
 #define GOAL_WEIGHT 1.28
@@ -498,8 +498,8 @@ void loop(void)
                                 // }
                                 if (ir_dist > 50)
                                 {
-                                        move_angle = ir_angle;
-                                        speed = STRAIGHT_SPEED;
+                                        //move_angle = ir_angle;
+                                        //speed = STRAIGHT_SPEED;
                                 }
                                 else
                                 {
@@ -507,7 +507,13 @@ void loop(void)
                                         {
                                                 // circ_exp =  1;
                                                 move_angle = ir_angle + constrain(ir_angle * circ_exp * CIRC_WEIGHT, -PI / 2.0, PI / 2.0);
-                                                speed = CIRC_SPEED;
+                                                if(abs(move_angle) < PI/6){
+                                                        speed = STRAIGHT_SPEED;
+                                                }
+                                                else{
+                                                        speed = CIRC_SPEED;
+                                                }
+                                                
                                         }
                                         else
                                         {
