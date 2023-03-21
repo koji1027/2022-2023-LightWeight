@@ -158,6 +158,7 @@ void loop(void)
                         battery_flag = true;
                 }*/
                 gyro.getEuler();
+                /*
                 if (millis() - display_refresh_time > 100)
                 {
                         display.clearDisplay();
@@ -203,6 +204,7 @@ void loop(void)
                         display.display();
                         display_refresh_time = millis();
                 }
+                */
                 ir_uart_recv();
                 openmv_uart_recv();
                 line.read();
@@ -220,7 +222,6 @@ void loop(void)
                                 abs_line_angle += TWO_PI;
                         }
                 }
-                // Serial.println(abs_line_angle);
                 abs_ir_angle = ir_angle + gyro.angle;
                 abs_ir_angle = fmod(abs_ir_angle, TWO_PI);
                 if (abs_ir_angle > PI)
@@ -233,6 +234,7 @@ void loop(void)
                 }
                 // Serial.println(abs_goal_angle_LPF);
                 // Serial.println(ir_angle);
+                // Serial.println(ir_flag);
                 if (line.on_line)
                 {
                         if (abs_line_angle > PI * 3.0 / 8.0 && abs_line_angle <= PI * 5.0 / 8.0) // ライン右
@@ -500,32 +502,25 @@ void loop(void)
                                 //{
                                 //         circ_exp = 1;
                                 // }
-                                if (abs(ir_angle) < PI / 3.0 || abs(ir_angle) > PI * 3.0 / 4.0)
+                                // if (abs(ir_angle) < PI / 3.0 || abs(ir_angle) > PI * 3.0 / 4.0)
+                                //{
+                                // circ_exp =  1;
+                                move_angle = ir_angle + constrain(ir_angle * circ_exp * CIRC_WEIGHT, -PI / 2.0, PI / 2.0);
+                                if (abs(move_angle) < PI / 4)
                                 {
-                                        //move_angle = ir_angle;
-                                        //speed = STRAIGHT_SPEED;
+                                        speed = STRAIGHT_SPEED;
                                 }
                                 else
                                 {
-                                        if (abs(ir_angle) < PI / 3.0 || abs(ir_angle) > PI * 3.0 / 4.0)
-                                        {
-                                                // circ_exp =  1;
-                                                move_angle = ir_angle + constrain(ir_angle * circ_exp * CIRC_WEIGHT, -PI / 2.0, PI / 2.0);
-                                                if(abs(move_angle) < PI/6){
-                                                        speed = STRAIGHT_SPEED;
-                                                }
-                                                else{
-                                                        speed = CIRC_SPEED;
-                                                }
-                                                
-                                        }
-                                        else
-                                        {
-                                                abs_move_angle = PI;
-                                                move_angle = abs_move_angle - machine_angle;
-                                                speed = STRAIGHT_SPEED;
-                                        }
+                                        speed = 140;
                                 }
+                                //}
+                                // else
+                                //{
+                                //        abs_move_angle = PI;
+                                //       move_angle = abs_move_angle - machine_angle;
+                                //      speed = STRAIGHT_SPEED;
+                                //}
                         }
                         else
                         {

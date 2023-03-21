@@ -54,11 +54,16 @@ while(True):
         goal_theta -= math.pi * 2
     print("角度: ", end="")
     print(goal_theta/math.pi*180, end="")
+    print("\t面積:", end="")
+    print(max_s)
     print("°\tFPS: ", end="")
     print(clock.fps())
     x = int((goal_theta + math.pi) * 100)
     y = int(x) & 0b0000000001111111
     z = int(x) >> 7
+    w = 0
+    if max_s > 3000:
+        w = 1
     try:
         uart.write(ustruct.pack('B',255))
         uart.write(ustruct.pack('B',int(y)))

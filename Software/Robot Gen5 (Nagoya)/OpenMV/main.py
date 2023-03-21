@@ -48,7 +48,7 @@ while(True):
     y = int(x) & 0b0000000001111111
     z = int(x) >> 7
     w = 0
-    if max_s > 1500:
+    if max_s > 3000:
         w = 1
     try:
         uart.write(ustruct.pack('B',255))

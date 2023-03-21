@@ -16,15 +16,15 @@
 #define ESP32_BAUD 115200
 #define OPENMV_BAUD 115200
 #define OpenMV Serial1
-#define GOAL_LPF 0.1
+#define GOAL_LPF 0.3
 #define PI_THIRDS PI / 3.0
 #define TWO_THIRDS_PI PI * 2.0 / 3.0
 #define GUARD_SPEED 180
 #define BACK_SPEED 140
-#define STRAIGHT_SPEED 180
+#define STRAIGHT_SPEED 140
 #define ESC_LINE_SPEED 180
 #define ATTACK_SPEED 120
-#define GOAL_WEIGHT 1.48
+#define GOAL_WEIGHT 1.5
 #define MAX_SIGNAL 2200
 #define MIN_SIGNAL 1000
 #define ESC_PIN D14
@@ -142,6 +142,7 @@ void loop(void)
         while (game_flag)
         {
                 motor_flag = 0;
+                machine_angle = 0;
                 /*
                 battery_voltage = analogRead(A2) * 3.3 / 1024.0 * 4.0;;
                 Serial.println(battery_voltage);
@@ -164,54 +165,75 @@ void loop(void)
                 abs_ir_angle = normalize_angle(abs_ir_angle);
 
                 // keeper
-                
+
                 if (line.on_line)
                 {
+                        if (goal_flag)
+                        {
+                                machine_angle = abs_goal_angle_LPF + PI;
+                                machine_angle = normalize_angle(machine_angle);
+                                machine_angle *= 1.5;
+                                machine_angle = constrain(machine_angle, -PI / 2, PI / 2);
+                        }
                         if (!attack_flag)
                         {
                                 if (abs(abs_line_angle) < PI_THIRDS)
                                 {
                                         line.line_state_flag = 1;
-                                        if (abs(abs_ir_angle) > PI / 6)
+                                        if (abs(ir_angle) > PI / 6)
                                         {
                                                 if (abs_ir_angle > 0)
                                                 {
-                                                        move_angle = HALF_PI;
+                                                        abs_move_angle = HALF_PI;
                                                 }
                                                 else if (abs_ir_angle < 0)
                                                 {
-                                                        move_angle = -HALF_PI;
+                                                        abs_move_angle = -HALF_PI;
                                                 }
-                                                //speed = GUARD_SPEED * sin(abs(abs_ir_angle));
-                                                speed =  100 + constrain(80 * ir_dist * abs(sin(abs_ir_angle)) / 50.0, 0, 80);
+                                                move_angle = abs_move_angle - gyro.angle;
+                                                // speed = GUARD_SPEED * sin(abs(abs_ir_angle));
+                                                speed = 100 + constrain(80 * ir_dist * abs(sin(abs_ir_angle)) / 50.0, 0, 80);
                                         }
                                         else
                                         {
-                                                //attack_flag = 1;
+                                                // attack_flag = 1;
                                                 move_angle = 0;
                                                 speed = STRAIGHT_SPEED;
                                         }
                                 }
                                 else if (abs_line_angle > 0 && abs_line_angle < PI * 165 / 180)
                                 {
-                                        //move_angle = HALF_PI;
-                                        move_angle = PI_THIRDS;
+                                        // move_angle = HALF_PI;
+                                        abs_move_angle = PI_THIRDS;
+                                        move_angle = abs_move_angle - gyro.angle;
                                 }
                                 else if (abs_line_angle < 0 && abs_line_angle > -PI * 165 / 180)
                                 {
-                                        //move_angle = -HALF_PI;
-                                        move_angle = -PI_THIRDS;
+                                        // move_angle = -HALF_PI;
+                                        abs_move_angle = -PI_THIRDS;
+                                        move_angle = abs_move_angle - gyro.angle;
                                 }
                                 else
                                 {
                                         line.line_state_flag = 3;
-                                        move_angle = PI;
+                                        abs_move_angle = PI;
+                                        move_angle = abs_move_angle - gyro.angle;
                                         speed = BACK_SPEED;
                                 }
                         }
-                        else{
-                                move_angle = abs_ir_angle;
-                                speed = ATTACK_SPEED;
+                        else
+                        {
+                                if (abs(ir_angle) > PI / 6.0)
+                                {
+                                        attack_flag = 0;
+                                        move_angle = PI;
+                                        speed = BACK_SPEED;
+                                }
+                                else
+                                {
+                                        move_angle = 0;
+                                        speed = ATTACK_SPEED;
+                                }
                                 /*if (abs_line_angle > 0 && abs_line_angle < PI * 165 / 180)
                                 {
                                         //move_angle = HALF_PI;
@@ -230,8 +252,28 @@ void loop(void)
                 {
                         if (attack_flag)
                         {
-                                attack_flag = 0;
-                                line.line_state_flag = 3;
+                                if (goal_flag)
+                                {
+                                        move_angle = 0;
+                                        speed = ATTACK_SPEED;
+                                        if (abs(ir_angle) > PI / 6.0)
+                                        {
+                                                attack_flag = 0;
+                                                if (abs(line.line_theta) <= HALF_PI && line.on_line)
+                                                {
+                                                        line.line_state_flag = 1;
+                                                }
+                                                else
+                                                {
+                                                        line.line_state_flag = 3;
+                                                }
+                                        }
+                                }
+                                else
+                                {
+                                        attack_flag = 0;
+                                        line.line_state_flag = 3;
+                                }
                         }
                         if (line.line_state_flag == 1)
                         {
@@ -241,7 +283,6 @@ void loop(void)
                         {
                                 move_angle = PI;
                         }
-                        
                 }
 
                 move_angle = normalize_angle(move_angle);
@@ -412,14 +453,19 @@ void openmv_uart_recv(void)
                         buf[0] = Serial1.read();
                         buf[1] = Serial1.read();
                         buf[2] = Serial1.read();
-                        goal_angle = (buf[0] + buf[1] * 128.0) / 100.0 - PI;
                         goal_flag = buf[2];
-                        if (abs(goal_angle) > PI)
-                        {
-                                goal_flag = 0;
-                        }
                         if (goal_flag)
                         {
+                                double pre_goal_angle = goal_angle;
+                                goal_angle = (buf[0] + buf[1] * 128.0) / 100.0 - PI;
+                                if (abs(goal_angle) > PI)
+                                {
+                                        goal_flag = 0;
+                                }
+                                if (abs(goal_angle - pre_goal_angle) > PI / 4.0)
+                                {
+                                        goal_flag = 0;
+                                }
                                 Serial.println(goal_angle / PI * 180.0);
                                 abs_goal_angle = goal_angle + gyro.angle;
                                 abs_goal_angle_LPF = abs_goal_angle_LPF * GOAL_LPF + abs_goal_angle * (1.0 - GOAL_LPF);
