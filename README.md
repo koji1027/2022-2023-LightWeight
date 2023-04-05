@@ -3,49 +3,35 @@
 各種リンク
 * [ツイッター](https://twitter.com/takataka_robo)
 * [ブログ](https://robocup-zunda.hatenablog.com)
-## リポジトリの構成
-以下に、このリポジトリのディレクトリ構造をのせておきます。  
-
-2022-2023-LightWeight/  
-&emsp;├ Hardware/  
-&emsp;│└ N号機/  
-&emsp;│&emsp;├ PCB/&emsp;&emsp;&emsp;※基板設計データ  
-&emsp;│&emsp;└ STL/&emsp;&emsp;&emsp;※３D部品データ   
-&emsp;│  
-&emsp;└ SoftWare/  
-&emsp;&emsp;├ Archived/&emsp;&emsp;&emsp;※開発時のデータ（未使用）  
-&emsp;&emsp;└ Robot Gen N/&emsp;&emsp;&emsp;※Rev.Nの機体のプログラム  
 
 ## ロボットの機体の概要
 今年のロボットの3Dデータです。-> https://a360.co/3iR0CL1  
 以下に、今年度のロボットの基本的なスペックについて示します。
 
 * Main  
-  * Raspberry Pi PICO1個
-  * MPU-6050 １個
+  * Raspberry Pi PICO 1個
+  * MPU-6050 1個
   * SSD1306 OLEDディスプレイ 1個
-  * 【予定】XIAO ESP32C3 1個
+
 * IR Unit
   * TSSP58038 16個
   * TI CD74HC4067 SOIC 1個
   * XIAO SAMD21 1個
+
 * Actuator
   * Maxon RE16 4個
   * Maxon GP16 1:19 4個
   * Pololu G2 18v17 4個
   * 自作オムニホイール 4個
   * XIAO RP2040 1個
+
 * Line Unit
   * NJL7502L 32個
   * WS2812B 32個
   * TI CD74HC4067 SOIC 2個
+
 * Cam
-  * OpenMV H7 R2 1個
-  * 自作双曲線ミラー 1個
-* Kicker
-  * 自作DCDCコンバータ 1個  
-&emsp;※XL6009採用 Max 50V
-  * タカハ CB1034 1個
+  * OpenMV H7 R2 もしくは UnitV 1個
   
 ## コーディング規則
 簡単なコーディング規則を定めておきます。  
