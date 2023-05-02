@@ -1,9 +1,7 @@
 // ライブラリのインクルード
 #include <Arduino.h>
-#include <stdlib.h>
 #include <Adafruit_SSD1306.h>
 #include <Adafruit_NeoPixel.h>
-#include <Servo.h>
 
 // 自作ライブラリのインクルード
 #include "MPU6050/gyro.h"
@@ -75,7 +73,6 @@ double abs_line_angle = 0;
 // その他
 double machine_angle = 0; // ロボットに向かせる角度（-PI ~ PI）
 bool goal_flag = 0;       // 0:ゴールなし, 1:ゴールあり
-bool attack_flag = 0;
 bool corner_flag = 0;
 uint8_t goal_flag_ratio = 0;
 uint8_t goal_flag_count = 0;
@@ -114,9 +111,6 @@ void setup(void)
         OpenMV.setTX(D12);
         OpenMV.setRX(D13);
         OpenMV.begin(OPENMV_BAUD);
-        // while (!OpenMV.available())
-        //         ;
-        OpenMV.read();
         line.begin();
         pinMode(button_pin[0], INPUT_PULLUP);
         pinMode(button_pin[1], INPUT_PULLUP);
@@ -135,24 +129,8 @@ void setup(void)
 
 void loop(void)
 {
-        while (0)
-        {
-                /*
-                line.read();
-                for (int i = 16; i < 32; i++)
-                {
-                        Serial.print(line.sensor_value[i]);
-                        Serial.print("\t");
-                }
-                Serial.println();
-                */
-                ir_uart_recv();
-                Serial.println(ir_angle);
-                delay(50);
-        }
         while (game_flag)
         {
-                unsigned long long time = micros();
                 gyro.getEuler();
                 ir_uart_recv();
                 openmv_uart_recv();
@@ -165,149 +143,68 @@ void loop(void)
                         abs_line_angle = line.line_theta + gyro.angle;
                         abs_line_angle = normalize_angle(abs_line_angle);
                 }
-                abs_ir_angle = ir_angle + gyro.angle;
-                abs_ir_angle = normalize_angle(abs_ir_angle);
                 if (line.on_line)
                 {
-                        if (!attack_flag)
+                        if (abs(abs_line_angle) < PI_THIRDS)
                         {
-                                if (abs(abs_line_angle) < PI_THIRDS)
+                                line.line_state_flag = 1;
+                                if (abs_ir_angle > PI_SIXTH && abs_ir_angle < EIGHT_NINTH_PI)
                                 {
-                                        line.line_state_flag = 1;
-                                        if (abs_ir_angle > PI_SIXTH && abs_ir_angle < EIGHT_NINTH_PI)
-                                        {
-                                                abs_move_angle = HALF_PI;
-                                                speed = SLIDE_SPEED - 15 * cos(abs_ir_angle);
-                                        }
-                                        else if (abs_ir_angle < -PI_SIXTH && abs_ir_angle > -EIGHT_NINTH_PI)
-                                        {
-                                                abs_move_angle = -HALF_PI;
-                                                speed = SLIDE_SPEED - 15 * cos(abs_ir_angle);
-                                        }
-                                        else if (abs(abs_ir_angle) >= EIGHT_NINTH_PI)
-                                        {
-                                                speed = 0;
-                                        }
-                                        else
-                                        {
-                                                abs_move_angle = 0;
-                                                speed = ATTACK_SPEED;
-                                        }
-                                        move_angle = abs_move_angle - gyro.angle;
+                                        abs_move_angle = HALF_PI;
+                                        speed = SLIDE_SPEED - 15 * cos(abs_ir_angle);
                                 }
-                                else if (abs_line_angle > 0 && abs_line_angle < PI_165_180)
+                                else if (abs_ir_angle < -PI_SIXTH && abs_ir_angle > -EIGHT_NINTH_PI)
                                 {
-                                        abs_move_angle = PI_FOURTH;
-                                        move_angle = abs_move_angle - gyro.angle;
-                                        speed = ESC_LINE_SPEED;
+                                        abs_move_angle = -HALF_PI;
+                                        speed = SLIDE_SPEED - 15 * cos(abs_ir_angle);
                                 }
-                                else if (abs_line_angle < 0 && abs_line_angle > -PI_165_180)
+                                else if (abs(abs_ir_angle) >= EIGHT_NINTH_PI)
                                 {
-                                        abs_move_angle = -PI_FOURTH;
-                                        move_angle = abs_move_angle - gyro.angle;
-                                        speed = ESC_LINE_SPEED;
+                                        speed = 0;
                                 }
                                 else
                                 {
-                                        line.line_state_flag = 3;
-                                        if (abs_ir_angle > 0)
-                                        {
-                                                abs_move_angle = PI_THREE_FOURTH;
-                                                speed = SLIDE_SPEED - 15 * cos(abs_ir_angle);
-                                        }
-                                        else if (abs_ir_angle < 0)
-                                        {
-                                                abs_move_angle = -PI_THREE_FOURTH;
-                                                speed = SLIDE_SPEED - 15 * cos(abs_ir_angle);
-                                        }
-                                        else
-                                        {
-                                                abs_move_angle = PI;
-                                                speed = ATTACK_SPEED;
-                                        }
-                                        move_angle = abs_move_angle - gyro.angle;
+                                        abs_move_angle = 0;
+                                        speed = ATTACK_SPEED;
                                 }
+                                move_angle = abs_move_angle - gyro.angle;
+                        }
+                        else if (abs_line_angle > 0 && abs_line_angle < PI_165_180)
+                        {
+                                abs_move_angle = PI_FOURTH;
+                                move_angle = abs_move_angle - gyro.angle;
+                                speed = ESC_LINE_SPEED;
+                        }
+                        else if (abs_line_angle < 0 && abs_line_angle > -PI_165_180)
+                        {
+                                abs_move_angle = -PI_FOURTH;
+                                move_angle = abs_move_angle - gyro.angle;
+                                speed = ESC_LINE_SPEED;
                         }
                         else
                         {
-                                if (abs(ir_angle) > PI_SIXTH)
+                                line.line_state_flag = 3;
+                                if (abs_ir_angle > 0)
                                 {
-                                        attack_flag = 0;
-                                        move_angle = PI;
-                                        speed = BACK_SPEED;
+                                        abs_move_angle = PI_THREE_FOURTH;
+                                        speed = SLIDE_SPEED - 15 * cos(abs_ir_angle);
+                                }
+                                else if (abs_ir_angle < 0)
+                                {
+                                        abs_move_angle = -PI_THREE_FOURTH;
+                                        speed = SLIDE_SPEED - 15 * cos(abs_ir_angle);
                                 }
                                 else
                                 {
-                                        move_angle = 0;
+                                        abs_move_angle = PI;
                                         speed = ATTACK_SPEED;
                                 }
+                                move_angle = abs_move_angle - gyro.angle;
                         }
                 }
                 else
                 {
-                        if (attack_flag)
-                        {
-                                if (goal_flag)
-                                {
-                                        move_angle = 0;
-                                        speed = ATTACK_SPEED;
-                                        if (abs(ir_angle) > PI_SIXTH)
-                                        {
-                                                attack_flag = 0;
-                                                if (abs(line.line_theta) <= HALF_PI && line.on_line)
-                                                {
-                                                        line.line_state_flag = 1;
-                                                }
-                                                else
-                                                {
-                                                        line.line_state_flag = 3;
-                                                }
-                                        }
-                                }
-                                else
-                                {
-                                        attack_flag = 0;
-                                        line.line_state_flag = 3;
-                                }
-                        }
-                        /*
-                        if (!goal_flag || goal_dist > 100)
-                        {
-                                // Serial.println("Yo");
-                                if (line.line_state_flag != 1)
-                                {
-                                        move_angle = PI;
-                                        line.line_state_flag = 3;
-                                        speed = BACK_SPEED;
-                                }
-                        }*/
-                        /*
-                        // ここ以下、新規追加。動作未確認
-                        else if (goal_flag && abs(abs_goal_angle_inv) < PI / 12.0)
-                        {
-                                move_angle = PI;
-                                line.line_state_flag = 3;
-                                speed = BACK_SPEED;
-                                Serial.print("B");
-                        }
-                        else if (goal_flag && abs_goal_angle_inv >= PI / 12.0 && abs_goal_angle_inv < HALF_PI)
-                        {
-                                move_angle = PI_FOURTH;
-                                line.line_state_flag = 3;
-                                speed = BACK_SPEED;
-                                Serial.print("C");
-                        }
-                        else if (goal_flag && abs_goal_angle_inv <= -PI / 12.0 && abs_goal_angle_inv > -HALF_PI)
-                        {
-                                move_angle = -PI_FOURTH;
-                                line.line_state_flag = 3;
-                                speed = BACK_SPEED;
-                                Serial.print("D");
-                        }
-
-                        // ここまで.
-                        */
-                        else if (line.line_state_flag == 1)
+                        if (line.line_state_flag == 1)
                         {
                                 line.line_state_flag = 1;
                                 if (abs_ir_angle > PI_NINTH)
@@ -383,8 +280,6 @@ void loop(void)
                                 Serial.println("Game Stop");
                         }
                 }
-                // double fps = 1000000.0 / (micros() - time);
-                //  Serial.println(fps);
         }
         if (digitalRead(button_pin[1]) == LOW)
         {
@@ -472,6 +367,8 @@ void ir_uart_recv(void)
                 ir_angle = (buf[1] + buf[2] * 128) / 100.0 - PI; // 0 ~ 200PI -> -PI ~ PI
                 ir_dist = buf[3];                                // 0~254[cm]
         }
+        abs_ir_angle = ir_angle + gyro.angle;
+        abs_ir_angle = normalize_angle(abs_ir_angle);
 }
 
 void push_button(uint gpio, uint32_t events)
