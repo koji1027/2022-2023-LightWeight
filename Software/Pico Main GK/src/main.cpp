@@ -24,7 +24,7 @@
 #define GOAL_WEIGHT 1.5
 #define MAX_SIGNAL 2200
 #define MIN_SIGNAL 1000
-#define LED_PIN D21
+#define LED_PIN D15
 #define LED_NUM 32
 #define SLIDE_SPEED 180
 #define SCREEN_WIDTH 128
@@ -135,6 +135,21 @@ void setup(void)
 
 void loop(void)
 {
+        while (0)
+        {
+                /*
+                line.read();
+                for (int i = 16; i < 32; i++)
+                {
+                        Serial.print(line.sensor_value[i]);
+                        Serial.print("\t");
+                }
+                Serial.println();
+                */
+                ir_uart_recv();
+                Serial.println(ir_angle);
+                delay(50);
+        }
         while (game_flag)
         {
                 unsigned long long time = micros();
@@ -152,14 +167,8 @@ void loop(void)
                 }
                 abs_ir_angle = ir_angle + gyro.angle;
                 abs_ir_angle = normalize_angle(abs_ir_angle);
-                // Serial.println(ir_angle);
-                Serial.print("Goal:");
-                Serial.print(goal_flag);
-                Serial.print("\tDist:");
-                Serial.println(goal_dist);
                 if (line.on_line)
                 {
-                        // Serial.println(line.line_theta / PI * 180.0);
                         if (!attack_flag)
                         {
                                 if (abs(abs_line_angle) < PI_THIRDS)
@@ -181,36 +190,8 @@ void loop(void)
                                         }
                                         else
                                         {
-                                                unsigned long long time = millis();
-                                                while (millis() - time < 600)
-                                                {
-                                                        gyro.getEuler();
-                                                        ir_uart_recv();
-                                                        openmv_uart_recv();
-                                                        line.read();
-                                                        if (line.on_line && abs(line.line_theta) < PI_FOURTH)
-                                                        {
-                                                                line.line_state_flag = 1;
-                                                        }
-                                                        else
-                                                        {
-                                                                line.line_state_flag = 3;
-                                                                Serial.println("A");
-                                                        }
-                                                        if (abs(ir_angle) >= PI_SIXTH)
-                                                        {
-                                                                abs_move_angle = PI;
-                                                                move_angle = abs_move_angle - gyro.angle;
-                                                                move_angle = normalize_angle(move_angle);
-                                                                speed = BACK_SPEED;
-                                                                break;
-                                                        }
-                                                        abs_move_angle = 0;
-                                                        move_angle = abs_move_angle - gyro.angle;
-                                                        move_angle = normalize_angle(move_angle);
-                                                        speed = ATTACK_SPEED;
-                                                        motor_uart_send();
-                                                }
+                                                abs_move_angle = 0;
+                                                speed = ATTACK_SPEED;
                                         }
                                         move_angle = abs_move_angle - gyro.angle;
                                 }
@@ -229,7 +210,6 @@ void loop(void)
                                 else
                                 {
                                         line.line_state_flag = 3;
-                                        Serial.println("B");
                                         if (abs_ir_angle > 0)
                                         {
                                                 abs_move_angle = PI_THREE_FOURTH;
@@ -288,9 +268,9 @@ void loop(void)
                                 {
                                         attack_flag = 0;
                                         line.line_state_flag = 3;
-                                        Serial.println("C");
                                 }
                         }
+                        /*
                         if (!goal_flag || goal_dist > 100)
                         {
                                 // Serial.println("Yo");
@@ -298,10 +278,9 @@ void loop(void)
                                 {
                                         move_angle = PI;
                                         line.line_state_flag = 3;
-                                        Serial.println("D");
                                         speed = BACK_SPEED;
                                 }
-                        }
+                        }*/
                         /*
                         // ここ以下、新規追加。動作未確認
                         else if (goal_flag && abs(abs_goal_angle_inv) < PI / 12.0)

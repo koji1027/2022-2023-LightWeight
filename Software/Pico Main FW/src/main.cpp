@@ -202,10 +202,6 @@ void loop(void)
                 // openmv_uart_recv();
                 line.read();
                 // line.debug();
-                if (line.on_line)
-                {
-                        Serial.println(line.line_theta);
-                }
 
                 if (line.on_line)
                 {
@@ -229,9 +225,6 @@ void loop(void)
                 {
                         abs_ir_angle += TWO_PI;
                 }
-                // Serial.println(abs_goal_angle_LPF);
-                // Serial.println(ir_angle);
-                // Serial.println(ir_flag);
                 if (line.on_line)
                 {
                         if (abs_line_angle > PI * 3.0 / 8.0 && abs_line_angle <= PI * 5.0 / 8.0) // ライン右
@@ -526,6 +519,7 @@ void loop(void)
                 }
 
                 move_angle = normalize_angle(move_angle);
+                Serial.println(move_angle);
                 motor_uart_send();
                 if (digitalRead(button_pin[0]) == LOW)
                 {

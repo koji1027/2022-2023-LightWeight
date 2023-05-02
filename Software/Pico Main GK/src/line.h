@@ -19,6 +19,7 @@ public:
         double pre_line_theta = 0.0;
         int cluster_num = -1; // 実際の数-１
         int line_state_flag = 0;
+        uint16_t sensor_value[SENSOR_NUM] = {0};
 
 private:
         const int COM_PIN[2] = {A1, A0};
@@ -26,7 +27,6 @@ private:
         double SENSOR_THETA[SENSOR_NUM] = {0.0};
         double SENSOR_VECTOR[SENSOR_NUM][2] = {0.0};
         uint16_t threshold[SENSOR_NUM] = {577, 584, 590, 586, 627, 604, 601, 614, 594, 605, 610, 627, 594, 615, 560, 508, 146, 498, 558, 578, 605, 592, 590, 608, 595, 619, 599, 586, 601, 577, 571, 576};
-        uint16_t sensor_value[SENSOR_NUM] = {0};
         bool sensor_state[SENSOR_NUM] = {false};
 };
 

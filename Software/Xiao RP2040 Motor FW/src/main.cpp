@@ -34,6 +34,11 @@ void setup()
 void loop()
 {
         // put your main code here, to run repeatedly:
+        while (0)
+        {
+                motor.cal(0, 0, 0, 100);
+                delay(100);
+        }
         if (Serial1.available())
         {
                 uart_recv();
