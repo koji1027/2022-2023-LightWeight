@@ -36,7 +36,7 @@ void loop()
         // put your main code here, to run repeatedly:
         while (0)
         {
-                motor.cal(0, 0, 0, 100);
+                motor.cal(PI / 2.0, 0, 0, 150);
                 delay(100);
         }
         if (Serial1.available())
@@ -98,7 +98,6 @@ void uart_recv(void)
                                 gyro_angle = (buf[3] + (buf[4] << 7)) / 100.0 - PI;    // 0 ~ 200PI -> -PI ~ PI
                                 machine_angle = (buf[5] + (buf[6] << 7)) / 100.0 - PI; // 0 ~ 200PI -> -PI ~ PI
                                 speed = buf[7];
-                                Serial.println("Received");
                         }
                 }
         }

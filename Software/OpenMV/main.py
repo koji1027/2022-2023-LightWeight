@@ -3,8 +3,8 @@ from pyb import UART
 center = [201, 94] #円錐の中心(x,y)
 #xの減少方向が後ろ、増加方向が正面
 #yの減少方向が右、増加方向が左(上から俯瞰して)
-#goal_thresholds = [(69, 88, -14, 1, 27, 79)] #黄色ゴール
-.goal_thresholds = [(29, 49, -28, 0, -30, -5)] #青色ゴール
+goal_thresholds = [(46, 73, -17, 16, 21, 61)] #黄色ゴール
+#goal_thresholds = [(29, 49, -28, 0, -30, -5)] #青色ゴール
 uart = UART(3, 115200)
 sensor.reset()
 sensor.set_pixformat(sensor.RGB565)

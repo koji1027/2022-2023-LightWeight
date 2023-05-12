@@ -25,7 +25,7 @@
 #define CIRC_BASE pow(0.6, 1.0 / 20.0)
 #define CIRC_WEIGHT 3.5
 #define CIRC_SPEED 160
-#define STRAIGHT_SPEED 170
+#define STRAIGHT_SPEED 150
 #define ESC_LINE_SPEED 190
 #define GOAL_WEIGHT 1.4
 #define MAX_SIGNAL 2200
@@ -199,7 +199,8 @@ void loop(void)
                 }
                 */
                 ir_uart_recv();
-                // openmv_uart_recv();
+                openmv_uart_recv();
+                Serial.println(goal_angle);
                 line.read();
                 // line.debug();
 
@@ -519,7 +520,6 @@ void loop(void)
                 }
 
                 move_angle = normalize_angle(move_angle);
-                Serial.println(move_angle);
                 motor_uart_send();
                 if (digitalRead(button_pin[0]) == LOW)
                 {

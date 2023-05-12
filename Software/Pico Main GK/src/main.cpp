@@ -24,7 +24,7 @@
 #define MIN_SIGNAL 1000
 #define LED_PIN D15
 #define LED_NUM 32
-#define SLIDE_SPEED 180
+#define SLIDE_SPEED 150
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
 #define SCREEN_ADDRESS 0x3C
@@ -129,6 +129,17 @@ void setup(void)
 
 void loop(void)
 {
+        while (1)
+        {
+                line.read();
+                for (int i = 0; i < 16; i++)
+                {
+                        Serial.print(line.sensor_value[i+16]);
+                        Serial.print("\t");
+                }
+                Serial.println();
+                delay(100);
+        }
         while (game_flag)
         {
                 gyro.getEuler();
@@ -145,27 +156,22 @@ void loop(void)
                 }
                 if (line.on_line)
                 {
-                        if (abs(abs_line_angle) < PI_THIRDS)
+                        if (abs(abs_line_angle) < PI_FOURTH)
                         {
                                 line.line_state_flag = 1;
-                                if (abs_ir_angle > PI_SIXTH && abs_ir_angle < EIGHT_NINTH_PI)
+                                if (abs_ir_angle > 0)
                                 {
                                         abs_move_angle = HALF_PI;
-                                        speed = SLIDE_SPEED - 15 * cos(abs_ir_angle);
+                                        speed = SLIDE_SPEED - 25 * cos(abs_ir_angle);
                                 }
-                                else if (abs_ir_angle < -PI_SIXTH && abs_ir_angle > -EIGHT_NINTH_PI)
+                                else if (abs_ir_angle < 0)
                                 {
                                         abs_move_angle = -HALF_PI;
-                                        speed = SLIDE_SPEED - 15 * cos(abs_ir_angle);
-                                }
-                                else if (abs(abs_ir_angle) >= EIGHT_NINTH_PI)
-                                {
-                                        speed = 0;
+                                        speed = SLIDE_SPEED - 25 * cos(abs_ir_angle);
                                 }
                                 else
                                 {
-                                        abs_move_angle = 0;
-                                        speed = ATTACK_SPEED;
+                                        speed = 0;
                                 }
                                 move_angle = abs_move_angle - gyro.angle;
                         }
@@ -187,12 +193,12 @@ void loop(void)
                                 if (abs_ir_angle > 0)
                                 {
                                         abs_move_angle = PI_THREE_FOURTH;
-                                        speed = SLIDE_SPEED - 15 * cos(abs_ir_angle);
+                                        speed = SLIDE_SPEED - 25 * cos(abs_ir_angle);
                                 }
                                 else if (abs_ir_angle < 0)
                                 {
                                         abs_move_angle = -PI_THREE_FOURTH;
-                                        speed = SLIDE_SPEED - 15 * cos(abs_ir_angle);
+                                        speed = SLIDE_SPEED - 25 * cos(abs_ir_angle);
                                 }
                                 else
                                 {
@@ -207,40 +213,38 @@ void loop(void)
                         if (line.line_state_flag == 1)
                         {
                                 line.line_state_flag = 1;
-                                if (abs_ir_angle > PI_NINTH)
+                                if (abs_ir_angle > 0)
                                 {
-                                        abs_move_angle = PI_FOURTH;
-                                        speed = SLIDE_SPEED - 15 * cos(abs_ir_angle);
+                                        abs_move_angle = PI_NINTH;
+                                        speed = SLIDE_SPEED - 25 * cos(abs_ir_angle);
                                 }
-                                else if (abs_ir_angle < -PI_NINTH)
+                                else if (abs_ir_angle < 0)
                                 {
-                                        abs_move_angle = -PI_FOURTH;
-                                        speed = SLIDE_SPEED - 15 * cos(abs_ir_angle);
+                                        abs_move_angle = -PI_NINTH;
+                                        speed = SLIDE_SPEED - 25 * cos(abs_ir_angle);
                                 }
                                 else
                                 {
-                                        abs_move_angle = 0;
-                                        speed = ATTACK_SPEED;
+                                        speed = 0;
                                 }
                                 move_angle = abs_move_angle - gyro.angle;
                         }
                         else if (line.line_state_flag == 3)
                         {
                                 line.line_state_flag = 3;
-                                if (abs_ir_angle > PI_NINTH)
+                                if (abs_ir_angle > 0)
                                 {
                                         abs_move_angle = PI_THREE_FOURTH;
-                                        speed = SLIDE_SPEED - 15 * cos(abs_ir_angle);
+                                        speed = SLIDE_SPEED - 25 * cos(abs_ir_angle);
                                 }
-                                else if (abs_ir_angle < -PI_NINTH)
+                                else if (abs_ir_angle < 0)
                                 {
-                                        abs_move_angle = -PI * 2.0 / 3.0;
-                                        speed = SLIDE_SPEED - 15 * cos(abs_ir_angle);
+                                        abs_move_angle = -PI_THREE_FOURTH;
+                                        speed = SLIDE_SPEED - 25 * cos(abs_ir_angle);
                                 }
                                 else
                                 {
-                                        abs_move_angle = PI;
-                                        speed = ATTACK_SPEED;
+                                        speed = 0;
                                 }
                                 move_angle = abs_move_angle - gyro.angle;
                         }

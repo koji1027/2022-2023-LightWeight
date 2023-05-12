@@ -1,12 +1,12 @@
 import sensor, image, time, math, ustruct
 from machine import UART
-from fpioa_manager import fm
+from ]sfpioa_manager import fm
 #from pyb import UART
 center = [160, 120] #円錐の中心(x,y)
 #xの減少方向が後ろ、増加方向が正面
 #yの減少方向が右、増加方向が左(上から俯瞰して)
-#thresholds = [(72, 96, -10, 12, 14, 52)] #黄色
-thresholds = [(41, 68, -11, 17, -39, -11)] #青色
+thresholds = [(47, 55, -4, 4, 12, 24)] #黄色
+#thresholds = [(41, 68, -11, 17, -39, -11)] #青色
 fm.register(35, fm.fpioa.UART1_TX, force=True)
 fm.register(34, fm.fpioa.UART1_RX, force=True)
 uart = UART(UART.UART1, 115200, 8, 0, 0, timeout=1000, read_buf_len=4096)

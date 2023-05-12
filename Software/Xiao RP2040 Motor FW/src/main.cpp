@@ -36,7 +36,7 @@ void loop()
         // put your main code here, to run repeatedly:
         while (0)
         {
-                motor.cal(0, 0, 0, 100);
+                motor.cal(PI / 2.0, 0, 0, 150);
                 delay(100);
         }
         if (Serial1.available())

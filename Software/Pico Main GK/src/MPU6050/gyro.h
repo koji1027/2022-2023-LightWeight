@@ -73,10 +73,10 @@ void Gyro::begin()
 
         if (devStatus == 0)
         {
-                //mpu.CalibrateAccel(6);
-                //mpu.CalibrateGyro(6);
-                //Serial.println();
-                //mpu.PrintActiveOffsets();
+                mpu.CalibrateAccel(6);
+                mpu.CalibrateGyro(6);
+                Serial.println();
+                mpu.PrintActiveOffsets();
                 mpu.setDMPEnabled(true);
                 mpuIntStatus = mpu.getIntStatus();
                 dmpReady = true;
