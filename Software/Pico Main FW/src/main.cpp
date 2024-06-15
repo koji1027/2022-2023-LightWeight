@@ -32,9 +32,9 @@
 #define STRAIGHT_SPEED 150
 #define ESC_LINE_SPEED 190
 // ゴールの角度について
-#define GOAL_WEIGHT 1.4　  //OpenMVからのゴールの角度を使用する際の重み
-#define MAX_SIGNAL 2200    // OpenMVからの信号の最大値
-#define MIN_SIGNAL 1000    // OpenMVからの信号の最小値
+#define GOAL_WEIGHT 1.4  // OpenMVからのゴールの角度を使用する際の重み
+#define MAX_SIGNAL 2200  // OpenMVからの信号の最大値
+#define MIN_SIGNAL 1000  // OpenMVからの信号の最小値
 // ピン番号の定義
 #define ESC_PIN D14  // ESC(ブラシレスモータードライバー)の制御ピン番号
 #define LED_PIN D15  // LEDのピン番号
